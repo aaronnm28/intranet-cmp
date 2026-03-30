@@ -2,7 +2,7 @@ export type EstadoSolicitud = 'en_revision' | 'aprobado' | 'observado' | 'rechaz
 export type TipoBien = 'computo' | 'mobiliario' | 'comunicaciones' | 'vehiculo' | 'otro'
 export type TipoAdelanto = 'adelanto_sueldo' | 'prestamo_personal'
 export type EstadoGasto = 'declarado' | 'pendiente_sustento' | 'observado' | 'aprobado'
-export type EstadoDevolucion = 'en_proceso' | 'completado' | 'cancelado'
+export type EstadoDevolucion = 'en_proceso' | 'observado' | 'bloqueado' | 'completado' | 'cancelado'
 export type EstadoPrestamoBien = 'activo' | 'devuelto' | 'vencido'
 
 export interface Colaborador {
