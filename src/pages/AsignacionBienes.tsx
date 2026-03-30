@@ -505,31 +505,68 @@ export function AsignacionBienes() {
                 FLUJO DE APROBACIÓN Y FIRMAS
               </div>
               <div className="space-y-2">
-                {[
-                  { paso: 1, rol: 'Solicitud del trabajador', nombre: 'Aaron Samuel Nuñez Muñoz', fecha: selected.fecha_solicitud, status: 'done' as const },
-                  { paso: 2, rol: 'Revisión por Administración', nombre: 'Lizzetti Díaz E.', fecha: selected.estado !== 'en_revision' ? '11/03/2026' : null, status: (['aprobado','entregado_pendiente','completado','observado'].includes(selected.estado) ? 'done' : 'current') as 'done' | 'current' | 'pending' },
-                  { paso: 3, rol: 'Aprobación por Jefe de Área', nombre: 'Jefe de UN. DE TI', fecha: ['entregado_pendiente','completado'].includes(selected.estado) ? '12/03/2026' : null, status: (['entregado_pendiente','completado'].includes(selected.estado) ? 'done' : 'pending') as 'done' | 'current' | 'pending' },
-                  { paso: 4, rol: 'Entrega y conformidad', nombre: 'Administración', fecha: selected.estado === 'completado' ? '15/03/2026' : null, status: (selected.estado === 'completado' ? 'done' : 'pending') as 'done' | 'current' | 'pending' },
-                ].map(step => (
-                  <div key={step.paso} className={`flex gap-3 border rounded-lg px-4 py-3 ${step.status === 'done' ? 'border-green-200 bg-green-50' : step.status === 'current' ? 'border-[#6B21A8] bg-[#F5F3FF]' : 'border-gray-100 bg-gray-50'}`}>
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 ${step.status === 'done' ? 'bg-green-500 text-white' : step.status === 'current' ? 'bg-[#6B21A8] text-white' : 'bg-gray-200 text-gray-500'}`}>
-                      {step.status === 'done' ? '✓' : step.paso}
+                {(() => {
+                  const e = selected.estado
+                  // Paso 1: Administración registra solicitud — siempre done
+                  // Paso 2: Área custodio entrega bien a Administración — done si aprobado/entregado_pendiente/completado
+                  // Paso 3: Administración entrega bien al colaborador — done si entregado_pendiente/completado
+                  // Paso 4: Colaborador firma conformidad — done si completado
+                  const steps: { paso: number; rol: string; descripcion: string; nombre: string; fecha: string | null; status: 'done' | 'current' | 'pending' }[] = [
+                    {
+                      paso: 1,
+                      rol: 'Solicitud registrada',
+                      descripcion: 'Administración registra la solicitud de asignación',
+                      nombre: 'SEC. ADMINISTRACIÓN',
+                      fecha: selected.fecha_solicitud,
+                      status: 'done',
+                    },
+                    {
+                      paso: 2,
+                      rol: 'Área custodio entrega bien',
+                      descripcion: 'El área que custodia el bien lo entrega a Administración',
+                      nombre: 'UN. DE TI',
+                      fecha: ['aprobado','entregado_pendiente','completado'].includes(e) ? '11/03/2026' : null,
+                      status: ['aprobado','entregado_pendiente','completado'].includes(e) ? 'done' : e === 'observado' ? 'current' : 'pending',
+                    },
+                    {
+                      paso: 3,
+                      rol: 'Administración entrega bien al colaborador',
+                      descripcion: 'Administración hace entrega física del bien al colaborador',
+                      nombre: 'SEC. ADMINISTRACIÓN',
+                      fecha: ['entregado_pendiente','completado'].includes(e) ? '13/03/2026' : null,
+                      status: ['entregado_pendiente','completado'].includes(e) ? 'done' : ['aprobado'].includes(e) ? 'current' : 'pending',
+                    },
+                    {
+                      paso: 4,
+                      rol: 'Colaborador firma conformidad',
+                      descripcion: 'El colaborador firma el acta de recepción y conformidad',
+                      nombre: 'Colaborador receptor',
+                      fecha: e === 'completado' ? '15/03/2026' : null,
+                      status: e === 'completado' ? 'done' : e === 'entregado_pendiente' ? 'current' : 'pending',
+                    },
+                  ]
+                  return steps.map(step => (
+                    <div key={step.paso} className={`flex gap-3 border rounded-lg px-4 py-3 ${step.status === 'done' ? 'border-green-200 bg-green-50' : step.status === 'current' ? 'border-[#6B21A8] bg-[#F5F3FF]' : 'border-gray-100 bg-gray-50'}`}>
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 mt-0.5 ${step.status === 'done' ? 'bg-green-500 text-white' : step.status === 'current' ? 'bg-[#6B21A8] text-white' : 'bg-gray-200 text-gray-500'}`}>
+                        {step.status === 'done' ? '✓' : step.paso}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[12px] font-semibold text-[#1E1B4B]">{step.rol}</div>
+                        <div className="text-[11px] text-gray-500">{step.descripcion}</div>
+                        <div className="text-[11px] text-gray-400 mt-0.5">{step.nombre}{step.fecha ? ` · ${step.fecha}` : ''}</div>
+                      </div>
+                      <div className={`border rounded-lg px-3 py-2 text-center min-w-[90px] flex-shrink-0 self-center ${step.status === 'done' ? 'border-green-300 bg-white' : 'border-dashed border-gray-200 bg-white'}`}>
+                        {step.status === 'done' ? (
+                          <div className="text-[10px] text-green-600 font-semibold">✓ Firmado</div>
+                        ) : step.status === 'current' ? (
+                          <div className="text-[10px] text-[#6B21A8] font-semibold">Pendiente</div>
+                        ) : (
+                          <div className="text-[10px] text-gray-300">—</div>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[12px] font-semibold text-[#1E1B4B]">{step.rol}</div>
-                      <div className="text-[11px] text-gray-500">{step.nombre}{step.fecha ? ` · ${step.fecha}` : ''}</div>
-                    </div>
-                    <div className={`border rounded-lg px-3 py-1 text-center min-w-[90px] flex-shrink-0 ${step.status === 'done' ? 'border-green-300 bg-white' : 'border-dashed border-gray-200 bg-white'}`}>
-                      {step.status === 'done' ? (
-                        <div className="text-[10px] text-green-600 font-semibold">✓ Firmado</div>
-                      ) : step.status === 'current' ? (
-                        <div className="text-[10px] text-[#6B21A8] font-semibold">Pendiente</div>
-                      ) : (
-                        <div className="text-[10px] text-gray-300">—</div>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  ))
+                })()}
               </div>
             </div>
           </div>
