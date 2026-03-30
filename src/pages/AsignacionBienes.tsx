@@ -17,18 +17,17 @@ const MOCK_DATA: SolicitudAsignacion[] = [
   { id: '4', numero: 'SOL-2026-004', bien_nombre: 'Monitor 24"', tipo: 'computo', fecha_solicitud: '01/03/2026', estado: 'entregado_pendiente', created_at: '' },
 ]
 
-const BIENES_POR_TIPO: Record<string, string[]> = {
-  computo: ['Laptop HP ProBook', 'Laptop Dell Latitude', 'Monitor 24"', 'Monitor 27"', 'Teclado + Mouse', 'Impresora HP'],
-  mobiliario: ['Silla ergonómica', 'Escritorio ejecutivo', 'Archivador metálico', 'Mesa de reuniones'],
-  comunicaciones: ['Teléfono IP', 'Auricular headset', 'Switch de red'],
-  vehiculo: ['Camioneta Hilux', 'Sedán Corolla'],
-  otro: ['Proyector EPSON', 'Ecran portátil', 'Extensión eléctrica'],
+const COLABS: Record<string, { nombre: string; apellido: string; puesto: string; subarea: string; consejo: string; initials: string }> = {
+  '77434028': { nombre: 'Aaron Samuel', apellido: 'Nuñez Muñoz', puesto: 'Analista de Sistemas', subarea: 'Tecnología de Información', consejo: 'Consejo Nacional', initials: 'AN' },
+  '45231089': { nombre: 'Carlos', apellido: 'Pérez Ramos', puesto: 'Analista Contable', subarea: 'UN. DE GDTH', consejo: 'Consejo Nacional', initials: 'CP' },
+  '32187654': { nombre: 'Ana María', apellido: 'Flores Vega', puesto: 'Asistente Administrativa', subarea: 'SEC. ADMINISTRACIÓN', consejo: 'Consejo Nacional', initials: 'FA' },
 }
 
 const BIENES_DISPONIBLES = [
-  { codigo: 'TI-MON-004', nombre: 'Monitor 27" Dell', tipo: 'Cómputo', estado: 'disponible' },
-  { codigo: 'LOG-SIL-001', nombre: 'Silla ergonómica', tipo: 'Mobiliario', estado: 'disponible' },
-  { codigo: 'TI-TEL-001', nombre: 'Teléfono IP Fanvil', tipo: 'Comunicaciones', estado: 'disponible' },
+  { codigo: 'TI-MON-004', nombre: 'Monitor 27" Dell P2722H', tipo: 'Cómputo' },
+  { codigo: 'LOG-SIL-001', nombre: 'Silla ergonómica Actiu', tipo: 'Mobiliario' },
+  { codigo: 'TI-TEL-001', nombre: 'Teléfono IP Fanvil X4U', tipo: 'Comunicaciones' },
+  { codigo: 'LOG-PRY-003', nombre: 'Proyector EPSON EB-W51', tipo: 'Otro' },
 ]
 
 function estadoBadge(estado: EstadoSolicitud) {
@@ -46,7 +45,7 @@ function estadoBadge(estado: EstadoSolicitud) {
 
 function stepperForEstado(estado: EstadoSolicitud) {
   const steps = ['Solicitud', 'Revisión', 'Aprobación', 'Entrega']
-  const idx = { en_revision: 1, observado: 1, aprobado: 2, rechazado: 2, entregado_pendiente: 3, completado: 4 }[estado] ?? 0
+  const idx = ({ en_revision: 1, observado: 1, aprobado: 2, rechazado: 2, entregado_pendiente: 3, completado: 4 } as Record<string, number>)[estado] ?? 0
   return steps.map((label, i) => ({
     label,
     status: i < idx ? 'done' : i === idx ? 'current' : 'pending',
@@ -68,8 +67,16 @@ export function AsignacionBienes() {
   const [selected, setSelected] = useState<SolicitudAsignacion | null>(null)
   const { toast, toastState, hideToast } = useToast()
 
-  // Form state
+  // Existing form state
   const [form, setForm] = useState({ tipo: '' as TipoBien | '', bien: '', justificacion: '', prioridad: 'normal' })
+
+  // New state for modal
+  const [modalTab, setModalTab] = useState<'bienes' | 'accesorios' | 'disponibles'>('bienes')
+  const [dniSearch, setDniSearch] = useState('')
+  const [colaboradorEncontrado, setColaboradorEncontrado] = useState<{ nombre: string; apellido: string; puesto: string; subarea: string; consejo: string; initials: string } | null>(null)
+  const [dniNotFound, setDniNotFound] = useState(false)
+  const [bienNombre, setBienNombre] = useState('')
+  const [tipoBien, setTipoBien] = useState('computo')
 
   useEffect(() => {
     solicitudesAsignacionService.getAll()
@@ -78,25 +85,42 @@ export function AsignacionBienes() {
       .finally(() => setLoading(false))
   }, [])
 
+  const handleBuscarColab = () => {
+    const found = COLABS[dniSearch.trim()]
+    if (found) {
+      setColaboradorEncontrado(found)
+      setDniNotFound(false)
+    } else {
+      setColaboradorEncontrado(null)
+      setDniNotFound(true)
+    }
+  }
+
   const handleSave = async () => {
     const nueva: SolicitudAsignacion = {
       id: String(Date.now()),
       numero: `SOL-2026-${String(data.length + 1).padStart(3, '0')}`,
-      bien_nombre: form.bien || 'Bien sin especificar',
-      tipo: (form.tipo || 'otro') as TipoBien,
+      bien_nombre: bienNombre || form.bien || 'Bien sin especificar',
+      tipo: (tipoBien || form.tipo || 'otro') as TipoBien,
       fecha_solicitud: new Date().toLocaleDateString('es-PE'),
       estado: 'en_revision',
       created_at: new Date().toISOString(),
     }
     try {
-      await solicitudesAsignacionService.create({ ...nueva, justificacion: form.justificacion, prioridad: form.prioridad })
+      await solicitudesAsignacionService.create({ ...nueva, justificacion: form.justificacion })
     } catch {
       // ignore, use local
     }
     setData(prev => [nueva, ...prev])
     setShowNueva(false)
     setForm({ tipo: '', bien: '', justificacion: '', prioridad: 'normal' })
-    toast('Solicitud registrada correctamente')
+    setModalTab('bienes')
+    setDniSearch('')
+    setColaboradorEncontrado(null)
+    setDniNotFound(false)
+    setBienNombre('')
+    setTipoBien('computo')
+    toast('Solicitud enviada correctamente.')
   }
 
   const handleConformidad = () => {
@@ -189,7 +213,6 @@ export function AsignacionBienes() {
                 ))}
               </tbody>
             </table>
-            {/* Footer banner */}
             <div className="px-4 py-3 border-t border-gray-100 bg-[#F8F6FB] text-[11px] text-gray-500">
               📋 Para solicitudes de bienes de cómputo, TI verificará disponibilidad. Para comunicaciones, el área de Comunicaciones gestionará el equipamiento.
             </div>
@@ -197,70 +220,209 @@ export function AsignacionBienes() {
         </>
       )}
 
-      {/* Modal Nueva Solicitud */}
+      {/* Modal Nueva Solicitud de Asignación de Bien */}
       <Modal
         open={showNueva}
         onClose={() => setShowNueva(false)}
-        title="Nueva Solicitud de Asignación"
-        subtitle="Complete los datos del bien que necesita"
+        title="Nueva Solicitud de Asignación de Bien"
+        maxWidth="max-w-2xl"
         footer={
           <>
             <Button variant="gray" size="sm" onClick={() => setShowNueva(false)}>Cancelar</Button>
-            <Button size="sm" onClick={handleSave} disabled={!form.tipo || !form.bien || !form.justificacion}>
-              Enviar Solicitud
+            <Button variant="outline" size="sm" onClick={() => toast('Borrador guardado.')}>💾 Guardar borrador</Button>
+            <Button
+              size="sm"
+              onClick={handleSave}
+              disabled={!colaboradorEncontrado || !bienNombre || !form.justificacion}
+            >
+              📤 Enviar Solicitud
             </Button>
           </>
         }
       >
         <div className="space-y-4">
-          <div>
-            <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Tipo de bien <span className="text-red-500">*</span></label>
-            <select
-              value={form.tipo}
-              onChange={e => setForm(f => ({ ...f, tipo: e.target.value as TipoBien, bien: '' }))}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8]"
-            >
-              <option value="">Seleccionar tipo...</option>
-              <option value="computo">Cómputo</option>
-              <option value="mobiliario">Mobiliario</option>
-              <option value="comunicaciones">Comunicaciones</option>
-              <option value="vehiculo">Vehículo</option>
-              <option value="otro">Otro</option>
-            </select>
+          {/* BUSCAR COLABORADOR */}
+          <div className="bg-gray-50 rounded-lg p-3 mb-4">
+            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">BUSCAR COLABORADOR</div>
+            <div className="flex gap-2 items-center flex-wrap">
+              <input
+                type="text"
+                value={dniSearch}
+                onChange={e => setDniSearch(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                onKeyDown={e => { if (e.key === 'Enter') handleBuscarColab() }}
+                placeholder="Ingrese DNI..."
+                style={{ flex: 1, maxWidth: 180 }}
+                className="border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8]"
+              />
+              <Button size="sm" onClick={handleBuscarColab}>🔍 Buscar</Button>
+              <Button variant="gray" size="sm" onClick={() => { setDniSearch(''); setColaboradorEncontrado(null); setDniNotFound(false) }}>Limpiar</Button>
+            </div>
+            <div className="text-[11px] text-gray-400 mt-1.5">
+              DNIs de prueba: <strong>45231089</strong> · <strong>77434028</strong> · <strong>32187654</strong>
+            </div>
+            {dniNotFound && (
+              <div className="mt-2 text-[12px] text-red-600 font-medium">DNI no encontrado</div>
+            )}
+            {colaboradorEncontrado && (
+              <div className="border border-[#6B21A8] bg-[#F5F3FF] rounded-lg p-3 mt-2">
+                <div className="flex gap-3 items-center">
+                  <div className="w-10 h-10 rounded-full bg-[#6B21A8] text-white font-bold text-[13px] flex items-center justify-center flex-shrink-0">
+                    {colaboradorEncontrado.initials}
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-[13px] font-bold text-[#1E1B4B]">{colaboradorEncontrado.nombre} {colaboradorEncontrado.apellido}</div>
+                    <div className="text-[11px] text-gray-500">{colaboradorEncontrado.puesto} · {colaboradorEncontrado.subarea}</div>
+                    <Badge variant="green">✓ Encontrado</Badge>
+                  </div>
+                </div>
+                <div className="mt-2 pt-2 border-t border-purple-200 grid grid-cols-2 gap-x-4 gap-y-2">
+                  {[
+                    { label: 'Nombre(s)', value: colaboradorEncontrado.nombre },
+                    { label: 'Apellido(s)', value: colaboradorEncontrado.apellido },
+                    { label: 'Puesto', value: colaboradorEncontrado.puesto },
+                    { label: 'Sub-Área', value: colaboradorEncontrado.subarea },
+                  ].map(f => (
+                    <div key={f.label}>
+                      <div className="text-[10px] text-gray-400 uppercase font-semibold">{f.label}</div>
+                      <div className="text-[12px] text-gray-800">{f.value}</div>
+                    </div>
+                  ))}
+                  <div className="col-span-2">
+                    <div className="text-[10px] text-gray-400 uppercase font-semibold">Consejo Regional</div>
+                    <div className="text-[12px] text-gray-800">{colaboradorEncontrado.consejo}</div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-          {form.tipo && (
-            <div>
-              <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Bien <span className="text-red-500">*</span></label>
-              <select
-                value={form.bien}
-                onChange={e => setForm(f => ({ ...f, bien: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8]"
+
+          <hr className="border-gray-200" />
+
+          {/* Modal tabs */}
+          <div className="flex gap-2 mb-3">
+            {[
+              { id: 'bienes', label: '📦 Bienes' },
+              { id: 'accesorios', label: '🔌 Accesorios' },
+              { id: 'disponibles', label: '📋 Disponibles' },
+            ].map(t => (
+              <button
+                key={t.id}
+                onClick={() => setModalTab(t.id as 'bienes' | 'accesorios' | 'disponibles')}
+                className={`rounded-full px-3 py-1.5 text-[12px] font-medium cursor-pointer transition-colors
+                  ${modalTab === t.id ? 'bg-[#6B21A8] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
               >
-                <option value="">Seleccionar bien...</option>
-                {(BIENES_POR_TIPO[form.tipo] ?? []).map(b => <option key={b} value={b}>{b}</option>)}
-              </select>
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab: Bienes */}
+          {modalTab === 'bienes' && (
+            <div className="space-y-3">
+              <div>
+                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Tipo de bien</label>
+                <select
+                  value={tipoBien}
+                  onChange={e => setTipoBien(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8]"
+                >
+                  <option value="computo">Cómputo</option>
+                  <option value="mobiliario">Mobiliario o Móvil</option>
+                  <option value="comunicaciones">Comunicaciones</option>
+                </select>
+                <div className="text-[11px] text-gray-400 mt-1">El tipo determina el área responsable del custodio</div>
+              </div>
+              <div>
+                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Bien a asignar</label>
+                <input
+                  type="text"
+                  value={bienNombre}
+                  onChange={e => setBienNombre(e.target.value)}
+                  placeholder="Ej: Laptop HP EliteBook 840"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8]"
+                />
+              </div>
+              <div>
+                <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Justificación / Motivo</label>
+                <textarea
+                  value={form.justificacion}
+                  onChange={e => setForm(f => ({ ...f, justificacion: e.target.value }))}
+                  rows={3}
+                  placeholder="Explique por qué necesita este bien..."
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8] resize-none"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Área funcional</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value="UN. DE TI"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[12px] bg-gray-50 text-gray-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Sede</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value="Sede Malecón de la Reserva"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[12px] bg-gray-50 text-gray-600"
+                  />
+                </div>
+              </div>
+              {tipoBien === 'computo' && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-[12px] text-blue-700">
+                  💻 Esta solicitud será revisada por SEC. DE ADMINISTRACION y derivada a UN. DE TI para verificar disponibilidad en inventario.
+                </div>
+              )}
             </div>
           )}
-          <div>
-            <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Justificación <span className="text-red-500">*</span></label>
-            <textarea
-              value={form.justificacion}
-              onChange={e => setForm(f => ({ ...f, justificacion: e.target.value }))}
-              rows={3}
-              placeholder="Explique por qué necesita este bien..."
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8] resize-none"
-            />
-          </div>
-          <div>
-            <label className="block text-[12px] font-semibold text-gray-700 mb-2">Prioridad</label>
-            <div className="flex gap-4">
-              {['normal', 'urgente', 'critica'].map(p => (
-                <label key={p} className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="prioridad" value={p} checked={form.prioridad === p} onChange={e => setForm(f => ({ ...f, prioridad: e.target.value }))} className="accent-[#6B21A8]" />
-                  <span className="text-[13px] capitalize">{p === 'critica' ? 'Crítica' : p.charAt(0).toUpperCase() + p.slice(1)}</span>
-                </label>
-              ))}
+
+          {/* Tab: Accesorios */}
+          {modalTab === 'accesorios' && (
+            <div className="flex flex-col items-center py-8 text-center">
+              <div className="text-3xl mb-2">🔌</div>
+              <div className="text-gray-500 text-[13px]">Módulo de accesorios próximamente disponible.</div>
             </div>
+          )}
+
+          {/* Tab: Disponibles */}
+          {modalTab === 'disponibles' && (
+            <div className="overflow-hidden rounded-lg border border-gray-200">
+              <table className="w-full text-[13px]">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    {['Código', 'Nombre', 'Tipo', 'Estado'].map(h => (
+                      <th key={h} className="text-left px-4 py-2.5 font-semibold text-gray-600 text-[12px]">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {BIENES_DISPONIBLES.map(item => (
+                    <tr
+                      key={item.codigo}
+                      className="border-b border-gray-100 cursor-pointer hover:bg-purple-50 transition-colors"
+                      onClick={() => {
+                        setBienNombre(item.nombre)
+                        setModalTab('bienes')
+                        toast(`✓ Bien seleccionado: ${item.nombre}`)
+                      }}
+                    >
+                      <td className="px-4 py-2.5 font-mono text-[12px] text-[#6B21A8]">{item.codigo}</td>
+                      <td className="px-4 py-2.5 font-medium text-[#1E1B4B]">{item.nombre}</td>
+                      <td className="px-4 py-2.5 text-gray-500">{item.tipo}</td>
+                      <td className="px-4 py-2.5"><Badge variant="green">Disponible</Badge></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <div className="text-[11px] text-gray-400 text-center mt-2">
+            Esta solicitud requiere aprobación de Jefe de Área y Administración antes de la asignación física.
           </div>
         </div>
       </Modal>
@@ -322,7 +484,6 @@ export function AsignacionBienes() {
       >
         {selected && (
           <div className="space-y-4">
-            {/* Summary block */}
             <div className="border-l-4 border-[#6B21A8] bg-[#F5F3FF] rounded-r-lg px-4 py-3 space-y-1.5">
               <div className="flex justify-between text-[12px]">
                 <span className="text-gray-500 font-medium">Bien</span>
@@ -350,56 +511,32 @@ export function AsignacionBienes() {
               </div>
             </div>
 
-            {/* Acta text */}
             <div className="bg-gray-50 rounded-lg px-4 py-3 text-[12px] text-gray-600 italic leading-relaxed border border-gray-200">
               "Yo, Aaron Samuel Nuñez Muñoz, identificado con DNI 77434028, declaro haber recibido el bien descrito en conformidad, en las condiciones indicadas, comprometiéndome a su uso responsable y devolución en caso corresponda."
             </div>
 
-            {/* Two-col row 1 */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-semibold text-gray-500 mb-1">Nombre completo</label>
-                <input
-                  type="text"
-                  readOnly
-                  value="Aaron Samuel Nuñez Muñoz"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[12px] bg-gray-50 text-gray-700"
-                />
+                <input type="text" readOnly value="Aaron Samuel Nuñez Muñoz" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[12px] bg-gray-50 text-gray-700" />
               </div>
               <div>
                 <label className="block text-[11px] font-semibold text-gray-500 mb-1">DNI</label>
-                <input
-                  type="text"
-                  readOnly
-                  value="77434028"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[12px] bg-gray-50 text-gray-700"
-                />
+                <input type="text" readOnly value="77434028" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[12px] bg-gray-50 text-gray-700" />
               </div>
             </div>
 
-            {/* Two-col row 2 */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-semibold text-gray-500 mb-1">Cargo</label>
-                <input
-                  type="text"
-                  readOnly
-                  value="Analista de Sistemas"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[12px] bg-gray-50 text-gray-700"
-                />
+                <input type="text" readOnly value="Analista de Sistemas" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[12px] bg-gray-50 text-gray-700" />
               </div>
               <div>
                 <label className="block text-[11px] font-semibold text-gray-500 mb-1">Fecha de firma</label>
-                <input
-                  type="text"
-                  readOnly
-                  value={todayStr}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[12px] bg-gray-50 text-gray-700"
-                />
+                <input type="text" readOnly value={todayStr} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[12px] bg-gray-50 text-gray-700" />
               </div>
             </div>
 
-            {/* Footer note */}
             <div className="text-[11px] text-gray-400 text-center">
               Esta acción registra tu conformidad. Podrás descargar el PDF desde Historial.
             </div>
