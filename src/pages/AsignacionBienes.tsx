@@ -30,6 +30,22 @@ const BIENES_DISPONIBLES = [
   { codigo: 'LOG-PRY-003', nombre: 'Proyector EPSON EB-W51', tipo: 'Otro' },
 ]
 
+const DISPONIBILIDAD_BIENES = [
+  { id: '111025', qr: 'CMP-038395', icono: '💻', nombre: 'Laptop', marca: 'HP EliteBook 840', condicion: 'Nuevo', disponibilidad: 'disponible' as const, area: 'UN. DE TI', serie: 'HP-00-2025-111025' },
+  { id: '111026', qr: 'CMP-038396', icono: '🖥️', nombre: 'Monitor', marca: 'Samsung 27" S27A', condicion: 'En Uso', disponibilidad: 'disponible' as const, area: 'UN. DE TI', serie: 'SAM-00-2024-111026' },
+  { id: '111027', qr: 'CMP-038397', icono: '🖨️', nombre: 'Impresora', marca: 'Epson L3150', condicion: 'En Uso', disponibilidad: 'revision' as const, area: 'UN. DE TI', serie: 'EPS-00-2023-111027' },
+  { id: '111028', qr: 'CMP-038398', icono: '📽️', nombre: 'Proyector', marca: 'Epson EB-X51', condicion: 'En Uso', disponibilidad: 'disponible' as const, area: 'UN. DE TI', serie: 'EPS-00-2024-111028' },
+  { id: '111029', qr: 'CMP-038399', icono: '📱', nombre: 'Tablet', marca: 'Samsung Tab S7', condicion: 'Nuevo', disponibilidad: 'disponible' as const, area: 'UN. DE TI', serie: 'SAM-00-2025-111029' },
+]
+
+const DISPONIBILIDAD_ACCESORIOS = [
+  { id: '20261114', nombre: 'Teclado Inalámbrico', marca: 'Logitech', subarea: 'UN. DE TI', estado: 'bueno' as const, disponibilidad: 'disponible' as const },
+  { id: '20261115', nombre: 'Mouse Inalámbrico', marca: 'Logitech', subarea: 'UN. DE TI', estado: 'bueno' as const, disponibilidad: 'disponible' as const },
+  { id: '20261116', nombre: 'Hub USB 4 puertos', marca: 'Anker', subarea: 'ADMINISTRACION', estado: 'bueno' as const, disponibilidad: 'disponible' as const },
+  { id: '20261117', nombre: 'Webcam HD', marca: 'Logitech', subarea: 'COMUNICACIONES', estado: 'bueno' as const, disponibilidad: 'asignado' as const },
+  { id: '20261118', nombre: 'Auriculares', marca: 'Sony', subarea: 'UN. DE GDTH', estado: 'regular' as const, disponibilidad: 'revision' as const },
+]
+
 function estadoBadge(estado: EstadoSolicitud) {
   const map: Record<EstadoSolicitud, { variant: 'blue' | 'green' | 'yellow' | 'red' | 'purple' | 'gray'; label: string }> = {
     en_revision: { variant: 'blue', label: 'En revisión' },
@@ -77,6 +93,8 @@ export function AsignacionBienes() {
   const [dniNotFound, setDniNotFound] = useState(false)
   const [bienNombre, setBienNombre] = useState('')
   const [tipoBien, setTipoBien] = useState('computo')
+  const [dispTab, setDispTab] = useState<'bienes' | 'accesorios'>('bienes')
+  const [dispBienSeleccionado, setDispBienSeleccionado] = useState<typeof DISPONIBILIDAD_BIENES[0] | null>(null)
 
   useEffect(() => {
     solicitudesAsignacionService.getAll()
@@ -433,35 +451,86 @@ export function AsignacionBienes() {
         onClose={() => setShowDetalle(false)}
         title={`Solicitud ${selected?.numero}`}
         subtitle="Detalle de la solicitud de asignación"
+        maxWidth="max-w-2xl"
         footer={
           <>
             <Button variant="gray" size="sm" onClick={() => setShowDetalle(false)}>Cerrar</Button>
             {selected?.estado === 'entregado_pendiente' && (
               <Button size="sm" onClick={() => { setShowDetalle(false); setShowConformidad(true) }}>
-                <CheckCircle size={13} /> Registrar Conformidad
+                <CheckCircle size={13} /> Firmar conformidad
               </Button>
             )}
           </>
         }
       >
         {selected && (
-          <div className="space-y-4">
+          <div className="space-y-5">
+            {/* Estado badge */}
+            <div className="flex items-center gap-2">
+              <span className="text-[12px] text-gray-500 font-medium">Estado actual:</span>
+              {estadoBadge(selected.estado)}
+            </div>
+
+            {/* Stepper */}
             <div className="bg-[#F8F6FB] rounded-lg p-4">
               <Stepper steps={stepperForEstado(selected.estado)} />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { label: 'N° Solicitud', value: selected.numero },
-                { label: 'Bien', value: selected.bien_nombre },
-                { label: 'Tipo', value: labelTipo[selected.tipo] },
-                { label: 'Fecha', value: selected.fecha_solicitud },
-                { label: 'Estado', value: estadoBadge(selected.estado) },
-              ].map(({ label, value }) => (
-                <div key={label}>
-                  <div className="text-[11px] text-gray-400 font-medium mb-0.5">{label}</div>
-                  <div className="text-[13px] text-[#1E1B4B] font-medium">{value}</div>
-                </div>
-              ))}
+
+            {/* DATOS DE LA SOLICITUD */}
+            <div>
+              <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3 pb-1.5 border-b border-gray-100">
+                DATOS DE LA SOLICITUD
+              </div>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                {[
+                  { label: 'N° Solicitud', value: selected.numero },
+                  { label: 'Bien', value: selected.bien_nombre },
+                  { label: 'Tipo', value: labelTipo[selected.tipo] },
+                  { label: 'Fecha solicitud', value: selected.fecha_solicitud },
+                  { label: 'Prioridad', value: 'Normal' },
+                  { label: 'Área solicitante', value: 'UN. DE TI' },
+                  { label: 'Observación', value: selected.observacion ?? '—' },
+                ].map(({ label, value }) => (
+                  <div key={label}>
+                    <div className="text-[10px] text-gray-400 uppercase font-semibold mb-0.5">{label}</div>
+                    <div className="text-[13px] text-[#1E1B4B] font-medium">{value}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* FLUJO DE APROBACIÓN Y FIRMAS */}
+            <div>
+              <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3 pb-1.5 border-b border-gray-100">
+                FLUJO DE APROBACIÓN Y FIRMAS
+              </div>
+              <div className="space-y-2">
+                {[
+                  { paso: 1, rol: 'Solicitud del trabajador', nombre: 'Aaron Samuel Nuñez Muñoz', fecha: selected.fecha_solicitud, status: 'done' as const },
+                  { paso: 2, rol: 'Revisión por Administración', nombre: 'Lizzetti Díaz E.', fecha: selected.estado !== 'en_revision' ? '11/03/2026' : null, status: (['aprobado','entregado_pendiente','completado','observado'].includes(selected.estado) ? 'done' : 'current') as 'done' | 'current' | 'pending' },
+                  { paso: 3, rol: 'Aprobación por Jefe de Área', nombre: 'Jefe de UN. DE TI', fecha: ['entregado_pendiente','completado'].includes(selected.estado) ? '12/03/2026' : null, status: (['entregado_pendiente','completado'].includes(selected.estado) ? 'done' : 'pending') as 'done' | 'current' | 'pending' },
+                  { paso: 4, rol: 'Entrega y conformidad', nombre: 'Administración', fecha: selected.estado === 'completado' ? '15/03/2026' : null, status: (selected.estado === 'completado' ? 'done' : 'pending') as 'done' | 'current' | 'pending' },
+                ].map(step => (
+                  <div key={step.paso} className={`flex gap-3 border rounded-lg px-4 py-3 ${step.status === 'done' ? 'border-green-200 bg-green-50' : step.status === 'current' ? 'border-[#6B21A8] bg-[#F5F3FF]' : 'border-gray-100 bg-gray-50'}`}>
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 ${step.status === 'done' ? 'bg-green-500 text-white' : step.status === 'current' ? 'bg-[#6B21A8] text-white' : 'bg-gray-200 text-gray-500'}`}>
+                      {step.status === 'done' ? '✓' : step.paso}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[12px] font-semibold text-[#1E1B4B]">{step.rol}</div>
+                      <div className="text-[11px] text-gray-500">{step.nombre}{step.fecha ? ` · ${step.fecha}` : ''}</div>
+                    </div>
+                    <div className={`border rounded-lg px-3 py-1 text-center min-w-[90px] flex-shrink-0 ${step.status === 'done' ? 'border-green-300 bg-white' : 'border-dashed border-gray-200 bg-white'}`}>
+                      {step.status === 'done' ? (
+                        <div className="text-[10px] text-green-600 font-semibold">✓ Firmado</div>
+                      ) : step.status === 'current' ? (
+                        <div className="text-[10px] text-[#6B21A8] font-semibold">Pendiente</div>
+                      ) : (
+                        <div className="text-[10px] text-gray-300">—</div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -547,37 +616,139 @@ export function AsignacionBienes() {
       {/* Modal Consultar Disponibilidad */}
       <Modal
         open={showDisponibilidad}
-        onClose={() => setShowDisponibilidad(false)}
+        onClose={() => { setShowDisponibilidad(false); setDispBienSeleccionado(null); setDispTab('bienes') }}
         title="Consultar Disponibilidad"
-        subtitle="Bienes disponibles para asignación"
-        footer={
-          <Button variant="gray" size="sm" onClick={() => setShowDisponibilidad(false)}>Cerrar</Button>
-        }
+        subtitle="Inventario de bienes y accesorios institucionales"
+        maxWidth="max-w-3xl"
+        footer={<Button variant="gray" size="sm" onClick={() => { setShowDisponibilidad(false); setDispBienSeleccionado(null) }}>Cerrar</Button>}
       >
-        <div className="overflow-hidden rounded-lg border border-gray-200">
-          <table className="w-full text-[13px]">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-[12px]">Código</th>
-                <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-[12px]">Nombre</th>
-                <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-[12px]">Tipo</th>
-                <th className="text-left px-4 py-2.5 font-semibold text-gray-600 text-[12px]">Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {BIENES_DISPONIBLES.map(b => (
-                <tr key={b.codigo} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="px-4 py-2.5 font-mono text-[12px] text-[#6B21A8]">{b.codigo}</td>
-                  <td className="px-4 py-2.5 font-medium text-[#1E1B4B]">{b.nombre}</td>
-                  <td className="px-4 py-2.5 text-gray-500">{b.tipo}</td>
-                  <td className="px-4 py-2.5">
-                    <Badge variant="green">Disponible</Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {/* Tabs */}
+        <div className="flex gap-2 mb-4">
+          {[{ id: 'bienes' as const, label: '📦 Bienes' }, { id: 'accesorios' as const, label: '🔌 Accesorios' }].map(t => (
+            <button
+              key={t.id}
+              onClick={() => { setDispTab(t.id); setDispBienSeleccionado(null) }}
+              className={`rounded-full px-4 py-1.5 text-[12px] font-medium cursor-pointer transition-colors
+                ${dispTab === t.id ? 'bg-[#6B21A8] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
+
+        {/* Tab Bienes */}
+        {dispTab === 'bienes' && !dispBienSeleccionado && (
+          <div className="space-y-2">
+            {DISPONIBILIDAD_BIENES.map(b => (
+              <div
+                key={b.id}
+                onClick={() => setDispBienSeleccionado(b)}
+                className="flex items-center gap-3 border border-gray-200 rounded-lg px-4 py-3 cursor-pointer hover:border-[#6B21A8] hover:bg-[#F5F3FF] transition-all"
+              >
+                <div className="text-[28px] w-10 flex-shrink-0">{b.icono}</div>
+                <div className="flex-1">
+                  <div className="text-[13px] font-bold text-[#1E1B4B]">{b.nombre} — {b.marca}</div>
+                  <div className="text-[11px] text-gray-400">ID: {b.id} · QR: {b.qr} · Condición: {b.condicion}</div>
+                </div>
+                {b.disponibilidad === 'disponible'
+                  ? <Badge variant="green">Disponible</Badge>
+                  : <Badge variant="yellow">En revisión</Badge>}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Detalle bien seleccionado */}
+        {dispTab === 'bienes' && dispBienSeleccionado && (
+          <div>
+            <button
+              onClick={() => setDispBienSeleccionado(null)}
+              className="text-[12px] text-[#6B21A8] font-medium mb-3 flex items-center gap-1 cursor-pointer hover:underline"
+            >
+              ← Volver al listado
+            </button>
+            <div className="border border-gray-200 rounded-xl p-4 space-y-4">
+              <div className="flex gap-3">
+                <div className="w-28 h-20 bg-gray-100 rounded-lg flex items-center justify-center text-[32px] border border-gray-200 flex-shrink-0">
+                  {dispBienSeleccionado.icono}
+                </div>
+                <div className="w-28 h-20 bg-gray-100 rounded-lg flex items-center justify-center text-[11px] text-gray-400 border border-gray-200 flex-shrink-0">
+                  Vista QR
+                </div>
+                <div className="flex-1">
+                  <div className="text-[15px] font-bold text-[#1E1B4B]">{dispBienSeleccionado.nombre}</div>
+                  <div className="text-[13px] text-gray-500">{dispBienSeleccionado.marca}</div>
+                  <div className="mt-2">
+                    {dispBienSeleccionado.disponibilidad === 'disponible'
+                      ? <Badge variant="green">Disponible</Badge>
+                      : <Badge variant="yellow">En revisión</Badge>}
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 border-t border-gray-100 pt-3">
+                {[
+                  { label: 'ID Inventario', value: dispBienSeleccionado.id },
+                  { label: 'Código QR', value: dispBienSeleccionado.qr },
+                  { label: 'Condición', value: dispBienSeleccionado.condicion },
+                  { label: 'Área custodio', value: dispBienSeleccionado.area },
+                  { label: 'N° Serie', value: dispBienSeleccionado.serie },
+                ].map(f => (
+                  <div key={f.label}>
+                    <div className="text-[10px] text-gray-400 uppercase font-semibold">{f.label}</div>
+                    <div className="text-[12px] text-[#1E1B4B] font-medium">{f.value}</div>
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={() => {
+                  setBienNombre(`${dispBienSeleccionado.nombre} ${dispBienSeleccionado.marca}`)
+                  setShowDisponibilidad(false)
+                  setDispBienSeleccionado(null)
+                  setShowNueva(true)
+                  toast(`✓ Bien seleccionado: ${dispBienSeleccionado.nombre}`)
+                }}
+                className="w-full bg-[#6B21A8] hover:bg-[#4A1272] text-white rounded-lg py-2.5 text-[13px] font-semibold cursor-pointer transition-colors"
+              >
+                ✔ Seleccionar para solicitud
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Tab Accesorios */}
+        {dispTab === 'accesorios' && (
+          <div className="overflow-hidden rounded-lg border border-gray-200">
+            <table className="w-full text-[13px]">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  {['ID', 'Nombre', 'Marca', 'Sub Área', 'Estado', 'Disponibilidad'].map(h => (
+                    <th key={h} className="text-left px-3 py-2.5 font-semibold text-gray-600 text-[12px] whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {DISPONIBILIDAD_ACCESORIOS.map(a => (
+                  <tr key={a.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="px-3 py-2.5 font-mono text-[12px] text-[#6B21A8]">{a.id}</td>
+                    <td className="px-3 py-2.5 font-medium text-[#1E1B4B]">{a.nombre}</td>
+                    <td className="px-3 py-2.5 text-gray-500">{a.marca}</td>
+                    <td className="px-3 py-2.5 text-gray-500">{a.subarea}</td>
+                    <td className="px-3 py-2.5">
+                      {a.estado === 'bueno' ? <Badge variant="green">Bueno</Badge> : <Badge variant="yellow">Regular</Badge>}
+                    </td>
+                    <td className="px-3 py-2.5">
+                      {a.disponibilidad === 'disponible'
+                        ? <Badge variant="green">Disponible</Badge>
+                        : a.disponibilidad === 'asignado'
+                          ? <Badge variant="blue">Asignado</Badge>
+                          : <Badge variant="yellow">En revisión</Badge>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Modal>
 
       <Toast message={toastState.message} show={toastState.show} onHide={hideToast} />

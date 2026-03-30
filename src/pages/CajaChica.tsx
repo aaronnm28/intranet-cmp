@@ -97,6 +97,7 @@ export function CajaChica() {
     descripcion: '',
     tipo_comprobante: 'Factura',
     num_comprobante: '',
+    proveedor: '',
     monto: '',
   })
 
@@ -121,7 +122,7 @@ export function CajaChica() {
       [selectedCaja.area]: [nuevoGasto, ...(prev[selectedCaja.area] ?? [])],
     }))
     setShowRegistrarGasto(false)
-    setFormGasto({ fecha: new Date().toISOString().slice(0, 10), descripcion: '', tipo_comprobante: 'Factura', num_comprobante: '', monto: '' })
+    setFormGasto({ fecha: new Date().toISOString().slice(0, 10), descripcion: '', tipo_comprobante: 'Factura', num_comprobante: '', proveedor: '', monto: '' })
     toast('Gasto registrado correctamente.')
   }
 
@@ -297,15 +298,32 @@ export function CajaChica() {
         }
       >
         <div className="space-y-4">
-          <div>
-            <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Fecha</label>
-            <input
-              type="date"
-              value={formGasto.fecha}
-              onChange={e => setFormGasto(f => ({ ...f, fecha: e.target.value }))}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8]"
-            />
+          {/* Fila: Fecha + Tipo comprobante */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Fecha del gasto</label>
+              <input
+                type="date"
+                value={formGasto.fecha}
+                onChange={e => setFormGasto(f => ({ ...f, fecha: e.target.value }))}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8]"
+              />
+            </div>
+            <div>
+              <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Tipo comprobante</label>
+              <select
+                value={formGasto.tipo_comprobante}
+                onChange={e => setFormGasto(f => ({ ...f, tipo_comprobante: e.target.value }))}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8]"
+              >
+                <option value="Boleta">Boleta</option>
+                <option value="Factura">Factura</option>
+                <option value="Recibo">Recibo</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
           </div>
+
           <div>
             <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Descripción del gasto <span className="text-red-500">*</span></label>
             <input
@@ -316,20 +334,9 @@ export function CajaChica() {
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8]"
             />
           </div>
+
+          {/* Fila: N° comprobante + Proveedor */}
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Tipo de comprobante</label>
-              <select
-                value={formGasto.tipo_comprobante}
-                onChange={e => setFormGasto(f => ({ ...f, tipo_comprobante: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8]"
-              >
-                <option value="Factura">Factura</option>
-                <option value="Boleta">Boleta</option>
-                <option value="Recibo">Recibo</option>
-                <option value="Ticket">Ticket</option>
-              </select>
-            </div>
             <div>
               <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">N° de comprobante <span className="text-red-500">*</span></label>
               <input
@@ -340,7 +347,19 @@ export function CajaChica() {
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8]"
               />
             </div>
+            <div>
+              <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Proveedor / A favor de</label>
+              <input
+                type="text"
+                value={formGasto.proveedor}
+                onChange={e => setFormGasto(f => ({ ...f, proveedor: e.target.value }))}
+                placeholder="Nombre del proveedor..."
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8]"
+              />
+            </div>
           </div>
+
+          {/* Monto + saldo dinámico */}
           <div>
             <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Monto S/. <span className="text-red-500">*</span></label>
             <input
@@ -352,13 +371,39 @@ export function CajaChica() {
               step="0.01"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8]"
             />
+            {selectedCaja && (
+              <div className="mt-2 bg-[#F8F6FB] border border-gray-200 rounded-lg px-3 py-2 text-[12px] text-gray-600 flex gap-4">
+                <span>Saldo actual: <strong className="text-emerald-700">S/. {(selectedCaja.monto_asignado - selectedCaja.gastado_mes).toLocaleString()}</strong></span>
+                <span>→</span>
+                <span>Saldo tras guardar: <strong className={parseFloat(formGasto.monto || '0') > (selectedCaja.monto_asignado - selectedCaja.gastado_mes) ? 'text-red-600' : 'text-[#6B21A8]'}>
+                  S/. {Math.max(0, (selectedCaja.monto_asignado - selectedCaja.gastado_mes) - parseFloat(formGasto.monto || '0')).toLocaleString()}
+                </strong></span>
+              </div>
+            )}
           </div>
+
           <div>
             <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Adjuntar comprobante</label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50 cursor-pointer hover:border-[#6B21A8] transition-colors">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-5 text-center bg-gray-50 cursor-pointer hover:border-[#6B21A8] transition-colors">
               <div className="text-[20px] mb-1">📎</div>
               <div className="text-[13px] text-gray-500">Arrastrar o hacer clic para adjuntar comprobante</div>
               <div className="text-[11px] text-gray-400 mt-1">PDF, JPG, PNG — máx. 5MB</div>
+            </div>
+          </div>
+
+          {/* Readonly: Responsable, Área, Periodo */}
+          <div className="grid grid-cols-3 gap-3 border-t border-gray-100 pt-3">
+            <div>
+              <label className="block text-[11px] font-semibold text-gray-400 uppercase mb-1">Responsable</label>
+              <input type="text" readOnly value={selectedCaja?.responsable ?? '—'} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[12px] bg-gray-50 text-gray-600" />
+            </div>
+            <div>
+              <label className="block text-[11px] font-semibold text-gray-400 uppercase mb-1">Área</label>
+              <input type="text" readOnly value={selectedCaja?.area ?? '—'} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[12px] bg-gray-50 text-gray-600" />
+            </div>
+            <div>
+              <label className="block text-[11px] font-semibold text-gray-400 uppercase mb-1">Periodo</label>
+              <input type="text" readOnly value="Marzo 2026" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[12px] bg-gray-50 text-gray-600" />
             </div>
           </div>
         </div>
