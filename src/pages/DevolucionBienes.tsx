@@ -47,6 +47,7 @@ interface DetallePanelProps {
   devolucion: Devolucion
   onBack: () => void
   toast: (msg: string) => void
+  onGenerarReporte: () => void
 }
 
 const BIENES_DEVOLUCION = [
@@ -60,7 +61,7 @@ const ACCESORIOS_DEVOLUCION = [
   { id: '20261107', nombre: 'USB Kingston', marca: 'Kingston', estado: 'bueno' },
 ]
 
-function DetallePanel({ devolucion, onBack, toast }: DetallePanelProps) {
+function DetallePanel({ devolucion, onBack, toast, onGenerarReporte }: DetallePanelProps) {
   const [openSections, setOpenSections] = useState<Set<string>>(new Set(['bienes', 'accesorios']))
 
   const toggleSection = (id: string) => {
@@ -308,6 +309,7 @@ function DetallePanel({ devolucion, onBack, toast }: DetallePanelProps) {
         </div>
         <div className="flex flex-wrap gap-2 mt-3">
           <Button variant="gray" size="sm" onClick={onBack}>← Regresar</Button>
+          <Button size="sm" onClick={onGenerarReporte}>📊 Generar Reporte</Button>
           <Button variant="outline" size="sm">📄 Emitir acta parcial</Button>
           <Button variant="gray" size="sm" disabled>✔ Emitir conformidad final</Button>
           <span className="ml-auto bg-[#0DA882] text-white text-[10px] px-2 py-0.5 rounded-full self-center">⚡ API — Datos desde Activos y Bienes</span>
@@ -323,6 +325,7 @@ export function DevolucionBienes() {
   const [activeTab, setActiveTab] = useState('activos')
   const [showModal, setShowModal] = useState(false)
   const [selected, setSelected] = useState<Devolucion | null>(null)
+  const [showReporte, setShowReporte] = useState(false)
   const { toast, toastState, hideToast } = useToast()
 
   // Form
@@ -389,7 +392,85 @@ export function DevolucionBienes() {
           devolucion={selected}
           onBack={() => setSelected(null)}
           toast={toast}
+          onGenerarReporte={() => setShowReporte(true)}
         />
+        {/* Modal Reporte Devolución */}
+        <Modal
+          open={showReporte}
+          onClose={() => setShowReporte(false)}
+          title="Reporte de Devolución de Bienes"
+          subtitle="Detalle completo con flujo de firmas y observaciones"
+          maxWidth="max-w-2xl"
+          footer={
+            <>
+              <Button variant="gray" size="sm" onClick={() => setShowReporte(false)}>Cerrar</Button>
+              <Button variant="outline" size="sm" onClick={() => { toast('Imprimiendo reporte...'); window.print() }}>🖨 Imprimir</Button>
+              <Button size="sm" onClick={() => { toast('Generando PDF...'); window.print() }}>📄 Generar PDF</Button>
+            </>
+          }
+        >
+          <div className="space-y-4">
+            {/* Colaborador */}
+            <div className="bg-[#F5F3FF] border border-[#DDD6FE] rounded-lg px-4 py-3">
+              <div className="text-[14px] font-bold text-[#1E1B4B]">{selected.colaborador_nombre}</div>
+              <div className="text-[12px] text-gray-500 mt-1">DNI: {selected.colaborador_dni} · Área: {selected.area} · Fecha cese: {selected.fecha_inicio}</div>
+            </div>
+
+            {/* Sección Bienes */}
+            <div>
+              <div className="text-[12px] font-bold text-gray-700 bg-amber-50 border-l-4 border-amber-400 px-3 py-2 rounded mb-2 flex justify-between">
+                <span>📦 Sección 1 — Bienes a devolver</span>
+                <span className="text-amber-600 font-normal">3 pendientes</span>
+              </div>
+              <table className="w-full text-[12px] border-collapse">
+                <thead><tr className="bg-gray-50"><th className="border border-gray-200 px-3 py-2 text-left font-semibold text-gray-500">ID</th><th className="border border-gray-200 px-3 py-2 text-left font-semibold text-gray-500">Descripción</th><th className="border border-gray-200 px-3 py-2 text-left font-semibold text-gray-500">Estado</th><th className="border border-gray-200 px-3 py-2 text-left font-semibold text-gray-500">Devolución</th></tr></thead>
+                <tbody>
+                  {BIENES_DEVOLUCION.map(b => (
+                    <tr key={b.id}><td className="border border-gray-200 px-3 py-2 font-mono text-[11px]">{b.id}</td><td className="border border-gray-200 px-3 py-2">{b.desc}</td><td className="border border-gray-200 px-3 py-2">{b.estado === 'bueno' ? <Badge variant="green">Bueno</Badge> : <Badge variant="yellow">Regular</Badge>}</td><td className="border border-gray-200 px-3 py-2 text-amber-600">{b.devolucion === 'pendiente' ? '☐ Pendiente' : '⚠ Observado'}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="mt-2 bg-amber-50 border border-amber-100 rounded px-3 py-2 text-[11px] text-gray-600">
+                <strong>Flujo de firmas:</strong> Admin registra ✓ → Jefe de Área ✓ → Colaborador firma ⏳ Pendiente
+              </div>
+              <div className="mt-1 bg-gray-50 border border-gray-200 rounded px-3 py-2 text-[11px] text-gray-600">
+                <strong>Obs. Silla ergonómica (200201):</strong> Presenta desgaste en soporte lumbar y rasguños en apoyabrazos izquierdo. Requiere evaluación.
+              </div>
+            </div>
+
+            {/* Sección Accesorios */}
+            <div>
+              <div className="text-[12px] font-bold text-gray-700 bg-emerald-50 border-l-4 border-emerald-400 px-3 py-2 rounded mb-2 flex justify-between">
+                <span>🔌 Sección 2 — Accesorios a devolver</span>
+                <span className="text-amber-600 font-normal">2 pendientes</span>
+              </div>
+              <table className="w-full text-[12px] border-collapse">
+                <thead><tr className="bg-gray-50"><th className="border border-gray-200 px-3 py-2 text-left font-semibold text-gray-500">ID</th><th className="border border-gray-200 px-3 py-2 text-left font-semibold text-gray-500">Nombre</th><th className="border border-gray-200 px-3 py-2 text-left font-semibold text-gray-500">Marca</th><th className="border border-gray-200 px-3 py-2 text-left font-semibold text-gray-500">Estado</th></tr></thead>
+                <tbody>
+                  {ACCESORIOS_DEVOLUCION.map(a => (
+                    <tr key={a.id}><td className="border border-gray-200 px-3 py-2 font-mono text-[11px]">{a.id}</td><td className="border border-gray-200 px-3 py-2">{a.nombre}</td><td className="border border-gray-200 px-3 py-2">{a.marca}</td><td className="border border-gray-200 px-3 py-2"><Badge variant="green">Bueno</Badge></td></tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="mt-2 bg-emerald-50 border border-emerald-100 rounded px-3 py-2 text-[11px] text-gray-600">
+                <strong>Flujo de firmas:</strong> Admin registra ✓ → Colaborador firma ⏳ Pendiente
+              </div>
+            </div>
+
+            {/* Secciones vacías */}
+            {['📦 Sección 3 — Préstamos Bienes Tecnológicos', '💰 Sección 4 — Préstamos y Adelantos', '🏧 Sección 5 — Caja Chica'].map(s => (
+              <div key={s} className="bg-gray-50 border border-gray-200 rounded px-3 py-2 text-[12px] text-gray-400 italic">
+                {s}: Sin registros activos.
+              </div>
+            ))}
+
+            {/* Resumen */}
+            <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-[12px]">
+              <div className="font-bold text-red-700 mb-1">Estado global: Proceso incompleto — 0 de 5 ítems devueltos (0%)</div>
+              <div className="text-gray-500">Generado el {new Date().toLocaleDateString('es-PE')} · Sistema de Gestión Interna — CMP</div>
+            </div>
+          </div>
+        </Modal>
         <Toast message={toastState.message} show={toastState.show} onHide={hideToast} />
       </>
     )

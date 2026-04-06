@@ -138,7 +138,7 @@ export function CajaChica() {
       <PageHeader
         title="Caja Chica"
         subtitle="Control de fondos por área — 6 cajas activas"
-        breadcrumb={<>Gestión de Recursos &rsaquo; Caja Chica Decanato</>}
+        breadcrumb={<>Gestión de Recursos &rsaquo; Caja Chica CMP</>}
         actions={<Button variant="outline" size="sm">📥 Exportar Excel</Button>}
       />
 

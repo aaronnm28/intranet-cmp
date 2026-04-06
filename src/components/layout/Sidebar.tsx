@@ -7,7 +7,7 @@ const SUB_ITEMS = [
   { id: 'devolucion', label: 'Devolución de Bienes', path: '/gestion/devolucion' },
   { id: 'prestamos-bienes', label: 'Préstamos Bienes Tec.', path: '/gestion/prestamos-bienes' },
   { id: 'prestamos-adelantos', label: 'Préstamos y Adelantos', path: '/gestion/prestamos-adelantos' },
-  { id: 'caja-chica', label: 'Caja Chica Decanato', path: '/gestion/caja-chica' },
+  { id: 'caja-chica', label: 'Caja Chica CMP', path: '/gestion/caja-chica' },
   { id: 'consulta-dni', label: 'Consulta por DNI (GDTH)', path: '/gestion/consulta-dni' },
 ]
 
