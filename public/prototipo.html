@@ -433,13 +433,13 @@
     <header class="topbar">
       <span class="topbar-title">INTRANET</span>
       <span class="topbar-icon">🔔</span>
-      <span class="topbar-icon">🔑</span>
       <div class="topbar-divider"></div>
       <div class="topbar-userinfo">
-        <div class="topbar-name">AARON SAMUEL</div>
-        <div class="topbar-role">Usuario</div>
+        <div class="topbar-name" id="tb-name">—</div>
+        <div class="topbar-role" id="tb-role">—</div>
       </div>
-      <div class="topbar-avatar">AS</div>
+      <div class="topbar-avatar" id="tb-avatar">—</div>
+      <button onclick="cmpLogout()" title="Cerrar sesión" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,.7);font-size:16px;padding:4px 6px;border-radius:6px;margin-left:4px;transition:color .15s" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,.7)'">⏏</button>
     </header>
 
     <!-- Content -->
@@ -5843,6 +5843,34 @@ function guardarObservacionPaso() {
   closeModal('modal-agregar-obs-paso');
   showToast('✓ Observación registrada correctamente.');
 }
+
+// ── Auth gate ──────────────────────────────────────────────────────────────
+const ROL_LABEL_MAP = {
+  admin: 'Administrador', gdth: 'GDTH', custodio: 'Custodio',
+  contabilidad: 'Contabilidad', colaborador: 'Colaborador'
+};
+
+function cmpLogout() {
+  localStorage.removeItem('cmp_session');
+  window.location.href = '/login';
+}
+
+(function initAuth() {
+  const raw = localStorage.getItem('cmp_session');
+  if (!raw) { window.location.href = '/login'; return; }
+  try {
+    const u = JSON.parse(raw);
+    const tbName = document.getElementById('tb-name');
+    const tbRole = document.getElementById('tb-role');
+    const tbAvatar = document.getElementById('tb-avatar');
+    const nombre = ((u.nombres || '').split(' ')[0] + ' ' + (u.apellidos || '').split(' ')[0]).trim().toUpperCase();
+    const rol = ROL_LABEL_MAP[u.rol] || u.rol || 'Usuario';
+    const initials = (u.nombres || 'U').charAt(0).toUpperCase() + (u.apellidos || '').charAt(0).toUpperCase();
+    if (tbName) tbName.textContent = nombre;
+    if (tbRole) tbRole.textContent = rol;
+    if (tbAvatar) tbAvatar.textContent = initials;
+  } catch { window.location.href = '/login'; }
+})();
 
 // Init: show result for default DNI
 document.addEventListener('DOMContentLoaded', function() {
