@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
+import { supabase } from '../lib/supabase'
 
 export function Login() {
   const [email, setEmail] = useState('')
@@ -9,7 +9,6 @@ export function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const { signIn } = useAuth()
-  const navigate = useNavigate()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -17,7 +16,23 @@ export function Login() {
     setLoading(true)
     try {
       await signIn(email, password)
-      navigate('/gestion/asignacion', { replace: true })
+      // Fetch profile — fallback to email-derived data so cmp_session is always set
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('nombres,apellidos,rol,area')
+          .eq('id', user.id)
+          .single()
+        const session = profile ?? {
+          nombres: user.user_metadata?.nombres ?? user.email?.split('@')[0] ?? 'Usuario',
+          apellidos: user.user_metadata?.apellidos ?? '',
+          rol: user.user_metadata?.rol ?? 'colaborador',
+          area: user.user_metadata?.area ?? 'CMP',
+        }
+        localStorage.setItem('cmp_session', JSON.stringify(session))
+      }
+      window.location.href = '/prototipo.html'
     } catch {
       setError('Correo o contraseña incorrectos. Verifica tus credenciales.')
     } finally {
