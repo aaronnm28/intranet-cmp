@@ -15,12 +15,6 @@ const COLABS: Record<string, { nombre: string; apellido: string; puesto: string;
   '32187654': { nombre: 'Ana María', apellido: 'Flores Vega', puesto: 'Asistente Administrativa', subarea: 'SEC. ADMINISTRACIÓN', consejo: 'Consejo Nacional', initials: 'FA' },
 }
 
-const BIENES_DISPONIBLES = [
-  { codigo: 'TI-MON-004', nombre: 'Monitor 27" Dell P2722H', tipo: 'Cómputo' },
-  { codigo: 'LOG-SIL-001', nombre: 'Silla ergonómica Actiu', tipo: 'Mobiliario' },
-  { codigo: 'TI-TEL-001', nombre: 'Teléfono IP Fanvil X4U', tipo: 'Comunicaciones' },
-  { codigo: 'LOG-PRY-003', nombre: 'Proyector EPSON EB-W51', tipo: 'Otro' },
-]
 
 const DISPONIBILIDAD_BIENES = [
   { id: '111025', qr: 'CMP-038395', icono: '💻', nombre: 'Laptop', marca: 'HP EliteBook 840', condicion: 'Nuevo', disponibilidad: 'disponible' as const, area: 'UN. DE TI', serie: 'HP-00-2025-111025' },
