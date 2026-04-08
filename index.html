@@ -486,7 +486,7 @@
                   <td><span class="badge b-gray">Cómputo</span></td>
                   <td>10/03/2026</td>
                   <td class="text-gray">—</td>
-                  <td><span class="badge b-blue">En revisión</span></td>
+                  <td><span class="badge b-yellow">En revisión</span></td>
                   <td><div class="actions-cell"><button class="btn btn-gray btn-xs" onclick="openDetalleSolicitud('SOL-2026-001')">Ver detalle</button></div></td>
                 </tr>
                 <tr>
@@ -513,7 +513,7 @@
                   <td><span class="badge b-gray">Cómputo</span></td>
                   <td>01/03/2026</td>
                   <td>15/03/2026</td>
-                  <td><span class="badge b-purple">Entregado — pendiente conformidad</span></td>
+                  <td><span class="badge b-red">Pendiente conformidad</span></td>
                   <td><div class="actions-cell"><button class="btn btn-primary btn-xs" onclick="openModal('modal-conformidad')">Firmar conformidad</button></div></td>
                 </tr>
               </tbody>
@@ -568,7 +568,7 @@
                   <td>UN. DE TI</td>
                   <td>31/03/2026</td>
                   <td>5 bienes</td>
-                  <td><span class="badge b-blue">En proceso</span></td>
+                  <td><span class="badge b-yellow">En proceso</span></td>
                   <td><span class="sem sem-g"></span></td>
                   <td><button class="btn btn-outline btn-xs" onclick="showScreen('screen-devolucion-detalle','sub-devolucion')">Ver proceso</button></td>
                 </tr>
@@ -596,7 +596,7 @@
             </table>
           </div>
           <div class="card-footer">
-            <span class="text-xs text-gray">🟢 Sin observaciones &nbsp;&nbsp; 🟡 Con observaciones pendientes &nbsp;&nbsp; 🔴 Bloqueado</span>
+            <span class="text-xs text-gray">🟢 Completado &nbsp;&nbsp; 🟡 Observado &nbsp;&nbsp; 🔴 Pendiente / Bloqueado</span>
           </div>
         </div>
         <div class="text-xs text-gray mt-8" style="font-style:italic">📌 Nota de diseño: Rol activo determina tabs visibles — usuario ve sus solicitudes, GDTH/Admin ven bandeja completa.</div>
@@ -619,7 +619,7 @@
             <div class="profile-meta">TI · DNI 45231089</div>
             <div class="profile-tags">
               <span class="tag-pill">Fecha cese: 31/03/2026</span>
-              <span class="badge b-yellow" style="font-size:11px">🟡 5 bienes pendientes de devolución</span>
+              <span class="badge b-red" style="font-size:11px">🔴 5 bienes pendientes de devolución</span>
             </div>
           </div>
         </div>
@@ -628,7 +628,7 @@
         <div class="section-block">
           <div class="section-block-hdr" onclick="toggleSection('sec-bienes-dev')">
             <span class="section-block-title"><span class="sem sem-y"></span> Bienes a devolver <span class="text-xs text-gray">(custodio: TI / ADMINISTRACIÓN)</span></span>
-            <div class="flex-row"><span class="badge b-yellow">3 pendientes</span><span style="margin-left:8px;color:#9CA3AF;font-size:12px" id="arrow-sec-bienes-dev">▾</span></div>
+            <div class="flex-row"><span class="badge b-red">3 pendientes</span><span style="margin-left:8px;color:#9CA3AF;font-size:12px" id="arrow-sec-bienes-dev">▾</span></div>
           </div>
           <div class="section-block-body" id="sec-bienes-dev">
             <table>
@@ -638,21 +638,21 @@
                   <td>111030</td><td>Laptop Dell</td><td><code>CMP-038401</code></td><td>UN. DE TI</td>
                   <td><span class="badge b-green">Bueno</span></td>
                   <td><span class="sem sem-y"></span></td>
-                  <td>☐ Pendiente</td>
+                  <td style="color:#991B1B;font-weight:600">☐ Pendiente</td>
                   <td><button class="btn btn-primary btn-xs" onclick="openActaDevolucion('111030','Laptop Dell','CMP-038401','Dell','Latitude 5420','SN20241001')">Registrar devolución</button></td>
                 </tr>
                 <tr>
                   <td>111031</td><td>Mouse Logitech</td><td><code>CMP-038402</code></td><td>UN. DE TI</td>
                   <td><span class="badge b-green">Bueno</span></td>
                   <td><span class="sem sem-y"></span></td>
-                  <td>☐ Pendiente</td>
+                  <td style="color:#991B1B;font-weight:600">☐ Pendiente</td>
                   <td><button class="btn btn-primary btn-xs" onclick="openActaDevolucion('111031','Mouse Logitech','CMP-038402','Logitech','M185','SN20231002')">Registrar devolución</button></td>
                 </tr>
                 <tr>
                   <td>200201</td><td>Silla ergonómica</td><td><code>CMP-ART-041</code></td><td>Administración</td>
                   <td><span class="badge b-yellow">Regular</span></td>
                   <td><span class="sem sem-r"></span></td>
-                  <td>⚠ Observado</td>
+                  <td style="color:#92400E;font-weight:600">⚠ Observado</td>
                   <td><div class="actions-cell"><button class="btn btn-gray btn-xs" onclick="openVerObsDev('200201')">Ver obs.</button><button class="btn btn-outline btn-xs" onclick="openActaDevolucion('200201','Silla ergonómica','CMP-ART-041','Ergosit','Modelo A','—')">Registrar devolución</button></div></td>
                 </tr>
               </tbody>
@@ -664,7 +664,7 @@
         <div class="section-block">
           <div class="section-block-hdr" onclick="toggleSection('sec-accesorios-dev')">
             <span class="section-block-title"><span class="sem sem-g"></span> Accesorios a devolver <span class="text-ex text-gray">(custodio: ADMINISTRACIÓN)</span></span>
-            <div class="flex-row"><span class="badge b-green">2 pendientes</span><span style="margin-left:8px;color:#9CA3AF;font-size:12px" id="arrow-sec-accesorios-dev">▾</span></div>
+            <div class="flex-row"><span class="badge b-red">2 pendientes</span><span style="margin-left:8px;color:#9CA3AF;font-size:12px" id="arrow-sec-accesorios-dev">▾</span></div>
           </div>
           <div class="section-block-body" id="sec-accesorios-dev">
             <table>
@@ -674,15 +674,15 @@
                   <td>20261106</td><td>Teclado HP</td><td>HP</td>
                   <td><span class="badge b-green">Bueno</span></td>
                   <td><span class="sem sem-y"></span></td>
-                  <td>☐ Pendiente</td>
-                  <td><button class="btn btn-primary btn-xs" onclick="openActaDevolucion('20261106','Teclado HP','ACC-20261106','HP','K1500','SN20220301')">Registrar devolución</button></td>
+                  <td style="color:#991B1B;font-weight:600">☐ Pendiente</td>
+                  <td><button class="btn btn-primary btn-xs" onclick="openActaDevolucion('20261106','Teclado HP','2026_ADM_0001','HP','K1500','SN20220301')">Registrar devolución</button></td>
                 </tr>
                 <tr>
                   <td>20261107</td><td>USB Kingston</td><td>Kingston</td>
                   <td><span class="badge b-green">Bueno</span></td>
                   <td><span class="sem sem-y"></span></td>
-                  <td>☐ Pendiente</td>
-                  <td><button class="btn btn-primary btn-xs" onclick="openActaDevolucion('20261107','USB Kingston','ACC-20261107','Kingston','DataTraveler 32GB','SN20230102')">Registrar devolución</button></td>
+                  <td style="color:#991B1B;font-weight:600">☐ Pendiente</td>
+                  <td><button class="btn btn-primary btn-xs" onclick="openActaDevolucion('20261107','USB Kingston','2026_ADM_0002','Kingston','DataTraveler 32GB','SN20230102')">Registrar devolución</button></td>
                 </tr>
               </tbody>
             </table>
@@ -798,7 +798,7 @@
                   <td>Tablet Samsung</td>
                   <td>22/03/2026</td>
                   <td>29/03/2026</td>
-                  <td><span class="badge b-yellow">Pendiente aprobación</span></td>
+                  <td><span class="badge b-red">Pendiente aprobación</span></td>
                   <td><button class="btn btn-gray btn-xs" onclick="openDetallePrestamoBien('PREST-2026-003')">Ver detalle</button></td>
                 </tr>
               </tbody>
@@ -848,7 +848,7 @@
                   </tr>
                   <tr>
                     <td class="fw-600">ADV-2026-002</td><td>Préstamo personal</td><td>S/. 2,500</td><td>10/03/2026</td>
-                    <td><span class="badge b-blue">En revisión — Bienestar</span></td>
+                    <td><span class="badge b-yellow">En revisión — Bienestar</span></td>
                     <td class="text-sm text-gray">Evaluación Bienestar</td>
                     <td><button class="btn btn-gray btn-xs" onclick="openDetalleAdelanto('ADV-2026-002')">Ver detalle</button></td>
                   </tr>
@@ -867,7 +867,7 @@
             <div class="card-body">
               <div class="flex-between mb-8">
                 <span class="text-sm fw-600 text-purple">ADV-2026-002 — Seguimiento de flujo</span>
-                <span class="badge b-blue">En revisión — Bienestar</span>
+                <span class="badge b-yellow">En revisión — Bienestar</span>
               </div>
               <div class="stepper">
                 <div class="step"><div class="step-circ done">✔</div><span class="step-lbl done">Solicitud</span></div>
@@ -914,7 +914,7 @@
                       <td>Adelanto de sueldo</td>
                       <td>S/. 1,200</td>
                       <td>15/02/2026</td>
-                      <td><span class="badge b-yellow">Pendiente V°B° GDTH</span></td>
+                      <td><span class="badge b-red">Pendiente V°B° GDTH</span></td>
                       <td class="text-sm text-gray">Bienestar — 18/02/2026</td>
                       <td>
                         <div class="actions-cell">
@@ -1071,7 +1071,7 @@
                       <td>Préstamo personal</td>
                       <td>S/. 2,500</td>
                       <td>10/03/2026</td>
-                      <td><span class="badge b-blue">En revisión — Bienestar</span></td>
+                      <td><span class="badge b-yellow">En revisión — Bienestar</span></td>
                       <td>5 cuotas de S/. 500</td>
                       <td>
                         <div class="actions-cell">
@@ -1273,7 +1273,7 @@
                   <tr><td>Uni. Administración</td><td>Pedro Salas Q.</td><td>S/. 2,000</td><td>S/. 980</td><td>S/. 1,020</td><td><span class="badge b-green">Al día</span></td><td>No</td><td><button class="btn btn-gray btn-xs" onclick="openDetalleCCArea('uni-admin')">Ver detalle</button></td></tr>
                   <tr><td>FOSEMED</td><td>Carmen Vega R.</td><td>S/. 3,500</td><td>S/. 850</td><td>S/. 2,650</td><td><span class="badge b-green">Al día</span></td><td>No</td><td><button class="btn btn-gray btn-xs" onclick="openDetalleCCArea('fosemed')">Ver detalle</button></td></tr>
                   <tr><td>SEMEFA</td><td>Jorge Lima C.</td><td>S/. 2,500</td><td>S/. 1,050</td><td>S/. 1,450</td><td><span class="badge b-green">Al día</span></td><td>No</td><td><button class="btn btn-gray btn-xs" onclick="openDetalleCCArea('semefa')">Ver detalle</button></td></tr>
-                  <tr><td>Decanato</td><td>Aaron Nuñez M.</td><td>S/. 3,000</td><td>S/. 250</td><td>S/. 2,750</td><td><span class="badge b-yellow">Pendiente sustento</span></td><td>Sí</td><td><button class="btn btn-gray btn-xs" onclick="openDetalleCCArea('decanato')">Ver detalle</button></td></tr>
+                  <tr><td>Decanato</td><td>Aaron Nuñez M.</td><td>S/. 3,000</td><td>S/. 250</td><td>S/. 2,750</td><td><span class="badge b-red">Pendiente sustento</span></td><td>Sí</td><td><button class="btn btn-gray btn-xs" onclick="openDetalleCCArea('decanato')">Ver detalle</button></td></tr>
                 </tbody>
               </table>
             </div>
@@ -1300,7 +1300,7 @@
             <tbody>
               <tr><td>15/03/2026</td><td>Servicio de courier</td><td>FAC-001-00892</td><td>S/. 180.00</td><td><span class="badge b-green">Declarado</span></td><td><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G001')">Ver</button></td></tr>
               <tr><td>12/03/2026</td><td>Material de impresión</td><td>BOL-001-01203</td><td>S/. 95.00</td><td><span class="badge b-green">Declarado</span></td><td><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G002')">Ver</button></td></tr>
-              <tr><td>08/03/2026</td><td>Movilidad local</td><td>REC-001-00045</td><td>S/. 60.00</td><td><span class="badge b-yellow">Pendiente sustento</span></td><td><div class="actions-cell"><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G003')">Ver</button><button class="btn btn-outline btn-xs" onclick="showToast('Función de adjuntar disponible en producción')">Adjuntar</button></div></td></tr>
+              <tr><td>08/03/2026</td><td>Movilidad local</td><td>REC-001-00045</td><td>S/. 60.00</td><td><span class="badge b-red">Pendiente sustento</span></td><td><div class="actions-cell"><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G003')">Ver</button><button class="btn btn-outline btn-xs" onclick="showToast('Función de adjuntar disponible en producción')">Adjuntar</button></div></td></tr>
             </tbody>
           </table></div></div>
         </div>
@@ -1320,7 +1320,7 @@
             <tbody>
               <tr><td>20/03/2026</td><td>Útiles de escritorio</td><td>FAC-001-02341</td><td>S/. 320.00</td><td><span class="badge b-green">Declarado</span></td><td><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G004')">Ver</button></td></tr>
               <tr><td>17/03/2026</td><td>Servicio de limpieza extra</td><td>BOL-001-00712</td><td>S/. 150.00</td><td><span class="badge b-green">Declarado</span></td><td><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G005')">Ver</button></td></tr>
-              <tr><td>14/03/2026</td><td>Refrigerio reunión directiva</td><td>BOL-001-00698</td><td>S/. 210.00</td><td><span class="badge b-red">Observado</span></td><td><div class="actions-cell"><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G006')">Ver</button><button class="btn btn-outline btn-xs" onclick="showToast('Iniciando subsanación...')">Subsanar</button></div></td></tr>
+              <tr><td>14/03/2026</td><td>Refrigerio reunión directiva</td><td>BOL-001-00698</td><td>S/. 210.00</td><td><span class="badge b-yellow">Observado</span></td><td><div class="actions-cell"><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G006')">Ver</button><button class="btn btn-outline btn-xs" onclick="showToast('Iniciando subsanación...')">Subsanar</button></div></td></tr>
             </tbody>
           </table></div></div>
         </div>
@@ -1358,7 +1358,7 @@
             <thead><tr><th>Fecha</th><th>Descripción gasto</th><th>Comprobante</th><th>Monto S/.</th><th>Estado</th><th>Acciones</th></tr></thead>
             <tbody>
               <tr><td>22/03/2026</td><td>Material médico menor</td><td>FAC-001-00567</td><td>S/. 380.00</td><td><span class="badge b-green">Declarado</span></td><td><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G009')">Ver</button></td></tr>
-              <tr><td>19/03/2026</td><td>Servicio técnico equipo</td><td>BOL-001-00445</td><td>S/. 220.00</td><td><span class="badge b-yellow">Pendiente sustento</span></td><td><div class="actions-cell"><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G010')">Ver</button><button class="btn btn-outline btn-xs" onclick="showToast('Función de adjuntar disponible en producción')">Adjuntar</button></div></td></tr>
+              <tr><td>19/03/2026</td><td>Servicio técnico equipo</td><td>BOL-001-00445</td><td>S/. 220.00</td><td><span class="badge b-red">Pendiente sustento</span></td><td><div class="actions-cell"><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G010')">Ver</button><button class="btn btn-outline btn-xs" onclick="showToast('Función de adjuntar disponible en producción')">Adjuntar</button></div></td></tr>
             </tbody>
           </table></div></div>
         </div>
@@ -1398,7 +1398,7 @@
                 <thead><tr><th>Fecha</th><th>Descripción gasto</th><th>Comprobante</th><th>Monto S/.</th><th>Estado</th><th>Acciones</th></tr></thead>
                 <tbody>
                   <tr><td>20/03/2026</td><td>Útiles de oficina</td><td>RHH-2026-001</td><td>S/. 85.00</td><td><span class="badge b-green">Declarado</span></td><td><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G013')">Ver</button></td></tr>
-                  <tr><td>15/03/2026</td><td>Refrigerio reunión</td><td>RHH-2026-003</td><td>S/. 165.00</td><td><span class="badge b-yellow">Pendiente sustento</span></td><td><div class="actions-cell"><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G014')">Ver</button><button class="btn btn-outline btn-xs" onclick="showToast('Función de adjuntar disponible en producción')">Adjuntar sustento</button></div></td></tr>
+                  <tr><td>15/03/2026</td><td>Refrigerio reunión</td><td>RHH-2026-003</td><td>S/. 165.00</td><td><span class="badge b-red">Pendiente sustento</span></td><td><div class="actions-cell"><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G014')">Ver</button><button class="btn btn-outline btn-xs" onclick="showToast('Función de adjuntar disponible en producción')">Adjuntar sustento</button></div></td></tr>
                 </tbody>
               </table>
             </div>
@@ -1468,14 +1468,14 @@
                 <div class="block-title" style="color:#065F46">📦 Bienes Asignados</div>
                 <span class="badge b-api">⚡ Activos y Bienes</span>
               </div>
-              <table>
-                <thead><tr><th>ID</th><th>Descripción</th><th>Tipo</th><th>Código QR</th><th>Estado</th><th>Devolución</th></tr></thead>
-                <tbody>
-                  <tr><td>111030</td><td>Laptop Dell</td><td>Activo</td><td><code>CMP-038401</code></td><td><span class="badge b-green">Bueno</span></td><td>☐ Pendiente</td></tr>
-                  <tr><td>111031</td><td>Mouse Logitech</td><td>Activo</td><td><code>CMP-038402</code></td><td><span class="badge b-green">Bueno</span></td><td>☐ Pendiente</td></tr>
-                  <tr><td>200201</td><td>Silla ergonómica</td><td>Artículo</td><td><code>CMP-ART-041</code></td><td><span class="badge b-yellow">Regular</span></td><td>⚠ Observado</td></tr>
-                  <tr><td>20261106</td><td>Teclado HP</td><td>Accesorio</td><td><code>CMP-ACC-106</code></td><td><span class="badge b-green">Bueno</span></td><td>☐ Pendiente</td></tr>
-                  <tr><td>20261107</td><td>USB Kingston</td><td>Accesorio</td><td><code>CMP-ACC-107</code></td><td><span class="badge b-green">Bueno</span></td><td>☐ Pendiente</td></tr>
+              <table id="dni-bienes-table">
+                <thead><tr><th>ID</th><th>Descripción</th><th>Tipo</th><th>Código QR</th><th>Estado</th><th>Custodio Responsable</th><th>Colaborador</th><th>Devolución</th></tr></thead>
+                <tbody id="dni-bienes-tbody">
+                  <tr><td>111030</td><td>Laptop Dell</td><td>Activo</td><td><code>CMP-038401</code></td><td><span class="badge b-green">Bueno</span></td><td style="vertical-align:top;padding:6px"><div style="font-family:Georgia,serif;font-style:italic;font-size:12px;color:#1E1B4B;border-bottom:1.5px solid #6B21A8;padding-bottom:2px;margin-bottom:3px">R. Limas</div><div style="font-size:10px;color:#6B7280">Jefe UN. DE TI</div><div style="font-size:10px;color:#9CA3AF">28/03/2026</div></td><td><span style="color:#991B1B;font-size:11px;font-weight:600">⏳ Pendiente</span></td><td style="color:#991B1B;font-weight:600">☐ Pendiente</td></tr>
+                  <tr><td>111031</td><td>Mouse Logitech</td><td>Activo</td><td><code>CMP-038402</code></td><td><span class="badge b-green">Bueno</span></td><td style="vertical-align:top;padding:6px"><div style="font-family:Georgia,serif;font-style:italic;font-size:12px;color:#1E1B4B;border-bottom:1.5px solid #6B21A8;padding-bottom:2px;margin-bottom:3px">R. Limas</div><div style="font-size:10px;color:#6B7280">Jefe UN. DE TI</div><div style="font-size:10px;color:#9CA3AF">28/03/2026</div></td><td><span style="color:#991B1B;font-size:11px;font-weight:600">⏳ Pendiente</span></td><td style="color:#991B1B;font-weight:600">☐ Pendiente</td></tr>
+                  <tr><td>200201</td><td>Silla ergonómica</td><td>Artículo</td><td><code>CMP-ART-041</code></td><td><span class="badge b-yellow">Regular</span></td><td style="vertical-align:top;padding:6px"><div style="font-family:Georgia,serif;font-style:italic;font-size:12px;color:#1E1B4B;border-bottom:1.5px solid #F59E0B;padding-bottom:2px;margin-bottom:3px">R. Limas</div><div style="font-size:10px;color:#6B7280">Jefe Admin. CMP</div><div style="font-size:10px;color:#92400E;font-weight:600">⚠ Observado</div></td><td><span style="color:#991B1B;font-size:11px;font-weight:600">⏳ Pendiente</span></td><td style="color:#92400E;font-weight:600">⚠ Observado</td></tr>
+                  <tr><td>20261106</td><td>Teclado HP</td><td>Accesorio</td><td><code>2026_ADM_0001</code></td><td><span class="badge b-green">Bueno</span></td><td><span style="color:#991B1B;font-size:11px;font-weight:600">⏳ Pendiente</span></td><td><span style="color:#991B1B;font-size:11px">○ En espera</span></td><td style="color:#991B1B;font-weight:600">☐ Pendiente</td></tr>
+                  <tr><td>20261107</td><td>USB Kingston</td><td>Accesorio</td><td><code>2026_ADM_0002</code></td><td><span class="badge b-green">Bueno</span></td><td><span style="color:#991B1B;font-size:11px;font-weight:600">⏳ Pendiente</span></td><td><span style="color:#991B1B;font-size:11px">○ En espera</span></td><td style="color:#991B1B;font-weight:600">☐ Pendiente</td></tr>
                 </tbody>
               </table>
             </div>
@@ -1489,9 +1489,9 @@
               </div>
               <div class="fw-600 text-sm mb-8" style="color:#374151">Préstamos y Adelantos</div>
               <table style="margin-bottom:14px">
-                <thead><tr><th>N°</th><th>Tipo</th><th>Monto S/.</th><th>Cuotas pendientes</th><th>Estado</th></tr></thead>
-                <tbody>
-                  <tr><td class="fw-600">ADV-2025-018</td><td>Préstamo</td><td>S/. 1,500</td><td>3 cuotas</td><td><span class="badge b-red">Activo</span></td></tr>
+                <thead><tr><th>N°</th><th>Tipo</th><th>Monto S/.</th><th>Cuotas pendientes</th><th>Estado</th><th>Custodio Responsable</th><th>Colaborador</th></tr></thead>
+                <tbody id="dni-econ-tbody">
+                  <tr><td class="fw-600">ADV-2025-018</td><td>Préstamo</td><td>S/. 1,500</td><td>3 cuotas</td><td><span class="badge b-red">Activo</span></td><td><span style="color:#991B1B;font-weight:600;font-size:11px">⏳ Pendiente</span></td><td><span style="color:#991B1B;font-size:11px">○ En espera</span></td></tr>
                 </tbody>
               </table>
               <div class="fw-600 text-sm mb-8" style="color:#374151">Caja Chica</div>
@@ -1781,6 +1781,9 @@
       <!-- ── PANE: ASIGNACIONES ── -->
       <div id="ns-pane-asignaciones" class="modal-tab-pane">
         <div class="banner banner-purple" style="margin-bottom:12px;font-size:12px">📌 Bienes y accesorios actualmente asignados al colaborador buscado.</div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+          <button class="btn btn-outline btn-sm" onclick="generarReporteAsignaciones()">📊 Generar Reporte</button>
+        </div>
         <!-- Sub-tabs -->
         <div class="sub-tabs">
           <div class="sub-tab active" id="nsa-tab-bienes" onclick="switchNSAsigTab('nsa-pane-bienes','nsa-tab-bienes')">📦 Bienes asignados</div>
@@ -1840,7 +1843,7 @@
         <div class="banner banner-purple" style="margin-bottom:12px;font-size:12px">🔄 Bienes y accesorios asignados al colaborador. Selecciona un registro para reasignar o dar de baja.</div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <span class="text-xs text-gray" id="reasi-hint">Selecciona un registro para habilitar acciones</span>
-          <button class="btn btn-primary btn-sm btn-disabled" id="btn-reasignar" disabled onclick="openReasignacion()">🔄 Reasignar Bien/Accesorio</button>
+          <button class="btn btn-primary btn-sm btn-disabled" id="btn-reasignar" disabled onclick="openReasignacion()">🔄 Reasignar / Quitar asignación</button>
         </div>
         <div class="table-wrap">
           <table id="reasi-table">
@@ -1852,7 +1855,6 @@
                 <th>Tipo</th>
                 <th>Código QR</th>
                 <th>Estado</th>
-                <th>Dar de baja</th>
               </tr>
             </thead>
             <tbody id="reasi-tbody">
@@ -1860,42 +1862,36 @@
                 <td><input type="radio" name="reasi-sel" style="accent-color:#6B21A8"></td>
                 <td class="fw-600">111030</td><td>Laptop Dell Latitude 5420</td><td>Bien</td><td><code>CMP-038401</code></td>
                 <td><span class="badge b-purple">Asignado</span></td>
-                <td><button class="btn btn-gray btn-xs" onclick="event.stopPropagation();darDeBajaReasig(this,'111030','Laptop Dell Latitude 5420')">Dar de baja</button></td>
               </tr>
               <tr class="reasi-row" onclick="seleccionarReasig(this,'111031','Monitor LG 24\" 24MK430H','Bien','CMP-038402','En Uso')">
                 <td><input type="radio" name="reasi-sel" style="accent-color:#6B21A8"></td>
                 <td class="fw-600">111031</td><td>Monitor LG 24" 24MK430H</td><td>Bien</td><td><code>CMP-038402</code></td>
                 <td><span class="badge b-purple">Asignado</span></td>
-                <td><button class="btn btn-gray btn-xs" onclick="event.stopPropagation();darDeBajaReasig(this,'111031','Monitor LG 24\" 24MK430H')">Dar de baja</button></td>
               </tr>
               <tr class="reasi-row" onclick="seleccionarReasig(this,'111032','Teléfono IP Fanvil X4U','Bien','CMP-038403','Bueno')">
                 <td><input type="radio" name="reasi-sel" style="accent-color:#6B21A8"></td>
                 <td class="fw-600">111032</td><td>Teléfono IP Fanvil X4U</td><td>Bien</td><td><code>CMP-038403</code></td>
                 <td><span class="badge b-purple">Asignado</span></td>
-                <td><button class="btn btn-gray btn-xs" onclick="event.stopPropagation();darDeBajaReasig(this,'111032','Teléfono IP Fanvil X4U')">Dar de baja</button></td>
               </tr>
-              <tr class="reasi-row" onclick="seleccionarReasig(this,'20261110','Teclado HP K1500','Accesorio','ACC-20261110','Bueno')">
+              <tr class="reasi-row" onclick="seleccionarReasig(this,'20261110','Teclado HP K1500','Accesorio','2026_ADM_0003','Bueno')">
                 <td><input type="radio" name="reasi-sel" style="accent-color:#6B21A8"></td>
-                <td class="fw-600">20261110</td><td>Teclado HP K1500</td><td>Accesorio</td><td><code>ACC-20261110</code></td>
+                <td class="fw-600">20261110</td><td>Teclado HP K1500</td><td>Accesorio</td><td><code>2026_ADM_0003</code></td>
                 <td><span class="badge b-purple">Asignado</span></td>
-                <td><button class="btn btn-gray btn-xs" onclick="event.stopPropagation();darDeBajaReasig(this,'20261110','Teclado HP K1500')">Dar de baja</button></td>
               </tr>
-              <tr class="reasi-row" onclick="seleccionarReasig(this,'20261111','Mouse Logitech M185','Accesorio','ACC-20261111','Bueno')">
+              <tr class="reasi-row" onclick="seleccionarReasig(this,'20261111','Mouse Logitech M185','Accesorio','2026_ADM_0004','Bueno')">
                 <td><input type="radio" name="reasi-sel" style="accent-color:#6B21A8"></td>
-                <td class="fw-600">20261111</td><td>Mouse Logitech M185</td><td>Accesorio</td><td><code>ACC-20261111</code></td>
+                <td class="fw-600">20261111</td><td>Mouse Logitech M185</td><td>Accesorio</td><td><code>2026_ADM_0004</code></td>
                 <td><span class="badge b-purple">Asignado</span></td>
-                <td><button class="btn btn-gray btn-xs" onclick="event.stopPropagation();darDeBajaReasig(this,'20261111','Mouse Logitech M185')">Dar de baja</button></td>
               </tr>
-              <tr class="reasi-row" onclick="seleccionarReasig(this,'20261112','Auriculares Jabra','Accesorio','ACC-20261112','Regular')">
+              <tr class="reasi-row" onclick="seleccionarReasig(this,'20261112','Auriculares Jabra','Accesorio','2026_ADM_0005','Regular')">
                 <td><input type="radio" name="reasi-sel" style="accent-color:#6B21A8"></td>
-                <td class="fw-600">20261112</td><td>Auriculares Jabra</td><td>Accesorio</td><td><code>ACC-20261112</code></td>
+                <td class="fw-600">20261112</td><td>Auriculares Jabra</td><td>Accesorio</td><td><code>2026_ADM_0005</code></td>
                 <td><span class="badge b-purple">Asignado</span></td>
-                <td><button class="btn btn-gray btn-xs" onclick="event.stopPropagation();darDeBajaReasig(this,'20261112','Auriculares Jabra')">Dar de baja</button></td>
               </tr>
             </tbody>
           </table>
         </div>
-        <div class="text-xs text-gray mt-8" style="font-style:italic">Los bienes dados de baja quedarán con estado <strong>Inactivo</strong> en el sistema.</div>
+        <div class="text-xs text-gray mt-8" style="font-style:italic">Selecciona un bien y usa el botón para <strong>Reasignar</strong> o <strong>Quitar asignación</strong> desde las pestañas del modal.</div>
       </div>
 
     </div>
@@ -1924,8 +1920,13 @@
       <div id="dts-stepper"></div>
       <div class="section-title-sm">DATOS DE LA SOLICITUD</div>
       <div class="inv-grid" id="dts-datos" style="margin-bottom:6px"></div>
-      <div class="section-title-sm" style="margin-top:18px">FLUJO DE APROBACIÓN Y FIRMAS</div>
+      <div class="section-title-sm" style="margin-top:18px">FLUJO DE APROBACIÓN</div>
       <div id="dts-flujo"></div>
+      <!-- Firmas del proceso -->
+      <div id="dts-firmas-section" style="display:none;margin-top:16px">
+        <div class="section-title-sm">FIRMAS DEL PROCESO</div>
+        <div id="dts-firmas"></div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-gray btn-sm" onclick="closeModal('modal-detalle-solicitud')">Cerrar</button>
@@ -1942,13 +1943,13 @@
     <div class="modal-hdr">
       <div>
         <span class="modal-title">Configuración de Reasignación</span>
-        <div style="font-size:11px;color:#9CA3AF;margin-top:2px">Reasignación o cambio de estado del bien/accesorio</div>
+        <div style="font-size:11px;color:#9CA3AF;margin-top:2px">Reasignación o baja de asignación del bien/accesorio</div>
       </div>
       <button class="modal-close" onclick="closeModal('modal-configuracion-reasignacion')">×</button>
     </div>
     <div class="modal-body">
 
-      <!-- Bien actual -->
+      <!-- Bien actual — compartido entre tabs -->
       <div class="section-title-sm">BIEN / ACCESORIO ACTUAL</div>
       <div class="colab-found mb-12" style="padding:10px 14px">
         <div class="colab-grid" style="grid-template-columns:1fr 1fr">
@@ -1960,93 +1961,198 @@
         </div>
       </div>
 
-      <div class="h-divider"></div>
-
-      <!-- Motivo de reasignación -->
-      <div class="form-group">
-        <label class="form-label">Motivo de reasignación <span class="req">*</span></label>
-        <select class="form-control" id="reasi-motivo" onchange="onReasiMotivoChange()">
-          <option value="">Seleccionar motivo...</option>
-          <option value="funciones">Cambio de funciones / nuevas responsabilidades</option>
-          <option value="mejor_equipo">Requiere equipo de mayor capacidad</option>
-          <option value="falla">Falla o mal funcionamiento del bien actual</option>
-          <option value="devolucion">Devolución y reasignación a otro colaborador</option>
-          <option value="otro">Otro motivo</option>
-        </select>
-      </div>
-      <div class="form-group" id="reasi-otro-group" style="display:none">
-        <label class="form-label">Especifica el motivo</label>
-        <textarea class="form-control" id="reasi-otro-texto" placeholder="Describe el motivo..." style="height:60px"></textarea>
+      <!-- Tabs -->
+      <div class="modal-tabs" style="margin:0 -18px;padding:0 18px;border-top:1px solid #F3F4F6;border-bottom:1px solid #F3F4F6;margin-bottom:0">
+        <div class="modal-tab active" id="rc-tab-reasignar" onclick="switchReasigTab('rc-pane-reasignar','rc-tab-reasignar')">🔄 Reasignar bien/accesorio</div>
+        <div class="modal-tab" id="rc-tab-quitar" onclick="switchReasigTab('rc-pane-quitar','rc-tab-quitar')">🚫 Quitar asignación</div>
       </div>
 
-      <!-- Nuevo bien requerido -->
-      <div class="form-group">
-        <label class="form-label">Nuevo bien/accesorio requerido <span class="req">*</span></label>
-        <input type="text" class="form-control" id="reasi-nuevo-bien" placeholder="Ej: Laptop HP EliteBook 850 G9, PC de escritorio HP...">
-      </div>
+      <!-- PANE 1: Reasignar -->
+      <div id="rc-pane-reasignar" class="modal-tab-pane active" style="padding-top:12px">
 
-      <!-- Estado del bien actual (obs 3) -->
-      <div class="form-group">
-        <label class="form-label">Estado del bien actual tras reasignación <span class="req">*</span></label>
-        <select class="form-control" id="reasi-nuevo-estado" onchange="toggleMantenimientoReasig()">
-          <option value="">Seleccionar estado...</option>
-          <option value="disponible">Disponible — retorna al inventario</option>
-          <option value="mantenimiento">Mantenimiento — requiere revisión técnica</option>
-          <option value="otro_colaborador">Reasignar directamente a otro colaborador</option>
-        </select>
-      </div>
+        <!-- Motivo de reasignación -->
+        <div class="form-group">
+          <label class="form-label">Motivo de reasignación <span class="req">*</span></label>
+          <select class="form-control" id="reasi-motivo" onchange="onReasiMotivoChange()">
+            <option value="">Seleccionar motivo...</option>
+            <option value="funciones">Cambio de funciones / nuevas responsabilidades</option>
+            <option value="mejor_equipo">Requiere equipo de mayor capacidad</option>
+            <option value="falla">Falla o mal funcionamiento del bien actual</option>
+            <option value="devolucion">Devolución y reasignación a otro colaborador</option>
+            <option value="otro">Otro motivo</option>
+          </select>
+        </div>
+        <div class="form-group" id="reasi-otro-group" style="display:none">
+          <label class="form-label">Especifica el motivo</label>
+          <textarea class="form-control" id="reasi-otro-texto" placeholder="Describe el motivo..." style="height:60px"></textarea>
+        </div>
 
-      <!-- Subárea de mantenimiento (obs 3 — solo si mantenimiento) -->
-      <div id="reasi-mantenimiento-group" style="display:none">
-        <div class="banner banner-blue mb-12" style="font-size:12px">🔧 TI tomará el registro y cambiará el estado a <strong>Disponible</strong> cuando el mantenimiento concluya.</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Subárea responsable del mantenimiento</label>
-            <input type="text" class="form-control" value="UN. DE TI" readonly style="background:#F9F8FF">
+        <!-- Nuevo bien requerido -->
+        <div class="form-group">
+          <label class="form-label">Nuevo bien/accesorio requerido <span class="req">*</span></label>
+          <input type="text" class="form-control" id="reasi-nuevo-bien" placeholder="Ej: Laptop HP EliteBook 850 G9, PC de escritorio HP...">
+        </div>
+
+        <!-- Estado del bien actual -->
+        <div class="form-group">
+          <label class="form-label">Estado del bien actual tras reasignación <span class="req">*</span></label>
+          <select class="form-control" id="reasi-nuevo-estado" onchange="toggleMantenimientoReasig()">
+            <option value="">Seleccionar estado...</option>
+            <option value="disponible">Disponible — retorna al inventario</option>
+            <option value="mantenimiento">Mantenimiento — requiere revisión técnica</option>
+            <option value="otro_colaborador">Reasignar directamente a otro colaborador</option>
+          </select>
+        </div>
+
+        <!-- Subárea de mantenimiento -->
+        <div id="reasi-mantenimiento-group" style="display:none">
+          <div class="banner banner-blue mb-12" style="font-size:12px">🔧 TI tomará el registro y cambiará el estado a <strong>Disponible</strong> cuando el mantenimiento concluya.</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Subárea responsable del mantenimiento</label>
+              <input type="text" class="form-control" value="UN. DE TI" readonly style="background:#F9F8FF">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tipo de mantenimiento</label>
+              <select class="form-control" id="reasi-tipo-mant">
+                <option value="preventivo">Preventivo</option>
+                <option value="correctivo">Correctivo</option>
+                <option value="formateo">Formateo / Reinstalación</option>
+              </select>
+            </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Tipo de mantenimiento</label>
-            <select class="form-control" id="reasi-tipo-mant">
-              <option value="preventivo">Preventivo</option>
-              <option value="correctivo">Correctivo</option>
-              <option value="formateo">Formateo / Reinstalación</option>
-            </select>
+            <label class="form-label">Observaciones técnicas</label>
+            <textarea class="form-control" id="reasi-obs-mant" placeholder="Detalla el problema o el tipo de mantenimiento requerido..." style="height:60px"></textarea>
           </div>
+        </div>
+
+        <!-- Colaborador destino -->
+        <div id="reasi-otro-colab-group" style="display:none">
+          <div class="form-group">
+            <label class="form-label">DNI del colaborador destino</label>
+            <div style="display:flex;gap:8px">
+              <input type="text" class="form-control" id="reasi-dni-destino" placeholder="DNI" maxlength="8">
+              <button class="btn btn-primary btn-sm" onclick="showToast('Función de búsqueda — pendiente de integración')">Buscar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="h-divider"></div>
+
+        <!-- Flujo de aprobación reasignación -->
+        <div class="section-title-sm">FLUJO DE APROBACIÓN</div>
+        <div class="stepper" style="margin:10px 0 6px">
+          <div class="step"><div class="step-circ pend" style="font-size:10px;width:24px;height:24px">1</div><span class="step-lbl pend" style="font-size:10px;text-align:center;max-width:55px">Admin<br>registra</span></div>
+          <div class="step-conn"></div>
+          <div class="step"><div class="step-circ pend" style="font-size:10px;width:24px;height:24px">2</div><span class="step-lbl pend" style="font-size:10px;text-align:center;max-width:55px">Jefe área<br>aprueba</span></div>
+          <div class="step-conn"></div>
+          <div class="step"><div class="step-circ pend" style="font-size:10px;width:24px;height:24px">3</div><span class="step-lbl pend" style="font-size:10px;text-align:center;max-width:55px" id="reasi-paso3-lbl">TI /<br>Admin</span></div>
+          <div class="step-conn"></div>
+          <div class="step"><div class="step-circ pend" style="font-size:10px;width:24px;height:24px">4</div><span class="step-lbl pend" style="font-size:10px;text-align:center;max-width:55px">Colaborador<br>confirma</span></div>
+        </div>
+      </div>
+
+      <!-- PANE 2: Quitar asignación -->
+      <div id="rc-pane-quitar" class="modal-tab-pane" style="padding-top:12px">
+        <div class="banner" style="background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;margin-bottom:12px;font-size:12px">⚠ Al quitar la asignación el bien quedará <strong>Disponible</strong> o <strong>Inactivo</strong> según el estado final que se indique.</div>
+
+        <div class="form-group">
+          <label class="form-label">Motivo de la baja <span class="req">*</span></label>
+          <select class="form-control" id="quitar-motivo">
+            <option value="">Seleccionar motivo...</option>
+            <option value="cese">Cese del colaborador</option>
+            <option value="deterioro">Deterioro / daño del bien</option>
+            <option value="robo_perdida">Robo o pérdida</option>
+            <option value="obsolescencia">Obsolescencia tecnológica</option>
+            <option value="reasignacion_area">Reasignación de área sin reemplazo</option>
+            <option value="otro">Otro motivo</option>
+          </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Observaciones técnicas</label>
-          <textarea class="form-control" id="reasi-obs-mant" placeholder="Detalla el problema o el tipo de mantenimiento requerido..." style="height:60px"></textarea>
+          <label class="form-label">Estado final del bien</label>
+          <select class="form-control" id="quitar-estado-final">
+            <option value="disponible">Disponible — retorna al inventario</option>
+            <option value="inactivo">Inactivo — dado de baja definitiva</option>
+            <option value="mantenimiento">Mantenimiento — requiere revisión técnica</option>
+          </select>
         </div>
-      </div>
-
-      <!-- Colaborador destino (solo si reasignar a otro) -->
-      <div id="reasi-otro-colab-group" style="display:none">
         <div class="form-group">
-          <label class="form-label">DNI del colaborador destino</label>
-          <div style="display:flex;gap:8px">
-            <input type="text" class="form-control" id="reasi-dni-destino" placeholder="DNI" maxlength="8">
-            <button class="btn btn-primary btn-sm" onclick="showToast('Función de búsqueda — pendiente de integración')">Buscar</button>
+          <label class="form-label">Observaciones</label>
+          <textarea class="form-control" id="quitar-obs" rows="2" placeholder="Describe el motivo o condición del bien..." style="height:60px"></textarea>
+        </div>
+
+        <div class="h-divider"></div>
+        <div class="section-title-sm">FLUJO DE FIRMAS — BAJA DE ASIGNACIÓN</div>
+        <div style="display:flex;flex-direction:column;gap:7px;margin:10px 0 4px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:white;border:1px solid #E5E7EB;border-radius:7px">
+            <div>
+              <div style="font-size:11px;font-weight:700;color:#6B21A8">Paso 1 — Admin registra baja</div>
+              <div style="font-size:11px;color:#6B7280;margin-top:1px">Registra solicitud de quitar asignación</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:7px">
+              <span style="font-size:11px;font-weight:600;color:#D97706">⏳ Pendiente</span>
+              <button class="btn btn-gray btn-xs" onclick="openObsQuitarAsig(1)">+Observación</button>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:white;border:1px solid #E5E7EB;border-radius:7px">
+            <div>
+              <div style="font-size:11px;font-weight:700;color:#6B21A8">Paso 2 — Jefe de Área V°B°</div>
+              <div style="font-size:11px;color:#6B7280;margin-top:1px">Aprueba la baja del bien asignado</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:7px">
+              <span style="font-size:11px;font-weight:600;color:#9CA3AF">○ En espera</span>
+              <button class="btn btn-gray btn-xs" onclick="openObsQuitarAsig(2)">+Observación</button>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:white;border:1px solid #E5E7EB;border-radius:7px">
+            <div>
+              <div style="font-size:11px;font-weight:700;color:#6B21A8">Paso 3 — Colaborador firma entrega</div>
+              <div style="font-size:11px;color:#6B7280;margin-top:1px">Confirma entrega física del bien</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:7px">
+              <span style="font-size:11px;font-weight:600;color:#9CA3AF">○ En espera</span>
+              <button class="btn btn-gray btn-xs" onclick="openObsQuitarAsig(3)">+Observación</button>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:white;border:1px solid #E5E7EB;border-radius:7px">
+            <div>
+              <div style="font-size:11px;font-weight:700;color:#6B21A8">Paso 4 — GDTH valida y cierra</div>
+              <div style="font-size:11px;color:#6B7280;margin-top:1px">Cierra el registro en el sistema</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:7px">
+              <span style="font-size:11px;font-weight:600;color:#9CA3AF">○ En espera</span>
+              <button class="btn btn-gray btn-xs" onclick="openObsQuitarAsig(4)">+Observación</button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="h-divider"></div>
-
-      <!-- Flujo -->
-      <div class="section-title-sm">FLUJO DE APROBACIÓN</div>
-      <div class="stepper" style="margin:10px 0 6px">
-        <div class="step"><div class="step-circ pend" style="font-size:10px;width:24px;height:24px">1</div><span class="step-lbl pend" style="font-size:10px;text-align:center;max-width:55px">Admin<br>registra</span></div>
-        <div class="step-conn"></div>
-        <div class="step"><div class="step-circ pend" style="font-size:10px;width:24px;height:24px">2</div><span class="step-lbl pend" style="font-size:10px;text-align:center;max-width:55px">Jefe área<br>aprueba</span></div>
-        <div class="step-conn"></div>
-        <div class="step"><div class="step-circ pend" style="font-size:10px;width:24px;height:24px">3</div><span class="step-lbl pend" style="font-size:10px;text-align:center;max-width:55px" id="reasi-paso3-lbl">TI /<br>Admin</span></div>
-        <div class="step-conn"></div>
-        <div class="step"><div class="step-circ pend" style="font-size:10px;width:24px;height:24px">4</div><span class="step-lbl pend" style="font-size:10px;text-align:center;max-width:55px">Colaborador<br>confirma</span></div>
-      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-gray" onclick="closeModal('modal-configuracion-reasignacion')">Cancelar</button>
-      <button class="btn btn-primary" onclick="confirmarReasignacion()">Enviar solicitud de reasignación</button>
+      <button class="btn btn-primary" id="rc-btn-reasignar" onclick="confirmarReasignacion()">Enviar solicitud de reasignación</button>
+      <button class="btn btn-sm" id="rc-btn-quitar" style="display:none;background:#EF4444;color:white;padding:7px 16px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:600" onclick="confirmarQuitarAsignacion()">Confirmar baja de asignación</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     MODAL — Reporte de Asignaciones
+     ══════════════════════════════════════════════════════════════════════════ -->
+<div id="modal-reporte-asignaciones" class="modal-overlay stacked" onclick="if(event.target===this)closeModal('modal-reporte-asignaciones')">
+  <div class="modal-box" style="max-width:700px;max-height:90vh;overflow-y:auto">
+    <div class="modal-hdr">
+      <div>
+        <span class="modal-title">Reporte de Asignaciones</span>
+        <div style="font-size:11px;color:#9CA3AF;margin-top:2px">Bienes y accesorios asignados al colaborador</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-reporte-asignaciones')">×</button>
+    </div>
+    <div class="modal-body" id="reporte-asig-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-gray" onclick="closeModal('modal-reporte-asignaciones')">Cerrar</button>
+      <button class="btn btn-primary" onclick="showToast('PDF generado — funcionalidad en implementación')">📄 Generar PDF</button>
     </div>
   </div>
 </div>
@@ -2773,9 +2879,14 @@
       <div id="dpb-obs-block" style="display:none;margin-bottom:14px">
         <div class="banner" style="background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;font-size:12px" id="dpb-obs-text"></div>
       </div>
-      <!-- Flujo completo con firmas -->
-      <div class="section-title-sm" style="margin-top:4px">FLUJO DEL PRÉSTAMO Y FIRMAS</div>
+      <!-- Flujo del proceso -->
+      <div class="section-title-sm" style="margin-top:4px">FLUJO DEL PROCESO</div>
       <div id="dpb-flujo"></div>
+      <!-- Firmas del proceso -->
+      <div id="dpb-firmas-section" style="display:none;margin-top:16px">
+        <div class="section-title-sm">FIRMAS DEL PROCESO</div>
+        <div id="dpb-firmas"></div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-gray" onclick="closeModal('modal-detalle-prestamo-bien')">Cerrar</button>
@@ -3182,14 +3293,14 @@
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Área</th><th>SubÁrea</th><th>Monto Asignado</th><th>Gasto Mes</th><th>Saldo Disponible</th><th>Estado</th><th>Reposición</th><th>Configuración</th></tr></thead>
+            <thead><tr><th>Área</th><th>SubÁrea</th><th>Responsable</th><th>Monto Asignado</th><th>Gasto Mes</th><th>Saldo Disponible</th><th>Estado</th><th>Reposición</th></tr></thead>
             <tbody>
-              <tr><td>SEC. DE ECONOMIA Y FINANZAS</td><td>UN. DE FINANZAS</td><td>S/. 3,000</td><td>S/. 1,200</td><td>S/. 1,800</td><td><span class="badge b-green">Al día</span></td><td class="text-gray">—</td><td><button class="btn btn-gray btn-xs" onclick="showToast('Configurando responsable...')">⚙</button></td></tr>
-              <tr><td>SEC. DE ADMINISTRACION</td><td>UN. DE ADMINISTRACION</td><td>S/. 4,000</td><td>S/. 2,100</td><td>S/. 1,900</td><td><span class="badge b-green">Al día</span></td><td class="text-gray">—</td><td><button class="btn btn-gray btn-xs" onclick="showToast('Configurando responsable...')">⚙</button></td></tr>
-              <tr><td>UN. DE ADMINISTRACION</td><td>UN. DE ADMINISTRACION</td><td>S/. 2,000</td><td>S/. 980</td><td>S/. 1,020</td><td><span class="badge b-green">Al día</span></td><td class="text-gray">—</td><td><button class="btn btn-gray btn-xs" onclick="showToast('Configurando responsable...')">⚙</button></td></tr>
-              <tr><td>FONDO DE BIEN.SOCIAL DEL MED.</td><td>FOSEMED</td><td>S/. 3,500</td><td>S/. 850</td><td>S/. 2,650</td><td><span class="badge b-green">Al día</span></td><td class="text-gray">—</td><td><button class="btn btn-gray btn-xs" onclick="showToast('Configurando responsable...')">⚙</button></td></tr>
-              <tr><td>SEMEFA</td><td>SEMEFA</td><td>S/. 2,500</td><td>S/. 1,050</td><td>S/. 1,450</td><td><span class="badge b-green">Al día</span></td><td class="text-gray">—</td><td><button class="btn btn-gray btn-xs" onclick="showToast('Configurando responsable...')">⚙</button></td></tr>
-              <tr><td>DECANATO</td><td>DECANATO</td><td>S/. 3,000</td><td>S/. 250</td><td>S/. 2,750</td><td><span class="badge b-yellow">Pendiente sustento</span></td><td><span class="badge b-amber">Sí</span></td><td><button class="btn btn-gray btn-xs" onclick="showToast('Configurando responsable...')">⚙</button></td></tr>
+              <tr><td>SEC. DE ECONOMIA Y FINANZAS</td><td>UN. DE FINANZAS</td><td class="fw-600">María Torres H.</td><td>S/. 3,000</td><td>S/. 1,200</td><td>S/. 1,800</td><td><span class="badge b-green">Al día</span></td><td class="text-gray">—</td></tr>
+              <tr><td>SEC. DE ADMINISTRACION</td><td>UN. DE ADMINISTRACION</td><td class="fw-600">Lizzetti Díaz E.</td><td>S/. 4,000</td><td>S/. 2,100</td><td>S/. 1,900</td><td><span class="badge b-green">Al día</span></td><td class="text-gray">—</td></tr>
+              <tr><td>UN. DE ADMINISTRACION</td><td>UN. DE ADMINISTRACION</td><td class="fw-600">Pedro Salas Q.</td><td>S/. 2,000</td><td>S/. 980</td><td>S/. 1,020</td><td><span class="badge b-green">Al día</span></td><td class="text-gray">—</td></tr>
+              <tr><td>FONDO DE BIEN.SOCIAL DEL MED.</td><td>FOSEMED</td><td class="fw-600">Carmen Vega R.</td><td>S/. 3,500</td><td>S/. 850</td><td>S/. 2,650</td><td><span class="badge b-green">Al día</span></td><td class="text-gray">—</td></tr>
+              <tr><td>SEMEFA</td><td>SEMEFA</td><td class="fw-600">Jorge Lima C.</td><td>S/. 2,500</td><td>S/. 1,050</td><td>S/. 1,450</td><td><span class="badge b-green">Al día</span></td><td class="text-gray">—</td></tr>
+              <tr><td>DECANATO</td><td>DECANATO</td><td class="fw-600">Aaron Nuñez M.</td><td>S/. 3,000</td><td>S/. 250</td><td>S/. 2,750</td><td><span class="badge b-red">Pendiente sustento</span></td><td><span class="badge b-amber">Sí</span></td></tr>
             </tbody>
           </table>
         </div>
@@ -3206,9 +3317,9 @@
               <tr><td>SEC. DE ECONOMIA Y FINANZAS</td><td>15/03/2026</td><td>Servicio de courier</td><td>FAC-001-00892</td><td>S/. 180.00</td><td><span class="badge b-green">Declarado</span></td><td><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G001')">Ver</button></td></tr>
               <tr><td>SEC. DE ECONOMIA Y FINANZAS</td><td>12/03/2026</td><td>Material de impresión</td><td>BOL-001-01203</td><td>S/. 95.00</td><td><span class="badge b-green">Declarado</span></td><td><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G002')">Ver</button></td></tr>
               <tr><td>SEC. DE ADMINISTRACION</td><td>20/03/2026</td><td>Útiles de escritorio</td><td>FAC-001-02341</td><td>S/. 320.00</td><td><span class="badge b-green">Declarado</span></td><td><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G004')">Ver</button></td></tr>
-              <tr><td>SEC. DE ADMINISTRACION</td><td>14/03/2026</td><td>Refrigerio reunión directiva</td><td>BOL-001-00698</td><td>S/. 210.00</td><td><span class="badge b-red">Observado</span></td><td><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G006')">Ver</button></td></tr>
+              <tr><td>SEC. DE ADMINISTRACION</td><td>14/03/2026</td><td>Refrigerio reunión directiva</td><td>BOL-001-00698</td><td>S/. 210.00</td><td><span class="badge b-yellow">Observado</span></td><td><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G006')">Ver</button></td></tr>
               <tr><td>DECANATO</td><td>20/03/2026</td><td>Útiles de oficina</td><td>RHH-2026-001</td><td>S/. 85.00</td><td><span class="badge b-green">Declarado</span></td><td><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G013')">Ver</button></td></tr>
-              <tr><td>DECANATO</td><td>15/03/2026</td><td>Refrigerio reunión</td><td>RHH-2026-003</td><td>S/. 165.00</td><td><span class="badge b-yellow">Pendiente sustento</span></td><td><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G014')">Ver</button></td></tr>
+              <tr><td>DECANATO</td><td>15/03/2026</td><td>Refrigerio reunión</td><td>RHH-2026-003</td><td>S/. 165.00</td><td><span class="badge b-red">Pendiente sustento</span></td><td><button class="btn btn-gray btn-xs" onclick="openDetalleGasto('G014')">Ver</button></td></tr>
             </tbody>
           </table>
         </div>
@@ -3234,15 +3345,15 @@
               </tr>
               <tr class="rep-row" onclick="seleccionarReposicion(this,'SEMEFA','Jorge Lima C.','S/. 1,200','REP-2026-003')" style="cursor:pointer">
                 <td><input type="radio" name="rep-sel" style="accent-color:#6B21A8"></td>
-                <td class="fw-600">REP-2026-003</td><td>SEMEFA</td><td>Jorge Lima C.</td><td>S/. 1,200</td><td>15/03/2026</td><td><span class="badge b-blue">En revisión</span></td><td>Jefe Área ⏳</td>
+                <td class="fw-600">REP-2026-003</td><td>SEMEFA</td><td>Jorge Lima C.</td><td>S/. 1,200</td><td>15/03/2026</td><td><span class="badge b-yellow">En revisión</span></td><td>Jefe Área ⏳</td>
               </tr>
               <tr class="rep-row" onclick="seleccionarReposicion(this,'FONDO DE BIEN.SOCIAL DEL MED.','Carmen Vega R.','S/. 900','REP-2026-004')" style="cursor:pointer">
                 <td><input type="radio" name="rep-sel" style="accent-color:#6B21A8"></td>
-                <td class="fw-600">REP-2026-004</td><td>FONDO DE BIEN.SOCIAL DEL MED.</td><td>Carmen Vega R.</td><td>S/. 900</td><td>20/03/2026</td><td><span class="badge b-yellow">Pendiente V°B°</span></td><td>Jefe Área ○</td>
+                <td class="fw-600">REP-2026-004</td><td>FONDO DE BIEN.SOCIAL DEL MED.</td><td>Carmen Vega R.</td><td>S/. 900</td><td>20/03/2026</td><td><span class="badge b-red">Pendiente V°B°</span></td><td>Jefe Área ○</td>
               </tr>
               <tr class="rep-row" onclick="seleccionarReposicion(this,'SEC. DE ECONOMIA Y FINANZAS','María Torres H.','S/. 1,800','REP-2026-005')" style="cursor:pointer">
                 <td><input type="radio" name="rep-sel" style="accent-color:#6B21A8"></td>
-                <td class="fw-600">REP-2026-005</td><td>SEC. DE ECONOMIA Y FINANZAS</td><td>María Torres H.</td><td>S/. 1,800</td><td>22/03/2026</td><td><span class="badge b-blue">En revisión</span></td><td>Contabilidad ⏳</td>
+                <td class="fw-600">REP-2026-005</td><td>SEC. DE ECONOMIA Y FINANZAS</td><td>María Torres H.</td><td>S/. 1,800</td><td>22/03/2026</td><td><span class="badge b-yellow">En revisión</span></td><td>Contabilidad ⏳</td>
               </tr>
             </tbody>
           </table>
@@ -3259,40 +3370,125 @@
      MODAL — Nuevo Responsable Caja Chica
      ══════════════════════════════════════════════════════════════════════════ -->
 <div id="modal-nuevo-responsable-cc" class="modal-overlay" onclick="if(event.target===this)closeModal('modal-nuevo-responsable-cc')">
-  <div class="modal-box" style="max-width:480px">
+  <div class="modal-box" style="max-width:520px">
     <div class="modal-hdr">
       <span class="modal-title">Nuevo Responsable de Caja Chica</span>
       <button class="modal-close" onclick="closeModal('modal-nuevo-responsable-cc')">×</button>
     </div>
     <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Área <span class="req">*</span></label>
-        <select class="form-control" id="nrc-area-select" onchange="updateSubareasCC()"></select>
+      <!-- Tabs -->
+      <div class="modal-tabs" style="margin:0 -18px;padding:0 18px;border-bottom:1px solid #F3F4F6;margin-bottom:0">
+        <div class="modal-tab active" id="nrc-tab-datos" onclick="switchNRCTab('nrc-pane-datos','nrc-tab-datos')">📋 Datos</div>
+        <div class="modal-tab" id="nrc-tab-adjuntos" onclick="switchNRCTab('nrc-pane-adjuntos','nrc-tab-adjuntos')">📎 Adjuntos</div>
       </div>
-      <div class="form-group">
-        <label class="form-label">SubÁrea</label>
-        <select class="form-control" id="nrc-subarea-select">
-          <option value="">— Selecciona primero un Área —</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Responsable <span class="req">*</span></label>
-        <input type="text" class="form-control" placeholder="Nombre completo del responsable">
-      </div>
-      <div class="form-row">
+      <!-- Pane Datos -->
+      <div id="nrc-pane-datos" class="modal-tab-pane active" style="padding-top:12px">
         <div class="form-group">
-          <label class="form-label">Monto Asignado (S/.) <span class="req">*</span></label>
-          <input type="number" class="form-control" placeholder="0.00">
+          <label class="form-label">Área <span class="req">*</span></label>
+          <select class="form-control" id="nrc-area-select" onchange="updateSubareasCC()"></select>
         </div>
         <div class="form-group">
-          <label class="form-label">Periodo</label>
-          <input type="month" class="form-control" value="2026-03">
+          <label class="form-label">SubÁrea</label>
+          <select class="form-control" id="nrc-subarea-select">
+            <option value="">— Selecciona primero un Área —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Responsable <span class="req">*</span></label>
+          <input type="text" class="form-control" placeholder="Nombre completo del responsable">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Monto Asignado (S/.) <span class="req">*</span></label>
+            <input type="number" class="form-control" placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Periodo</label>
+            <input type="month" class="form-control" value="2026-03">
+          </div>
+        </div>
+
+        <div class="h-divider"></div>
+        <div class="section-title-sm">FIRMAS DEL PROCESO</div>
+        <div class="banner banner-blue mb-12" style="font-size:12px">ℹ Requiere V°B° del Jefe/Designado de Contabilidad y firma de aceptación del nuevo responsable.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px">
+
+          <!-- Paso 1: Jefe de Contabilidad — activo (zona de firma interactiva) -->
+          <div class="aprob-cell" style="border:1px solid #6B21A8;background:#F5F3FF">
+            <div class="aprob-title" style="font-size:10px">Paso 1 — Jefe / Designado de Contabilidad</div>
+            <div class="aprob-zona" onclick="activarFirmaAprobAdv(this)" style="min-height:40px">
+              <span class="firma-placeholder" style="font-size:11px">Firmar aquí</span>
+              <input type="text" class="firma-input" id="nrc-firma-contabilidad" style="display:none" placeholder="Firma">
+            </div>
+            <div class="text-xs text-gray mt-4">Jefe de Contabilidad CMP</div>
+            <div class="text-xs text-gray">—</div>
+            <div style="margin-top:6px"><button class="btn btn-gray btn-xs" onclick="openObsNuevoResp(1)">+Observación</button></div>
+          </div>
+
+          <!-- Paso 2: Nuevo Responsable — en espera -->
+          <div class="aprob-cell" style="border:1px solid #D1D5DB;background:#FAFAFA">
+            <div class="aprob-title" style="font-size:10px">Paso 2 — Nuevo Responsable acepta</div>
+            <div style="background:#F3F4F6;border:1px dashed #D1D5DB;border-radius:4px;height:40px;display:flex;align-items:center;justify-content:center">
+              <span style="font-size:11px;color:#9CA3AF">Pendiente</span>
+            </div>
+            <div class="text-xs text-gray mt-4" id="nrc-firma-nombre">Nuevo Responsable designado</div>
+            <div class="text-xs text-gray">—</div>
+            <div style="margin-top:6px"><button class="btn btn-gray btn-xs" onclick="openObsNuevoResp(2)">+Observación</button></div>
+          </div>
+
+        </div>
+      </div>
+      <!-- Pane Adjuntos -->
+      <div id="nrc-pane-adjuntos" class="modal-tab-pane" style="padding-top:12px">
+        <div style="border:2px dashed #DDD6FE;border-radius:8px;padding:20px;text-align:center;cursor:pointer;background:#F9F8FF" onclick="document.getElementById('nrc-file-input').click()">
+          <div style="font-size:24px;margin-bottom:6px">📎</div>
+          <div style="font-size:13px;font-weight:600;color:#6B21A8">Haz clic o arrastra archivos aquí</div>
+          <div style="font-size:11px;color:#9CA3AF;margin-top:4px">PDF, Word, Excel, imágenes — Máx. 10 MB por archivo</div>
+          <input type="file" id="nrc-file-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg" style="display:none" onchange="agregarArchivosNRC(this)">
+        </div>
+        <div id="nrc-files-list" style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:white;border:1px solid #E5E7EB;border-radius:6px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:18px">📄</span>
+              <div><div style="font-size:12px;font-weight:600;color:#374151">Memorando-designacion-cc.pdf</div><div style="font-size:10px;color:#9CA3AF">2.3 MB · Subido 08/04/2026</div></div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-gray btn-xs" onclick="verArchivoNRC('Memorando-designacion-cc.pdf')">👁 Ver</button>
+              <button class="btn btn-gray btn-xs" onclick="showToast('Archivo eliminado')">🗑</button>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:white;border:1px solid #E5E7EB;border-radius:6px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:18px">📋</span>
+              <div><div style="font-size:12px;font-weight:600;color:#374151">Acta-asignacion-caja-chica.docx</div><div style="font-size:10px;color:#9CA3AF">145 KB · Subido 08/04/2026</div></div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-gray btn-xs" onclick="verArchivoNRC('Acta-asignacion-caja-chica.docx')">👁 Ver</button>
+              <button class="btn btn-gray btn-xs" onclick="showToast('Archivo eliminado')">🗑</button>
+            </div>
+          </div>
+        </div>
+        <div id="nrc-visor" style="display:none;margin-top:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="font-size:12px;font-weight:700;color:#374151" id="nrc-visor-nombre">—</div>
+            <button class="btn btn-gray btn-xs" onclick="cerrarVisorNRC()">× Cerrar visor</button>
+          </div>
+          <div style="border:1.5px solid #DDD6FE;border-radius:6px;background:#F9F8FF;padding:24px;text-align:center;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <div style="font-size:40px;margin-bottom:8px">📄</div>
+            <div style="font-size:13px;color:#6B21A8;font-weight:600" id="nrc-visor-label">Vista previa del documento</div>
+            <div style="font-size:11px;color:#9CA3AF;margin-top:4px">Los documentos reales se visualizarán desde el servidor en la implementación final</div>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:14px">
+          <label class="form-label">Notas / Observaciones adicionales</label>
+          <textarea class="form-control" id="nrc-notas" maxlength="500" rows="3" placeholder="Agrega observaciones o comunicaciones relacionadas a la designación..." oninput="updateCharCount('nrc-notas','nrc-notas-count',500)" style="height:80px"></textarea>
+          <div class="form-hint" style="text-align:right"><span id="nrc-notas-count">0</span>/500 caracteres</div>
         </div>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-gray" onclick="closeModal('modal-nuevo-responsable-cc')">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarNuevoResponsable()">Guardar Responsable</button>
+      <button class="btn btn-primary" onclick="guardarNuevoResponsable()">Enviar solicitud</button>
     </div>
   </div>
 </div>
@@ -3409,6 +3605,14 @@ function updateTipoBienInfo() {
     if (areaEl) areaEl.innerHTML = 'Área<br>valida';
     if (infoEl) infoEl.textContent = 'Selecciona el tipo de bien para ver el área responsable de validación.';
   }
+  // Auto-fill Área Funcional según tipo
+  const areaFuncionalMap = {
+    'computo': 'UN. DE TI',
+    'mobiliario': 'UN. ADMINISTRACIÓN',
+    'comunicaciones': 'UN. DE COMUNICACIONES'
+  };
+  const areaFEl = document.getElementById('ns-area-funcional');
+  if (areaFEl) areaFEl.value = val && areaFuncionalMap[val] ? areaFuncionalMap[val] : '';
 }
 
 // ══════════════════════════════ CONSULTA DNI ════════════════════════════
@@ -3430,7 +3634,12 @@ const dniData = {
     dni: '77434028', cargo: 'Analista de Sistemas', area: 'SEC. DE ADMINISTRACION', subarea: 'UN. DE TI',
     correo: 'a.nunez@cmp.org.pe', sede: 'Sede Malecón de la Reserva', fechaCese: null,
     jefeArea: 'Roberto Limas', correoJefe: 'r.limas@cmp.org.pe',
-    pendientes: { bienes: [], accesorios: [], prestamos: [], cajaChica: [] }
+    pendientes: {
+      bienes: ['Laptop HP EliteBook 840 (SOL-2026-001)', 'Monitor HP 24" (111033)', 'Teléfono IP Fanvil X4U (111032)'],
+      accesorios: ['Teclado Logitech MK270 (2026_ADM_0006)', 'Mouse Logitech M185 (2026_ADM_0007)', 'Auriculares Jabra (2026_ADM_0008)'],
+      prestamos: ['PREST-2026-002 — Proyector Epson EB-X41 · Pendiente devolución'],
+      cajaChica: []
+    }
   },
   '32187654': {
     nombre: 'María Torres Huamán', meta: 'DNI: 32187654 · Cargo: Especialista GDTH · Área: UN. DE GDTH', avatar: 'MT',
@@ -3449,14 +3658,53 @@ function consultarDNI(dniParam) {
   const data = dniData[dni];
   if (data) {
     dniActual = data;
-    document.getElementById('dni-nombre').textContent = data.nombre;
-    document.getElementById('dni-meta').textContent = data.meta;
     document.getElementById('dni-result').style.display = 'block';
+    renderDNIResult(data);
     showToast('✓ Colaborador encontrado: ' + data.nombre);
   } else {
     dniActual = null;
     document.getElementById('dni-result').style.display = 'none';
     showToast('DNI no encontrado. Prueba: 45231089, 77434028 o 32187654');
+  }
+}
+
+function renderDNIResult(d) {
+  document.getElementById('dni-nombre').textContent = d.nombre;
+  document.getElementById('dni-meta').textContent = d.meta;
+  // For demo purposes we use the existing static layout for 45231089 (Carlos)
+  // For 77434028, rebuild the panels dynamically
+  if (d.dni === '77434028') {
+    // Override the static content for the demo
+    const bienesT = document.getElementById('dni-bienes-tbody');
+    if (bienesT) {
+      const fDone = (nombre, cargo, fecha) =>
+        `<td style="vertical-align:top;padding:6px"><div style="font-family:Georgia,serif;font-style:italic;font-size:12px;color:#1E1B4B;border-bottom:1.5px solid #6B21A8;padding-bottom:2px;margin-bottom:3px">${nombre}</div><div style="font-size:10px;color:#6B7280">${cargo}</div><div style="font-size:10px;color:#9CA3AF">${fecha}</div></td>`;
+      const fPend = () => `<td><span style="color:#991B1B;font-size:11px;font-weight:600">⏳ Pendiente</span></td>`;
+      const fWait = () => `<td><span style="color:#991B1B;font-size:11px">○ En espera</span></td>`;
+      bienesT.innerHTML = `
+        <tr><td>SOL-2026-001</td><td>Laptop HP EliteBook 840</td><td>Activo</td><td><code>CMP-038410</code></td><td><span class="badge b-green">Bueno</span></td>${fDone('R. Limas','Jefe UN. DE TI','28/03/2026')}${fDone('Aaron N.','Analista de Sistemas — UN. DE TI','28/03/2026')}<td><span style="color:#059669;font-weight:600;font-size:11px">✓ Completado</span></td></tr>
+        <tr><td>111033</td><td>Monitor HP 24"</td><td>Activo</td><td><code>CMP-038411</code></td><td><span class="badge b-green">Bueno</span></td>${fDone('R. Limas','Jefe UN. DE TI','28/03/2026')}${fDone('Aaron N.','Analista de Sistemas — UN. DE TI','28/03/2026')}<td><span style="color:#059669;font-weight:600;font-size:11px">✓ Completado</span></td></tr>
+        <tr><td>111032</td><td>Teléfono IP Fanvil X4U</td><td>Activo</td><td><code>CMP-038403</code></td><td><span class="badge b-green">Bueno</span></td>${fPend()}${fWait()}<td style="color:#991B1B;font-weight:600">☐ Pendiente</td></tr>
+        <tr><td>2026_ADM_0006</td><td>Teclado Logitech MK270</td><td>Accesorio</td><td><code>2026_ADM_0006</code></td><td><span class="badge b-green">Bueno</span></td>${fDone('R. Limas','Jefe UN. DE TI','28/03/2026')}${fDone('Aaron N.','Analista de Sistemas — UN. DE TI','28/03/2026')}<td><span style="color:#059669;font-weight:600;font-size:11px">✓ Completado</span></td></tr>
+        <tr><td>2026_ADM_0007</td><td>Mouse Logitech M185</td><td>Accesorio</td><td><code>2026_ADM_0007</code></td><td><span class="badge b-green">Bueno</span></td>${fDone('R. Limas','Jefe UN. DE TI','28/03/2026')}${fDone('Aaron N.','Analista de Sistemas — UN. DE TI','28/03/2026')}<td><span style="color:#059669;font-weight:600;font-size:11px">✓ Completado</span></td></tr>
+        <tr><td>2026_ADM_0008</td><td>Auriculares Jabra</td><td>Accesorio</td><td><code>2026_ADM_0008</code></td><td><span class="badge b-yellow">Regular</span></td>${fPend()}${fWait()}<td style="color:#991B1B;font-weight:600">☐ Pendiente</td></tr>`;
+    }
+    const econT = document.getElementById('dni-econ-tbody');
+    if (econT) {
+      econT.innerHTML = `<tr><td class="fw-600">PREST-2026-002</td><td>Préstamo bien tec.</td><td>—</td><td>Pendiente devolución</td><td><span class="badge b-blue">En préstamo</span></td>${fPend()}${fWait()}</tr>`;
+    }
+    // Update counters
+    const counters = document.querySelectorAll('.counter-num');
+    if (counters.length >= 5) {
+      counters[0].textContent = '2';  // Activos
+      counters[1].textContent = '1';  // Artículos
+      counters[2].textContent = '3';  // Accesorios
+      counters[3].textContent = '1';  // Préstamo
+      counters[4].textContent = '0';  // Caja chica
+    }
+    // Update banner
+    const banner = document.querySelector('.panel-footer .banner');
+    if (banner) banner.innerHTML = '<span class="sem sem-y"></span> <strong>2 bienes pendientes de devolución</strong>, 1 préstamo activo, 3 accesorios (2 completados)';
   }
 }
 
@@ -3720,7 +3968,7 @@ function enviarSolicitud() {
       <td><span class="badge b-gray">${tipoLabel}</span></td>
       <td>${today}</td>
       <td class="text-gray">—</td>
-      <td><span class="badge b-blue">En revisión</span></td>
+      <td><span class="badge b-yellow">En revisión</span></td>
       <td><div class="actions-cell"><button class="btn btn-gray btn-xs" onclick="showToast('Solicitud en proceso inicial')">Ver detalle</button></div></td>`;
     tbody.insertBefore(tr, tbody.firstChild);
   }
@@ -4147,6 +4395,40 @@ function openDetalleSolicitud(id) {
   });
   document.getElementById('dts-flujo').innerHTML = flujoHtml;
 
+  // ── FIRMAS DEL PROCESO (aprob-cell grid) ──
+  const dtsFirmasSec = document.getElementById('dts-firmas-section');
+  const dtsFirmasEl  = document.getElementById('dts-firmas');
+  const dtsCols = Math.min(d.flujo.length, 4);
+  let dtsFirmasHtml = `<div style="display:grid;grid-template-columns:repeat(${dtsCols},1fr);gap:10px;margin-top:8px">`;
+  d.flujo.forEach((s, si) => {
+    const isDone     = s.status === 'done';
+    const isActive   = s.status === 'active';
+    const isRejected = s.status === 'rejected';
+    let firmaBox = '';
+    if (isDone || isRejected) {
+      firmaBox = `<div class="firma-box" style="min-width:100%">${s.firmante || '—'}</div>`;
+    } else if (isActive) {
+      firmaBox = `<div class="aprob-zona" onclick="activarFirmaAprobAdv(this)" style="min-height:40px">
+        <span class="firma-placeholder" style="font-size:11px">Firmar aquí</span>
+        <input type="text" class="firma-input" id="dts-firma-${si}" style="display:none" placeholder="Firma">
+      </div>`;
+    } else {
+      firmaBox = `<div style="background:#F3F4F6;border:1px dashed #D1D5DB;border-radius:4px;height:40px;display:flex;align-items:center;justify-content:center"><span style="font-size:11px;color:#9CA3AF">Pendiente</span></div>`;
+    }
+    const borderColor = isDone ? '#22C55E' : isRejected ? '#EF4444' : isActive ? '#6B21A8' : '#D1D5DB';
+    const bgColor     = isDone ? '#F0FDF4'  : isRejected ? '#FEF2F2' : isActive ? '#F5F3FF'  : '#FAFAFA';
+    dtsFirmasHtml += `<div class="aprob-cell" style="border:1px solid ${borderColor};background:${bgColor}">
+      <div class="aprob-title" style="font-size:10px">Paso ${s.paso} — ${s.label}</div>
+      ${firmaBox}
+      <div class="text-xs text-gray mt-4">${s.cargo}</div>
+      <div class="text-xs text-gray">${s.fecha}</div>
+      ${isRejected ? `<div style="font-size:10px;color:#EF4444;margin-top:3px">✖ Rechazado / Observado</div>` : ''}
+    </div>`;
+  });
+  dtsFirmasHtml += '</div>';
+  dtsFirmasEl.innerHTML = dtsFirmasHtml;
+  dtsFirmasSec.style.display = 'block';
+
   const acc = document.getElementById('dts-acciones');
   acc.innerHTML = d.estado==='Observado'
     ? '<button class="btn btn-outline btn-sm" onclick="showToast(\'Iniciando subsanación...\')">✏ Subsanar observación</button>'
@@ -4288,6 +4570,7 @@ function openDetallePrestamoBien(id) {
           </div>` : ''}
           <div class="inv-field"><div class="lbl">Fecha</div><div class="val">${f.fecha}</div></div>
         </div>
+        <div style="margin-top:8px"><button class="btn btn-gray btn-xs" onclick="openObsPrestamoStep(${i},'${id}')">+Observación</button></div>
       </div>`;
     } else if (isActive) {
       flujoHtml += `<div class="flow-step-body">
@@ -4297,13 +4580,49 @@ function openDetallePrestamoBien(id) {
           <input type="text" class="form-control" id="dpb-firma-paso-${i}" placeholder="Escribe aquí tu firma..." style="font-family:Georgia,serif;font-style:italic;font-size:14px;color:#1E1B4B">
         </div>
         <button class="btn btn-primary btn-sm" onclick="registrarFirmaPrestamo(${i},'${id}')">✔ Registrar firma</button>
+        <button class="btn btn-gray btn-xs" style="margin-top:6px" onclick="openObsPrestamoStep(${i},'${id}')">+Observación</button>
       </div>`;
     } else {
-      flujoHtml += `<div class="flow-step-body"><p class="text-xs text-gray" style="font-style:italic">🔒 Pendiente — se habilitará al completar el paso anterior.</p></div>`;
+      flujoHtml += `<div class="flow-step-body"><p class="text-xs text-gray" style="font-style:italic">🔒 Pendiente — se habilitará al completar el paso anterior.</p>
+<div style="margin-top:6px"><button class="btn btn-gray btn-xs" onclick="openObsPrestamoStep(${i},'${id}')">+Observación</button></div></div>`;
     }
     flujoHtml += '</div>';
   });
   document.getElementById('dpb-flujo').innerHTML = flujoHtml;
+
+  // ── FIRMAS DEL PROCESO (aprob-cell grid) ──
+  const firmasSec = document.getElementById('dpb-firmas-section');
+  const firmasEl  = document.getElementById('dpb-firmas');
+  const cols = Math.min(d.flujo.length, 3);
+  let firmasHtml = `<div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:10px;margin-top:8px">`;
+  d.flujo.forEach((f, fi) => {
+    const isDone   = f.status === 'done';
+    const isActive = f.status === 'active';
+    let firmaBox = '';
+    if (isDone) {
+      firmaBox = `<div class="firma-box" style="min-width:100%">${f.firmante}</div>`;
+      if (f.firmante2) firmaBox += `<div style="font-size:10px;color:#6B7280;margin-top:3px;font-style:italic">${f.firmante2}</div>`;
+    } else if (isActive) {
+      firmaBox = `<div class="aprob-zona" onclick="activarFirmaAprobAdv(this)" style="min-height:40px">
+        <span class="firma-placeholder" style="font-size:11px">Firmar aquí</span>
+        <input type="text" class="firma-input" id="pb-firma-${fi}" style="display:none" placeholder="Firma">
+      </div>`;
+    } else {
+      firmaBox = `<div style="background:#F3F4F6;border:1px dashed #D1D5DB;border-radius:4px;height:40px;display:flex;align-items:center;justify-content:center"><span style="font-size:11px;color:#9CA3AF">Pendiente</span></div>`;
+    }
+    const borderColor = isDone ? '#22C55E' : isActive ? '#6B21A8' : '#D1D5DB';
+    const bgColor     = isDone ? '#F0FDF4'  : isActive ? '#F5F3FF'  : '#FAFAFA';
+    firmasHtml += `<div class="aprob-cell" style="border:1px solid ${borderColor};background:${bgColor}">
+      <div class="aprob-title" style="font-size:10px">${f.paso}</div>
+      ${firmaBox}
+      <div class="text-xs text-gray mt-4">${f.cargo}</div>
+      <div class="text-xs text-gray">${f.fecha}</div>
+    </div>`;
+  });
+  firmasHtml += '</div>';
+  firmasEl.innerHTML = firmasHtml;
+  firmasSec.style.display = 'block';
+
   const btnDiv = document.getElementById('dpb-btn-devolucion');
   btnDiv.innerHTML = d.estadoCls === 'b-blue'
     ? '<button class="btn btn-primary btn-sm" onclick="closeModal(\'modal-detalle-prestamo-bien\');openActaDevolucion(\''+d.id_bien+'\',\''+d.bien+'\',\''+d.qr+'\',\''+d.marca+'\',\''+d.modelo+'\',\'S/N\')">📥 Registrar devolución</button>'
@@ -4353,34 +4672,49 @@ function abrirReporteDevolucion() {
         📦 SECCIÓN 1 — Bienes a devolver
       </div>
       <table style="width:100%;border-collapse:collapse;font-size:12px">
-        <thead><tr style="background:#FEF9EE"><th style="border:1px solid #E5E7EB;padding:7px;text-align:left">ID</th><th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Descripción</th><th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Código QR</th><th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Estado</th><th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Devolución</th></tr></thead>
+        <thead><tr style="background:#FEF9EE">
+          <th style="border:1px solid #E5E7EB;padding:7px;text-align:left">ID</th>
+          <th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Descripción</th>
+          <th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Código QR</th>
+          <th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Estado físico</th>
+          <th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Validación Custodio</th>
+          <th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Validación Colaborador</th>
+          <th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Validación GDTH</th>
+          <th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Devolución</th>
+        </tr></thead>
         <tbody>
-          <tr><td style="border:1px solid #E5E7EB;padding:7px">111030</td><td style="border:1px solid #E5E7EB;padding:7px">Laptop Dell Latitude 5420</td><td style="border:1px solid #E5E7EB;padding:7px">CMP-038401</td><td style="border:1px solid #E5E7EB;padding:7px">Bueno</td><td style="border:1px solid #E5E7EB;padding:7px;color:#D97706">☐ Pendiente</td></tr>
-          <tr><td style="border:1px solid #E5E7EB;padding:7px">111031</td><td style="border:1px solid #E5E7EB;padding:7px">Mouse Logitech M185</td><td style="border:1px solid #E5E7EB;padding:7px">CMP-038402</td><td style="border:1px solid #E5E7EB;padding:7px">Bueno</td><td style="border:1px solid #E5E7EB;padding:7px;color:#D97706">☐ Pendiente</td></tr>
-          <tr><td style="border:1px solid #E5E7EB;padding:7px">200201</td><td style="border:1px solid #E5E7EB;padding:7px">Silla ergonómica</td><td style="border:1px solid #E5E7EB;padding:7px">CMP-ART-041</td><td style="border:1px solid #E5E7EB;padding:7px">Regular</td><td style="border:1px solid #E5E7EB;padding:7px;color:#EF4444">⚠ Observado</td></tr>
+          <tr>
+            <td style="border:1px solid #E5E7EB;padding:7px">111030</td>
+            <td style="border:1px solid #E5E7EB;padding:7px">Laptop Dell Latitude 5420</td>
+            <td style="border:1px solid #E5E7EB;padding:7px">CMP-038401</td>
+            <td style="border:1px solid #E5E7EB;padding:7px">Bueno</td>
+            <td style="border:1px solid #E5E7EB;padding:7px"><span style="font-family:Georgia,serif;font-style:italic;font-size:11px;color:#059669">R. Limas ✓</span></td>
+            <td style="border:1px solid #E5E7EB;padding:7px"><span style="color:#991B1B;font-size:11px">⏳ Pendiente</span></td>
+            <td style="border:1px solid #E5E7EB;padding:7px"><span style="color:#991B1B;font-size:11px">○ En espera</span></td>
+            <td style="border:1px solid #E5E7EB;padding:7px;color:#D97706">☐ Pendiente</td>
+          </tr>
+          <tr>
+            <td style="border:1px solid #E5E7EB;padding:7px">111031</td>
+            <td style="border:1px solid #E5E7EB;padding:7px">Mouse Logitech M185</td>
+            <td style="border:1px solid #E5E7EB;padding:7px">CMP-038402</td>
+            <td style="border:1px solid #E5E7EB;padding:7px">Bueno</td>
+            <td style="border:1px solid #E5E7EB;padding:7px"><span style="font-family:Georgia,serif;font-style:italic;font-size:11px;color:#059669">R. Limas ✓</span></td>
+            <td style="border:1px solid #E5E7EB;padding:7px"><span style="color:#991B1B;font-size:11px">⏳ Pendiente</span></td>
+            <td style="border:1px solid #E5E7EB;padding:7px"><span style="color:#991B1B;font-size:11px">○ En espera</span></td>
+            <td style="border:1px solid #E5E7EB;padding:7px;color:#D97706">☐ Pendiente</td>
+          </tr>
+          <tr>
+            <td style="border:1px solid #E5E7EB;padding:7px">200201</td>
+            <td style="border:1px solid #E5E7EB;padding:7px">Silla ergonómica</td>
+            <td style="border:1px solid #E5E7EB;padding:7px">CMP-ART-041</td>
+            <td style="border:1px solid #E5E7EB;padding:7px">Regular</td>
+            <td style="border:1px solid #E5E7EB;padding:7px"><span style="font-family:Georgia,serif;font-style:italic;font-size:11px;color:#D97706">R. Limas ⚠</span></td>
+            <td style="border:1px solid #E5E7EB;padding:7px"><span style="color:#991B1B;font-size:11px">⏳ Pendiente</span></td>
+            <td style="border:1px solid #E5E7EB;padding:7px"><span style="color:#991B1B;font-size:11px">○ En espera</span></td>
+            <td style="border:1px solid #E5E7EB;padding:7px;color:#EF4444">⚠ Observado</td>
+          </tr>
         </tbody>
       </table>
-      <div style="margin-top:10px;padding:10px 14px;background:#FFFBEB;border-radius:6px;border:1px solid #FDE68A">
-        <div style="font-size:11px;font-weight:700;color:#92400E;margin-bottom:6px">Flujo de firmas — Bienes</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <div style="padding:7px 12px;background:white;border:1px solid #D1D5DB;border-radius:6px;font-size:11px;text-align:center">
-            <div style="font-weight:700;color:#6B21A8">1. Admin registra</div>
-            <div style="color:#6B7280;margin-top:2px">L. Díaz · 28/03/2026</div>
-            <div style="color:#059669;font-weight:600">✓ Firmado</div>
-          </div>
-          <div style="padding:7px 12px;background:white;border:1px solid #D1D5DB;border-radius:6px;font-size:11px;text-align:center">
-            <div style="font-weight:700;color:#6B21A8">2. Jefe de Área</div>
-            <div style="color:#6B7280;margin-top:2px">R. Limas · 29/03/2026</div>
-            <div style="color:#059669;font-weight:600">✓ Firmado</div>
-          </div>
-          <div style="padding:7px 12px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:6px;font-size:11px;text-align:center">
-            <div style="font-weight:700;color:#6B21A8">3. Colaborador firma</div>
-            <div style="color:#6B7280;margin-top:2px">C. Pérez — pendiente</div>
-            <div style="color:#D97706;font-weight:600">⏳ Pendiente</div>
-          </div>
-        </div>
-        <div style="margin-top:8px;font-size:11px;color:#374151"><strong>Observación Silla ergonómica (200201):</strong> Presenta desgaste en el soporte lumbar y rasguños en el apoyabrazos izquierdo. Requiere evaluación por administración.</div>
-      </div>
     </div>
 
     <!-- Sección 2: Accesorios -->
@@ -4389,27 +4723,39 @@ function abrirReporteDevolucion() {
         🔌 SECCIÓN 2 — Accesorios a devolver
       </div>
       <table style="width:100%;border-collapse:collapse;font-size:12px">
-        <thead><tr style="background:#F0FDF4"><th style="border:1px solid #E5E7EB;padding:7px;text-align:left">ID</th><th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Nombre</th><th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Marca</th><th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Estado</th><th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Devolución</th></tr></thead>
+        <thead><tr style="background:#F0FDF4">
+          <th style="border:1px solid #E5E7EB;padding:7px;text-align:left">ID</th>
+          <th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Nombre</th>
+          <th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Marca</th>
+          <th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Estado físico</th>
+          <th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Validación Custodio</th>
+          <th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Validación Colaborador</th>
+          <th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Validación GDTH</th>
+          <th style="border:1px solid #E5E7EB;padding:7px;text-align:left">Devolución</th>
+        </tr></thead>
         <tbody>
-          <tr><td style="border:1px solid #E5E7EB;padding:7px">20261106</td><td style="border:1px solid #E5E7EB;padding:7px">Teclado HP K1500</td><td style="border:1px solid #E5E7EB;padding:7px">HP</td><td style="border:1px solid #E5E7EB;padding:7px">Bueno</td><td style="border:1px solid #E5E7EB;padding:7px;color:#D97706">☐ Pendiente</td></tr>
-          <tr><td style="border:1px solid #E5E7EB;padding:7px">20261107</td><td style="border:1px solid #E5E7EB;padding:7px">USB Kingston DataTraveler</td><td style="border:1px solid #E5E7EB;padding:7px">Kingston</td><td style="border:1px solid #E5E7EB;padding:7px">Bueno</td><td style="border:1px solid #E5E7EB;padding:7px;color:#D97706">☐ Pendiente</td></tr>
+          <tr>
+            <td style="border:1px solid #E5E7EB;padding:7px">20261106</td>
+            <td style="border:1px solid #E5E7EB;padding:7px">Teclado HP K1500</td>
+            <td style="border:1px solid #E5E7EB;padding:7px">HP</td>
+            <td style="border:1px solid #E5E7EB;padding:7px">Bueno</td>
+            <td style="border:1px solid #E5E7EB;padding:7px"><span style="color:#991B1B;font-size:11px">⏳ Pendiente</span></td>
+            <td style="border:1px solid #E5E7EB;padding:7px"><span style="color:#991B1B;font-size:11px">○ En espera</span></td>
+            <td style="border:1px solid #E5E7EB;padding:7px"><span style="color:#991B1B;font-size:11px">○ En espera</span></td>
+            <td style="border:1px solid #E5E7EB;padding:7px;color:#D97706">☐ Pendiente</td>
+          </tr>
+          <tr>
+            <td style="border:1px solid #E5E7EB;padding:7px">20261107</td>
+            <td style="border:1px solid #E5E7EB;padding:7px">USB Kingston DataTraveler</td>
+            <td style="border:1px solid #E5E7EB;padding:7px">Kingston</td>
+            <td style="border:1px solid #E5E7EB;padding:7px">Bueno</td>
+            <td style="border:1px solid #E5E7EB;padding:7px"><span style="color:#991B1B;font-size:11px">⏳ Pendiente</span></td>
+            <td style="border:1px solid #E5E7EB;padding:7px"><span style="color:#991B1B;font-size:11px">○ En espera</span></td>
+            <td style="border:1px solid #E5E7EB;padding:7px"><span style="color:#991B1B;font-size:11px">○ En espera</span></td>
+            <td style="border:1px solid #E5E7EB;padding:7px;color:#D97706">☐ Pendiente</td>
+          </tr>
         </tbody>
       </table>
-      <div style="margin-top:10px;padding:10px 14px;background:#F0FDF4;border-radius:6px;border:1px solid #BBF7D0">
-        <div style="font-size:11px;font-weight:700;color:#065F46;margin-bottom:6px">Flujo de firmas — Accesorios</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <div style="padding:7px 12px;background:white;border:1px solid #D1D5DB;border-radius:6px;font-size:11px;text-align:center">
-            <div style="font-weight:700;color:#6B21A8">1. Admin registra</div>
-            <div style="color:#6B7280;margin-top:2px">L. Díaz · 28/03/2026</div>
-            <div style="color:#059669;font-weight:600">✓ Firmado</div>
-          </div>
-          <div style="padding:7px 12px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:6px;font-size:11px;text-align:center">
-            <div style="font-weight:700;color:#6B21A8">2. Colaborador firma</div>
-            <div style="color:#6B7280;margin-top:2px">C. Pérez — pendiente</div>
-            <div style="color:#D97706;font-weight:600">⏳ Pendiente</div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- Sección 3: Préstamos bienes tec -->
@@ -5230,6 +5576,8 @@ function openReasignacion() {
   document.getElementById('reasi-otro-group').style.display = 'none';
   document.getElementById('reasi-mantenimiento-group').style.display = 'none';
   document.getElementById('reasi-otro-colab-group').style.display = 'none';
+  // Reset to tab 1
+  switchReasigTab('rc-pane-reasignar', 'rc-tab-reasignar');
   openModalStacked('modal-configuracion-reasignacion');
 }
 
@@ -5250,6 +5598,48 @@ function onReasiMotivoChange() {
   document.getElementById('reasi-otro-group').style.display = val === 'otro' ? 'block' : 'none';
 }
 
+function switchReasigTab(paneId, tabId) {
+  ['rc-pane-reasignar','rc-pane-quitar'].forEach(id => {
+    const p = document.getElementById(id);
+    if (p) p.classList.remove('active');
+  });
+  ['rc-tab-reasignar','rc-tab-quitar'].forEach(id => {
+    const t = document.getElementById(id);
+    if (t) t.classList.remove('active');
+  });
+  const pane = document.getElementById(paneId);
+  const tab = document.getElementById(tabId);
+  if (pane) pane.classList.add('active');
+  if (tab) tab.classList.add('active');
+  // Toggle footer buttons
+  const btnR = document.getElementById('rc-btn-reasignar');
+  const btnQ = document.getElementById('rc-btn-quitar');
+  if (btnR) btnR.style.display = paneId === 'rc-pane-reasignar' ? '' : 'none';
+  if (btnQ) btnQ.style.display = paneId === 'rc-pane-quitar' ? '' : 'none';
+}
+
+function openObsQuitarAsig(paso) {
+  const today = new Date().toLocaleDateString('es-PE');
+  const actores = {1:'Admin — Aaron Samuel Nuñez Muñoz', 2:'Jefe de Área', 3:'Colaborador — Carlos Pérez Ramos', 4:'GDTH — Gestor de Recursos Humanos'};
+  document.getElementById('obs-paso-subtitle').textContent = 'Baja de asignación — Paso ' + paso;
+  document.getElementById('obs-paso-actor').textContent = actores[paso] || '—';
+  document.getElementById('obs-paso-fecha').textContent = today;
+  document.getElementById('obs-paso-texto').value = '';
+  document.getElementById('obs-paso-count').textContent = '0';
+  openModalStacked('modal-agregar-obs-paso');
+}
+
+function openObsNuevoResp(paso) {
+  const today = new Date().toLocaleDateString('es-PE');
+  const actores = {1:'Jefe / Designado de Contabilidad CMP', 2:'Nuevo Responsable de Caja Chica'};
+  document.getElementById('obs-paso-subtitle').textContent = 'Nuevo Responsable CC — Paso ' + paso;
+  document.getElementById('obs-paso-actor').textContent = actores[paso] || '—';
+  document.getElementById('obs-paso-fecha').textContent = today;
+  document.getElementById('obs-paso-texto').value = '';
+  document.getElementById('obs-paso-count').textContent = '0';
+  openModalStacked('modal-agregar-obs-paso');
+}
+
 function confirmarReasignacion() {
   const motivo = document.getElementById('reasi-motivo').value;
   const nuevoBien = document.getElementById('reasi-nuevo-bien').value.trim();
@@ -5259,6 +5649,174 @@ function confirmarReasignacion() {
   if (!nuevoEstado) { showToast('Selecciona el estado del bien actual'); return; }
   closeModal('modal-configuracion-reasignacion');
   showToast('✓ Solicitud de reasignación enviada correctamente — pendiente de aprobación');
+}
+
+function confirmarQuitarAsignacion() {
+  const motivo = document.getElementById('quitar-motivo').value;
+  if (!motivo) { showToast('Selecciona el motivo de la baja'); return; }
+  closeModal('modal-configuracion-reasignacion');
+  showToast('✓ Solicitud de baja de asignación enviada — flujo de firmas iniciado');
+}
+
+function openObsPrestamoStep(paso, nPrestamo) {
+  const today = new Date().toLocaleDateString('es-PE');
+  document.getElementById('obs-paso-subtitle').textContent = 'Préstamo ' + nPrestamo + ' — Paso ' + (paso + 1);
+  document.getElementById('obs-paso-actor').textContent = 'Aaron Samuel Nuñez Muñoz';
+  document.getElementById('obs-paso-fecha').textContent = today;
+  document.getElementById('obs-paso-texto').value = '';
+  document.getElementById('obs-paso-count').textContent = '0';
+  openModalStacked('modal-agregar-obs-paso');
+}
+
+function switchNRCTab(paneId, tabId) {
+  ['nrc-pane-datos','nrc-pane-adjuntos'].forEach(id => {
+    const p = document.getElementById(id); if (p) p.classList.remove('active');
+  });
+  ['nrc-tab-datos','nrc-tab-adjuntos'].forEach(id => {
+    const t = document.getElementById(id); if (t) t.classList.remove('active');
+  });
+  const p = document.getElementById(paneId); if (p) p.classList.add('active');
+  const t = document.getElementById(tabId); if (t) t.classList.add('active');
+}
+
+function agregarArchivosNRC(input) {
+  const list = document.getElementById('nrc-files-list');
+  if (!list || !input.files.length) return;
+  const today = new Date().toLocaleDateString('es-PE');
+  Array.from(input.files).forEach(f => {
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:white;border:1px solid #E5E7EB;border-radius:6px';
+    const ext = f.name.split('.').pop().toLowerCase();
+    const ico = ['pdf'].includes(ext) ? '📄' : ['doc','docx'].includes(ext) ? '📋' : ['xls','xlsx'].includes(ext) ? '📊' : '🖼';
+    const kb = f.size > 1024*1024 ? (f.size/1024/1024).toFixed(1)+' MB' : Math.round(f.size/1024)+' KB';
+    div.innerHTML = `<div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">${ico}</span><div><div style="font-size:12px;font-weight:600;color:#374151">${f.name}</div><div style="font-size:10px;color:#9CA3AF">${kb} · Subido ${today}</div></div></div><div style="display:flex;gap:6px"><button class="btn btn-gray btn-xs" onclick="verArchivoNRC('${f.name}')">👁 Ver</button><button class="btn btn-gray btn-xs" onclick="this.closest('div[style]').remove()">🗑</button></div>`;
+    list.appendChild(div);
+  });
+  showToast('✓ ' + input.files.length + ' archivo(s) adjuntado(s)');
+}
+
+function verArchivoNRC(nombre) {
+  document.getElementById('nrc-visor-nombre').textContent = nombre;
+  document.getElementById('nrc-visor-label').textContent = 'Visualizando: ' + nombre;
+  document.getElementById('nrc-visor').style.display = 'block';
+}
+
+function cerrarVisorNRC() {
+  document.getElementById('nrc-visor').style.display = 'none';
+}
+
+function generarReporteAsignaciones() {
+  const colab = document.getElementById('ns-colab-nombre') ? document.getElementById('ns-colab-nombre').textContent : 'Colaborador';
+  const body = document.getElementById('reporte-asig-body');
+  if (!body) return;
+
+  // Helper: celda de firma estándar
+  function fc(firmante, cargo, fecha, status) {
+    const p = 'border:1px solid #E5E7EB;padding:7px;vertical-align:top';
+    if (status === 'done') {
+      return `<td style="${p}">
+        <div style="font-family:Georgia,serif;font-style:italic;font-size:13px;color:#1E1B4B;border-bottom:1.5px solid #6B21A8;padding-bottom:3px;margin-bottom:4px">${firmante}</div>
+        <div style="font-size:10px;color:#6B7280">${cargo}</div>
+        <div style="font-size:10px;color:#9CA3AF">${fecha}</div>
+      </td>`;
+    } else if (status === 'pending') {
+      return `<td style="${p}"><span style="color:#991B1B;font-size:11px;font-weight:600">⏳ Pendiente</span></td>`;
+    } else {
+      return `<td style="${p}"><span style="color:#991B1B;font-size:11px">○ En espera</span></td>`;
+    }
+  }
+
+  const th = 'border:1px solid #E5E7EB;padding:7px;text-align:left;font-size:11px;font-weight:700';
+  const td = 'border:1px solid #E5E7EB;padding:7px;font-size:12px;vertical-align:top';
+
+  body.innerHTML = `
+    <div style="border:1.5px solid #6B21A8;border-radius:8px;padding:12px 16px;margin-bottom:16px;background:#F5F3FF">
+      <div style="font-size:13px;font-weight:700;color:#1E1B4B;margin-bottom:2px">${colab}</div>
+      <div style="font-size:11px;color:#6B7280">Reporte generado el: ${new Date().toLocaleDateString('es-PE')} · Sistema CMP Intranet</div>
+    </div>
+
+    <!-- Bienes asignados -->
+    <div style="margin-bottom:18px">
+      <div style="font-size:12px;font-weight:700;color:#374151;background:#F3F4F6;border-radius:6px;padding:8px 12px;margin-bottom:8px;border-left:4px solid #6B21A8">📦 Bienes Asignados</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="background:#F5F3FF">
+          <th style="${th}">ID</th>
+          <th style="${th}">Descripción</th>
+          <th style="${th}">QR</th>
+          <th style="${th}">Estado</th>
+          <th style="${th}">Custodio Responsable</th>
+          <th style="${th}">Colaborador</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td style="${td}">111030</td>
+            <td style="${td}">Laptop Dell Latitude 5420</td>
+            <td style="${td}">CMP-038401</td>
+            <td style="${td}"><span style="color:#059669;font-weight:600">✓ Bueno</span></td>
+            ${fc('R. Limas','Jefe UN. DE TI','28/03/2026','done')}
+            ${fc('Aaron N.','Analista de Sistemas — UN. DE TI','28/03/2026','done')}
+          </tr>
+          <tr>
+            <td style="${td}">111031</td>
+            <td style="${td}">Monitor LG 24" 24MK430H</td>
+            <td style="${td}">CMP-038402</td>
+            <td style="${td}"><span style="color:#059669;font-weight:600">✓ Bueno</span></td>
+            ${fc('R. Limas','Jefe UN. DE TI','28/03/2026','done')}
+            ${fc('Aaron N.','Analista de Sistemas — UN. DE TI','28/03/2026','done')}
+          </tr>
+          <tr>
+            <td style="${td}">111032</td>
+            <td style="${td}">Teléfono IP Fanvil X4U</td>
+            <td style="${td}">CMP-038403</td>
+            <td style="${td}"><span style="color:#059669;font-weight:600">✓ Bueno</span></td>
+            ${fc('','','','pending')}
+            ${fc('','','','waiting')}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Accesorios asignados -->
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;font-weight:700;color:#374151;background:#F3F4F6;border-radius:6px;padding:8px 12px;margin-bottom:8px;border-left:4px solid #F59E0B">🔌 Accesorios Asignados</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="background:#FEF9EE">
+          <th style="${th}">Nomenclatura</th>
+          <th style="${th}">Descripción</th>
+          <th style="${th}">Marca</th>
+          <th style="${th}">Estado</th>
+          <th style="${th}">Custodio Responsable</th>
+          <th style="${th}">Colaborador</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td style="${td}">2026_ADM_0003</td>
+            <td style="${td}">Teclado HP K1500</td>
+            <td style="${td}">HP</td>
+            <td style="${td}"><span style="color:#059669;font-weight:600">✓ Bueno</span></td>
+            ${fc('R. Limas','Jefe UN. DE TI','29/03/2026','done')}
+            ${fc('Aaron N.','Analista de Sistemas — UN. DE TI','29/03/2026','done')}
+          </tr>
+          <tr>
+            <td style="${td}">2026_ADM_0004</td>
+            <td style="${td}">Mouse Logitech M185</td>
+            <td style="${td}">Logitech</td>
+            <td style="${td}"><span style="color:#059669;font-weight:600">✓ Bueno</span></td>
+            ${fc('R. Limas','Jefe UN. DE TI','29/03/2026','done')}
+            ${fc('Aaron N.','Analista de Sistemas — UN. DE TI','29/03/2026','done')}
+          </tr>
+          <tr>
+            <td style="${td}">2026_ADM_0005</td>
+            <td style="${td}">Auriculares Jabra</td>
+            <td style="${td}">Jabra</td>
+            <td style="${td}"><span style="color:#D97706;font-weight:600">Regular</span></td>
+            ${fc('R. Limas','Jefe UN. DE TI','29/03/2026','done')}
+            ${fc('Aaron N.','Analista de Sistemas — UN. DE TI','29/03/2026','done')}
+          </tr>
+        </tbody>
+      </table>
+    </div>`;
+  openModalStacked('modal-reporte-asignaciones');
 }
 
 // ══════════════════════ OBS 7 — CHAR COUNT ══════════
