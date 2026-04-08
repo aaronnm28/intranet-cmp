@@ -1,10 +1,4 @@
 import { useState, useEffect } from 'react'
-import { PageHeader } from '../components/ui/PageHeader'
-import { Badge } from '../components/ui/Badge'
-import { Button } from '../components/ui/Button'
-import { Modal } from '../components/ui/Modal'
-import { Toast, useToast } from '../components/ui/Toast'
-import { MetricCard } from '../components/ui/MetricCard'
 import { cajaChicaService } from '../services/db'
 import type { CajaChica as CajaChicaType } from '../types'
 
@@ -36,12 +30,12 @@ const MOCK_GASTOS: Record<string, GastoRow[]> = {
     { fecha: '19/03/2026', descripcion: 'Servicio técnico equipo', comprobante: 'BOL-001-00445', monto: 220, estado: 'pendiente_sustento' },
   ],
   'SEMEFA': [
-    { fecha: '21/03/2026', descripcion: 'Papelería y útiles', comprobante: 'FAC-001-00231', monto: 145, estado: 'declarado' },
-    { fecha: '16/03/2026', descripcion: 'Movilidad comisión', comprobante: 'REC-001-00067', monto: 75, estado: 'declarado' },
-    { fecha: '11/03/2026', descripcion: 'Refrigerio capacitación', comprobante: 'BOL-001-00512', monto: 180, estado: 'pendiente_sustento' },
+    { fecha: '21/03/2026', descripcion: 'Impresión de diplomas', comprobante: 'FAC-001-01122', monto: 450, estado: 'declarado' },
+    { fecha: '16/03/2026', descripcion: 'Insumos de oficina', comprobante: 'BOL-001-00834', monto: 120, estado: 'declarado' },
   ],
   'Decanato': [
-    { fecha: '25/03/2026', descripcion: 'Flores protocolo', comprobante: 'BOL-001-00789', monto: 250, estado: 'pendiente_sustento' },
+    { fecha: '20/03/2026', descripcion: 'Útiles de oficina', comprobante: 'RHH-2026-001', monto: 85, estado: 'declarado' },
+    { fecha: '15/03/2026', descripcion: 'Refrigerio reunión', comprobante: 'RHH-2026-003', monto: 165, estado: 'pendiente_sustento' },
   ],
 }
 
@@ -55,12 +49,12 @@ const MOCK_CAJAS: CajaChicaType[] = [
 ]
 
 const TABLERO_ROWS = [
-  { area: 'Sec. Economía y Finanzas', responsable: 'María Torres H.', asignado: 'S/. 3,000', gastado: 'S/. 1,200', saldo: 'S/. 1,800', estadoV: 'green' as const, reposicion: '—' },
-  { area: 'Sec. Administración', responsable: 'Lizzetti Díaz E.', asignado: 'S/. 4,000', gastado: 'S/. 2,100', saldo: 'S/. 1,900', estadoV: 'green' as const, reposicion: '—' },
-  { area: 'Uni. Administración', responsable: 'Pedro Salas Q.', asignado: 'S/. 2,000', gastado: 'S/. 980', saldo: 'S/. 1,020', estadoV: 'green' as const, reposicion: '—' },
-  { area: 'FOSEMED', responsable: 'Carmen Vega R.', asignado: 'S/. 3,500', gastado: 'S/. 850', saldo: 'S/. 2,650', estadoV: 'green' as const, reposicion: '—' },
-  { area: 'SEMEFA', responsable: 'Jorge Lima C.', asignado: 'S/. 2,500', gastado: 'S/. 1,050', saldo: 'S/. 1,450', estadoV: 'green' as const, reposicion: '—' },
-  { area: 'Decanato', responsable: 'Aaron Nuñez M.', asignado: 'S/. 3,000', gastado: 'S/. 250', saldo: 'S/. 2,750', estadoV: 'yellow' as const, reposicion: 'Sí' },
+  { area: 'Sec. Economía y Finanzas', responsable: 'María Torres H.', asignado: 'S/. 3,000', gastado: 'S/. 1,200', saldo: 'S/. 1,800', estadoV: 'green' as const, reposicion: 'No', tab: 'Sec. Economía y Finanzas' },
+  { area: 'Sec. Administración', responsable: 'Lizzetti Díaz E.', asignado: 'S/. 4,000', gastado: 'S/. 2,100', saldo: 'S/. 1,900', estadoV: 'green' as const, reposicion: 'No', tab: 'Sec. Administración' },
+  { area: 'Uni. Administración', responsable: 'Pedro Salas Q.', asignado: 'S/. 2,000', gastado: 'S/. 980', saldo: 'S/. 1,020', estadoV: 'green' as const, reposicion: 'No', tab: 'Uni. Administración' },
+  { area: 'FOSEMED', responsable: 'Carmen Vega R.', asignado: 'S/. 3,500', gastado: 'S/. 850', saldo: 'S/. 2,650', estadoV: 'green' as const, reposicion: 'No', tab: 'FOSEMED' },
+  { area: 'SEMEFA', responsable: 'Jorge Lima C.', asignado: 'S/. 2,500', gastado: 'S/. 1,050', saldo: 'S/. 1,450', estadoV: 'green' as const, reposicion: 'No', tab: 'SEMEFA' },
+  { area: 'Decanato', responsable: 'Aaron Nuñez M.', asignado: 'S/. 3,000', gastado: 'S/. 250', saldo: 'S/. 2,750', estadoV: 'red' as const, reposicion: 'Sí', tab: 'Decanato' },
 ]
 
 const AREA_TABS = [
@@ -73,11 +67,20 @@ const AREA_TABS = [
   { id: 'Decanato', label: 'Decanato' },
 ]
 
+const AREA_META: Record<string, { saldo: string; gastado: string; reposiciones: number }> = {
+  'Sec. Economía y Finanzas': { saldo: 'S/. 1,800.00', gastado: 'S/. 1,200.00', reposiciones: 0 },
+  'Sec. Administración':      { saldo: 'S/. 1,900.00', gastado: 'S/. 2,100.00', reposiciones: 0 },
+  'Uni. Administración':      { saldo: 'S/. 1,020.00', gastado: 'S/. 980.00',   reposiciones: 0 },
+  'FOSEMED':                  { saldo: 'S/. 2,650.00', gastado: 'S/. 850.00',   reposiciones: 0 },
+  'SEMEFA':                   { saldo: 'S/. 1,450.00', gastado: 'S/. 1,050.00', reposiciones: 0 },
+  'Decanato':                 { saldo: 'S/. 2,750.00', gastado: 'S/. 250.00',   reposiciones: 1 },
+}
+
 function gastoBadge(estado: string) {
-  if (estado === 'declarado') return <Badge variant="green">Declarado</Badge>
-  if (estado === 'pendiente_sustento') return <Badge variant="yellow">Pendiente sustento</Badge>
-  if (estado === 'observado') return <Badge variant="red">Observado</Badge>
-  return <Badge variant="gray">{estado}</Badge>
+  if (estado === 'declarado') return <span className="badge b-green">Declarado</span>
+  if (estado === 'pendiente_sustento') return <span className="badge b-red">Pendiente sustento</span>
+  if (estado === 'observado') return <span className="badge b-yellow">Observado</span>
+  return <span className="badge b-gray">{estado}</span>
 }
 
 export function CajaChica() {
@@ -88,14 +91,15 @@ export function CajaChica() {
   const [showRegistrarGasto, setShowRegistrarGasto] = useState(false)
   const [showReposicion, setShowReposicion] = useState(false)
   const [showDetalleGasto, setShowDetalleGasto] = useState(false)
+  const [showGestionar, setShowGestionar] = useState(false)
+  const [gestionarTab, setGestionarTab] = useState('responsables')
   const [selectedCaja, setSelectedCaja] = useState<CajaChicaType | null>(null)
   const [selectedGasto, setSelectedGasto] = useState<GastoRow | null>(null)
-  const { toast, toastState, hideToast } = useToast()
 
   const [formGasto, setFormGasto] = useState({
     fecha: new Date().toISOString().slice(0, 10),
     descripcion: '',
-    tipo_comprobante: 'Factura',
+    tipo_comprobante: 'Boleta',
     num_comprobante: '',
     proveedor: '',
     monto: '',
@@ -111,7 +115,7 @@ export function CajaChica() {
   const handleRegistrarGasto = () => {
     if (!selectedCaja) return
     const nuevoGasto: GastoRow = {
-      fecha: formGasto.fecha || new Date().toLocaleDateString('es-PE'),
+      fecha: formGasto.fecha ? formGasto.fecha.split('-').reverse().join('/') : new Date().toLocaleDateString('es-PE'),
       descripcion: formGasto.descripcion,
       comprobante: `${formGasto.tipo_comprobante.slice(0, 3).toUpperCase()}-${formGasto.num_comprobante}`,
       monto: parseFloat(formGasto.monto),
@@ -122,349 +126,549 @@ export function CajaChica() {
       [selectedCaja.area]: [nuevoGasto, ...(prev[selectedCaja.area] ?? [])],
     }))
     setShowRegistrarGasto(false)
-    setFormGasto({ fecha: new Date().toISOString().slice(0, 10), descripcion: '', tipo_comprobante: 'Factura', num_comprobante: '', proveedor: '', monto: '' })
-    toast('Gasto registrado correctamente.')
+    setFormGasto({ fecha: new Date().toISOString().slice(0, 10), descripcion: '', tipo_comprobante: 'Boleta', num_comprobante: '', proveedor: '', monto: '' })
   }
 
   const activeCaja = cajas.find(c => c.area === activeTab) ?? null
   const activeGastos = activeCaja ? (gastosState[activeCaja.area] ?? []) : []
+  const activeMeta = activeCaja ? AREA_META[activeCaja.area] : null
 
-  const totalFondos = 18000
-  const totalGastado = 6430
-  const pctEjecucion = 35.7
+  const saldoActual = selectedCaja ? (selectedCaja.monto_asignado - selectedCaja.gastado_mes) : 0
+  const montoInput = parseFloat(formGasto.monto || '0')
+  const saldoTras = Math.max(0, saldoActual - montoInput)
 
   return (
     <div>
-      <PageHeader
-        title="Caja Chica"
-        subtitle="Control de fondos por área — 6 cajas activas"
-        breadcrumb={<>Gestión de Recursos &rsaquo; Caja Chica Decanato</>}
-        actions={<Button variant="outline" size="sm">📥 Exportar Excel</Button>}
-      />
+      {/* Breadcrumb */}
+      <div className="breadcrumb">Gestión de Recursos › <span>Caja Chica CMP</span></div>
+
+      {/* Page header */}
+      <div className="page-header">
+        <div>
+          <div className="page-title">Caja Chica CMP</div>
+          <div className="page-subtitle">Control de fondos por área — 6 cajas activas</div>
+        </div>
+        <div className="header-actions">
+          <button className="btn btn-outline btn-sm" onClick={() => setShowGestionar(true)}>⚙ Gestionar Caja Chica</button>
+        </div>
+      </div>
 
       {loading ? (
-        <div className="flex justify-center py-16">
-          <div className="w-8 h-8 border-4 border-[#6B21A8] border-t-transparent rounded-full animate-spin" />
+        <div style={{ textAlign: 'center', padding: '48px 0' }}>
+          <div style={{ display: 'inline-block', width: 32, height: 32, border: '4px solid #6B21A8', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
         </div>
       ) : (
         <>
           {/* Tabs */}
-          <div className="flex border-b border-gray-200 mb-4 overflow-x-auto">
+          <div className="tabs" style={{ overflowX: 'auto', flexWrap: 'nowrap' }}>
             {AREA_TABS.map(tab => (
-              <button
+              <div
                 key={tab.id}
+                className={`tab${activeTab === tab.id ? ' active' : ''}`}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2.5 text-[13px] font-medium cursor-pointer border-b-2 -mb-px transition-all whitespace-nowrap
-                  ${activeTab === tab.id ? 'text-[#6B21A8] border-[#6B21A8]' : 'text-gray-500 border-transparent hover:text-gray-700'}`}
               >
                 {tab.label}
-              </button>
+              </div>
             ))}
           </div>
 
           {/* TAB: Tablero */}
           {activeTab === 'tablero' && (
-            <div className="space-y-4">
-              <div className="flex gap-3">
-                <MetricCard icon="💰" value="S/. 18,000" label="Total fondos asignados" />
-                <MetricCard icon="📤" value="S/. 6,430" label="Total gastado este mes" />
-                <MetricCard icon="📊" value="S/. 11,570" label="Saldo total disponible" />
-              </div>
-
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <table className="w-full text-[13px]">
-                  <thead>
-                    <tr className="bg-gray-50 border-b border-gray-200">
-                      {['Área', 'Responsable', 'Monto asignado S/.', 'Gastado mes S/.', 'Saldo disponible S/.', 'Estado', 'Reposición pendiente', 'Acciones'].map(h => (
-                        <th key={h} className="text-left px-4 py-3 font-semibold text-gray-600 text-[12px] whitespace-nowrap">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {TABLERO_ROWS.map((r, idx) => (
-                      <tr key={r.area} className={`border-b border-gray-100 hover:bg-gray-50 ${idx % 2 === 1 ? 'bg-gray-50/30' : ''}`}>
-                        <td className="px-4 py-3 font-medium text-[#1E1B4B]">{r.area}</td>
-                        <td className="px-4 py-3 text-gray-500">{r.responsable}</td>
-                        <td className="px-4 py-3 font-semibold">{r.asignado}</td>
-                        <td className="px-4 py-3 font-semibold text-red-600">{r.gastado}</td>
-                        <td className="px-4 py-3 font-semibold text-emerald-700">{r.saldo}</td>
-                        <td className="px-4 py-3">
-                          {r.estadoV === 'green' && <Badge variant="green">Al día</Badge>}
-                          {r.estadoV === 'yellow' && <Badge variant="yellow">Pendiente sustento</Badge>}
-                        </td>
-                        <td className="px-4 py-3 text-gray-500">{r.reposicion}</td>
-                        <td className="px-4 py-3">
-                          <Button variant="ghost" size="xs" onClick={() => setActiveTab(r.area)}>Ver detalle</Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                {/* Footer ejecución */}
-                <div className="px-4 py-3 border-t border-gray-100 bg-[#F8F6FB]">
-                  <div className="text-[12px] text-gray-600 mb-2">
-                    Ejecución presupuestal del mes: <span className="font-semibold text-[#1E1B4B]">{pctEjecucion}%</span>
-                    {' '}(S/. {totalGastado.toLocaleString()} / S/. {totalFondos.toLocaleString()})
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="h-2 rounded-full bg-[#6B21A8]" style={{ width: `${pctEjecucion}%` }} />
-                  </div>
+            <div>
+              <div className="metrics-row">
+                <div className="metric-card">
+                  <div className="metric-icon">💰</div>
+                  <div className="metric-value">S/. 18,000.00</div>
+                  <div className="metric-label">Total fondos asignados</div>
+                </div>
+                <div className="metric-card">
+                  <div className="metric-icon">📤</div>
+                  <div className="metric-value">S/. 6,430.00</div>
+                  <div className="metric-label">Total gastado este mes</div>
+                </div>
+                <div className="metric-card">
+                  <div className="metric-icon">📊</div>
+                  <div className="metric-value">S/. 11,570.00</div>
+                  <div className="metric-label">Saldo total disponible</div>
                 </div>
               </div>
 
-              <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-[12px] text-amber-700">
-                ⚠ Contabilidad aún está validando el formato estándar de registro. Este módulo está en versión preliminar — los campos pueden ajustarse.
+              <div className="card">
+                <div className="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Área</th>
+                        <th>Responsable</th>
+                        <th>Monto asignado S/.</th>
+                        <th>Gastado mes S/.</th>
+                        <th>Saldo disponible S/.</th>
+                        <th>Estado</th>
+                        <th>Reposición pendiente</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {TABLERO_ROWS.map(r => (
+                        <tr key={r.area}>
+                          <td>{r.area}</td>
+                          <td>{r.responsable}</td>
+                          <td>{r.asignado}</td>
+                          <td>{r.gastado}</td>
+                          <td>{r.saldo}</td>
+                          <td>
+                            {r.estadoV === 'green' && <span className="badge b-green">Al día</span>}
+                            {r.estadoV === 'red' && <span className="badge b-red">Pendiente sustento</span>}
+                          </td>
+                          <td>{r.reposicion}</td>
+                          <td>
+                            <button className="btn btn-gray btn-xs" onClick={() => setActiveTab(r.tab)}>Ver detalle</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="card-footer">
+                  <div className="text-sm fw-600 mb-8">Ejecución presupuestal del mes: 35.7% (S/. 6,430 / S/. 18,000)</div>
+                  <div className="prog-bar"><div className="prog-fill" style={{ width: '36%' }} /></div>
+                </div>
               </div>
+
+              <div className="banner banner-amber mt-12">⚠ Contabilidad aún está validando el formato estándar de registro. Este módulo está en versión preliminar — los campos pueden ajustarse.</div>
             </div>
           )}
 
           {/* Area tabs */}
-          {activeCaja && activeTab !== 'tablero' && (
-            <div className="space-y-4">
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                  <div className="text-[14px] font-bold text-[#1E1B4B]">{activeCaja.area}</div>
-                  <div className="text-[12px] text-gray-400">Responsable: {activeCaja.responsable}</div>
-                </div>
-
-                <div className="p-4">
-                  <div className="flex gap-3 mb-4">
-                    <MetricCard icon="💰" value={`S/. ${activeCaja.monto_asignado.toLocaleString()}`} label="Monto asignado" />
-                    <MetricCard icon="📤" value={`S/. ${activeCaja.gastado_mes.toLocaleString()}`} label="Gastado este mes" />
-                    <MetricCard icon="💵" value={`S/. ${(activeCaja.monto_asignado - activeCaja.gastado_mes).toLocaleString()}`} label="Saldo disponible" />
-                  </div>
-
-                  <div className="flex gap-2 mb-4">
-                    <Button size="sm" onClick={() => { setSelectedCaja(activeCaja); setShowRegistrarGasto(true) }}>+ Registrar Gasto</Button>
-                    <Button variant="outline" size="sm" onClick={() => { setSelectedCaja(activeCaja); setShowReposicion(true) }}>Solicitar Reposición</Button>
-                  </div>
-
-                  <div className="overflow-hidden rounded-lg border border-gray-200">
-                    <table className="w-full text-[13px]">
-                      <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200">
-                          {['Fecha', 'Descripción gasto', 'Comprobante', 'Monto S/.', 'Estado', 'Acciones'].map(h => (
-                            <th key={h} className="text-left px-4 py-3 font-semibold text-gray-600 text-[12px] whitespace-nowrap">{h}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {activeGastos.length === 0 && (
-                          <tr><td colSpan={6} className="text-center py-8 text-gray-400">Sin gastos registrados</td></tr>
-                        )}
-                        {activeGastos.map((g, idx) => (
-                          <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
-                            <td className="px-4 py-3 text-gray-500">{g.fecha}</td>
-                            <td className="px-4 py-3 text-[#1E1B4B]">{g.descripcion}</td>
-                            <td className="px-4 py-3 font-mono text-[12px] text-gray-500">{g.comprobante}</td>
-                            <td className="px-4 py-3 font-semibold">S/. {g.monto.toFixed(2)}</td>
-                            <td className="px-4 py-3">{gastoBadge(g.estado)}</td>
-                            <td className="px-4 py-3">
-                              <div className="flex gap-1.5">
-                                <Button variant="ghost" size="xs" onClick={() => { setSelectedGasto(g); setShowDetalleGasto(true) }}>Ver</Button>
-                                {g.estado === 'pendiente_sustento' && (
-                                  <Button variant="outline" size="xs" onClick={() => toast('Adjuntando comprobante...')}>Adjuntar</Button>
-                                )}
-                                {g.estado === 'observado' && (
-                                  <Button variant="outline" size="xs" onClick={() => toast('Subsanando observación...')}>Subsanar</Button>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+          {activeCaja && activeTab !== 'tablero' && activeMeta && (
+            <div>
+              <div className="page-header" style={{ marginBottom: 14 }}>
+                <div>
+                  <div className="page-title" style={{ fontSize: 17 }}>Caja Chica — {activeCaja.area}</div>
+                  <div className="page-subtitle">Responsable: {activeCaja.responsable}</div>
                 </div>
               </div>
+
+              <div className="metrics-row">
+                <div className="metric-card">
+                  <div className="metric-icon">💰</div>
+                  <div className="metric-value">{activeMeta.saldo}</div>
+                  <div className="metric-label">Saldo disponible</div>
+                </div>
+                <div className="metric-card">
+                  <div className="metric-icon">📤</div>
+                  <div className="metric-value">{activeMeta.gastado}</div>
+                  <div className="metric-label">Gastado este mes</div>
+                </div>
+                <div className="metric-card">
+                  <div className="metric-icon">⏳</div>
+                  <div className="metric-value">{activeMeta.reposiciones}</div>
+                  <div className="metric-label">Reposiciones pendientes</div>
+                </div>
+              </div>
+
+              <div className="card">
+                <div className="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Fecha</th>
+                        <th>Descripción gasto</th>
+                        <th>Comprobante</th>
+                        <th>Monto S/.</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {activeGastos.length === 0 && (
+                        <tr><td colSpan={6} style={{ textAlign: 'center', padding: '24px 0', color: '#9CA3AF' }}>Sin gastos registrados</td></tr>
+                      )}
+                      {activeGastos.map((g, idx) => (
+                        <tr key={idx}>
+                          <td>{g.fecha}</td>
+                          <td>{g.descripcion}</td>
+                          <td>{g.comprobante}</td>
+                          <td>S/. {g.monto.toFixed(2)}</td>
+                          <td>{gastoBadge(g.estado)}</td>
+                          <td>
+                            {g.estado === 'pendiente_sustento' ? (
+                              <div className="actions-cell">
+                                <button className="btn btn-gray btn-xs" onClick={() => { setSelectedGasto(g); setShowDetalleGasto(true) }}>Ver</button>
+                                <button className="btn btn-outline btn-xs" onClick={() => alert('Función de adjuntar disponible en producción')}>
+                                  {activeTab === 'Decanato' ? 'Adjuntar sustento' : 'Adjuntar'}
+                                </button>
+                              </div>
+                            ) : g.estado === 'observado' ? (
+                              <div className="actions-cell">
+                                <button className="btn btn-gray btn-xs" onClick={() => { setSelectedGasto(g); setShowDetalleGasto(true) }}>Ver</button>
+                                <button className="btn btn-outline btn-xs" onClick={() => alert('Iniciando subsanación...')}>Subsanar</button>
+                              </div>
+                            ) : (
+                              <button className="btn btn-gray btn-xs" onClick={() => { setSelectedGasto(g); setShowDetalleGasto(true) }}>Ver</button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {activeTab === 'Decanato' && (
+                  <div className="card-footer">
+                    <div className="flex-between">
+                      <span className="text-sm fw-600">Total registrado: S/. 250.00</span>
+                      <button className="btn btn-gray btn-sm" onClick={() => alert('Exportando a PDF...')}>📄 Exportar a PDF</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {activeTab === 'Decanato' && (
+                <div className="banner banner-amber mt-12">⚠ Contabilidad aún está validando el formato estándar de registro. Este módulo está en versión preliminar — los campos pueden ajustarse.</div>
+              )}
             </div>
           )}
         </>
       )}
 
-      {/* Modal Registrar Gasto */}
-      <Modal
-        open={showRegistrarGasto}
-        onClose={() => setShowRegistrarGasto(false)}
-        title={`Registrar Gasto — ${selectedCaja?.area ?? ''}`}
-        footer={
-          <>
-            <Button variant="gray" size="sm" onClick={() => setShowRegistrarGasto(false)}>Cancelar</Button>
-            <Button size="sm" onClick={handleRegistrarGasto} disabled={!formGasto.descripcion || !formGasto.monto || !formGasto.num_comprobante}>
-              💾 Guardar Gasto
-            </Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          {/* Fila: Fecha + Tipo comprobante */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Fecha del gasto</label>
-              <input
-                type="date"
-                value={formGasto.fecha}
-                onChange={e => setFormGasto(f => ({ ...f, fecha: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8]"
-              />
+      {/* ── Modal: Registrar Gasto ── */}
+      {showRegistrarGasto && (
+        <div className="modal-overlay" onClick={() => setShowRegistrarGasto(false)}>
+          <div className="modal-box" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}>
+            <div className="modal-hdr">
+              <span className="modal-title">Registrar Gasto — Caja Chica <span>{selectedCaja?.area ?? ''}</span></span>
+              <button className="modal-close" onClick={() => setShowRegistrarGasto(false)}>×</button>
             </div>
-            <div>
-              <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Tipo comprobante</label>
-              <select
-                value={formGasto.tipo_comprobante}
-                onChange={e => setFormGasto(f => ({ ...f, tipo_comprobante: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8]"
+            <div className="modal-body">
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Fecha del gasto <span className="req">*</span></label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={formGasto.fecha}
+                    onChange={e => setFormGasto(f => ({ ...f, fecha: e.target.value }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Tipo de comprobante <span className="req">*</span></label>
+                  <select
+                    className="form-control"
+                    value={formGasto.tipo_comprobante}
+                    onChange={e => setFormGasto(f => ({ ...f, tipo_comprobante: e.target.value }))}
+                  >
+                    <option>Boleta</option>
+                    <option>Factura</option>
+                    <option>Recibo</option>
+                    <option>Otro</option>
+                  </select>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Descripción del gasto <span className="req">*</span></label>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Ej: Útiles de oficina"
+                  value={formGasto.descripcion}
+                  onChange={e => setFormGasto(f => ({ ...f, descripcion: e.target.value }))}
+                />
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">N° de comprobante <span className="req">*</span></label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="RHH-2026-XXX"
+                    value={formGasto.num_comprobante}
+                    onChange={e => setFormGasto(f => ({ ...f, num_comprobante: e.target.value }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Proveedor / A favor de</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Nombre del proveedor"
+                    value={formGasto.proveedor}
+                    onChange={e => setFormGasto(f => ({ ...f, proveedor: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Monto (S/.) <span className="req">*</span></label>
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="0.00"
+                  value={formGasto.monto}
+                  onChange={e => setFormGasto(f => ({ ...f, monto: e.target.value }))}
+                />
+              </div>
+              {selectedCaja && (
+                <div className="saldo-dyn">
+                  Saldo actual: <strong>S/. {saldoActual.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</strong>
+                  {' '}→ Saldo tras guardar: <strong>S/. {saldoTras.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</strong>
+                </div>
+              )}
+              <div className="form-group mt-12">
+                <label className="form-label">Adjuntar comprobante <span className="req">*</span></label>
+                <div className="dropzone" onClick={() => alert('Función de carga disponible en producción')}>
+                  <div className="dropzone-icon">📎</div>
+                  <div>Arrastra el archivo o haz clic para seleccionar</div>
+                  <div className="dropzone-text">PDF, JPG, PNG — máx 5MB</div>
+                </div>
+              </div>
+              <div className="readonly-row">
+                <div className="readonly-item">
+                  <div className="lbl">Responsable</div>
+                  <div className="val">{selectedCaja?.responsable ?? '—'}</div>
+                </div>
+                <div className="readonly-item">
+                  <div className="lbl">Área</div>
+                  <div className="val">{selectedCaja?.area ?? '—'}</div>
+                </div>
+                <div className="readonly-item">
+                  <div className="lbl">Periodo</div>
+                  <div className="val">Marzo 2026</div>
+                </div>
+              </div>
+              <div className="h-divider" />
+              <div className="section-title-sm">FLUJO DE VALIDACIÓN</div>
+              <div className="banner banner-purple" style={{ fontSize: 12 }}>📋 Al guardar este gasto, el Jefe del Área deberá validarlo antes de que quede declarado.</div>
+              <div style={{ fontSize: 12, color: '#374151', marginTop: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <span className="step-circ pend" style={{ fontSize: 10, width: 22, height: 22, flexShrink: 0 }}>1</span>
+                  <span>Responsable registra el gasto</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span className="step-circ pend" style={{ fontSize: 10, width: 22, height: 22, flexShrink: 0 }}>2</span>
+                  <span>Jefe del Área valida y aprueba</span>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-gray" onClick={() => setShowRegistrarGasto(false)}>Cancelar</button>
+              <button
+                className="btn btn-primary"
+                onClick={handleRegistrarGasto}
+                disabled={!formGasto.descripcion || !formGasto.monto || !formGasto.num_comprobante}
               >
-                <option value="Boleta">Boleta</option>
-                <option value="Factura">Factura</option>
-                <option value="Recibo">Recibo</option>
-                <option value="Otro">Otro</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Descripción del gasto <span className="text-red-500">*</span></label>
-            <input
-              type="text"
-              value={formGasto.descripcion}
-              onChange={e => setFormGasto(f => ({ ...f, descripcion: e.target.value }))}
-              placeholder="Ej: Compra de útiles de escritorio..."
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8]"
-            />
-          </div>
-
-          {/* Fila: N° comprobante + Proveedor */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">N° de comprobante <span className="text-red-500">*</span></label>
-              <input
-                type="text"
-                value={formGasto.num_comprobante}
-                onChange={e => setFormGasto(f => ({ ...f, num_comprobante: e.target.value }))}
-                placeholder="001-00001"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8]"
-              />
-            </div>
-            <div>
-              <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Proveedor / A favor de</label>
-              <input
-                type="text"
-                value={formGasto.proveedor}
-                onChange={e => setFormGasto(f => ({ ...f, proveedor: e.target.value }))}
-                placeholder="Nombre del proveedor..."
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8]"
-              />
-            </div>
-          </div>
-
-          {/* Monto + saldo dinámico */}
-          <div>
-            <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Monto S/. <span className="text-red-500">*</span></label>
-            <input
-              type="number"
-              value={formGasto.monto}
-              onChange={e => setFormGasto(f => ({ ...f, monto: e.target.value }))}
-              placeholder="0.00"
-              min="0"
-              step="0.01"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#6B21A8]/30 focus:border-[#6B21A8]"
-            />
-            {selectedCaja && (
-              <div className="mt-2 bg-[#F8F6FB] border border-gray-200 rounded-lg px-3 py-2 text-[12px] text-gray-600 flex gap-4">
-                <span>Saldo actual: <strong className="text-emerald-700">S/. {(selectedCaja.monto_asignado - selectedCaja.gastado_mes).toLocaleString()}</strong></span>
-                <span>→</span>
-                <span>Saldo tras guardar: <strong className={parseFloat(formGasto.monto || '0') > (selectedCaja.monto_asignado - selectedCaja.gastado_mes) ? 'text-red-600' : 'text-[#6B21A8]'}>
-                  S/. {Math.max(0, (selectedCaja.monto_asignado - selectedCaja.gastado_mes) - parseFloat(formGasto.monto || '0')).toLocaleString()}
-                </strong></span>
-              </div>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-[12px] font-semibold text-gray-700 mb-1.5">Adjuntar comprobante</label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-5 text-center bg-gray-50 cursor-pointer hover:border-[#6B21A8] transition-colors">
-              <div className="text-[20px] mb-1">📎</div>
-              <div className="text-[13px] text-gray-500">Arrastrar o hacer clic para adjuntar comprobante</div>
-              <div className="text-[11px] text-gray-400 mt-1">PDF, JPG, PNG — máx. 5MB</div>
-            </div>
-          </div>
-
-          {/* Readonly: Responsable, Área, Periodo */}
-          <div className="grid grid-cols-3 gap-3 border-t border-gray-100 pt-3">
-            <div>
-              <label className="block text-[11px] font-semibold text-gray-400 uppercase mb-1">Responsable</label>
-              <input type="text" readOnly value={selectedCaja?.responsable ?? '—'} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[12px] bg-gray-50 text-gray-600" />
-            </div>
-            <div>
-              <label className="block text-[11px] font-semibold text-gray-400 uppercase mb-1">Área</label>
-              <input type="text" readOnly value={selectedCaja?.area ?? '—'} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[12px] bg-gray-50 text-gray-600" />
-            </div>
-            <div>
-              <label className="block text-[11px] font-semibold text-gray-400 uppercase mb-1">Periodo</label>
-              <input type="text" readOnly value="Marzo 2026" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[12px] bg-gray-50 text-gray-600" />
+                Guardar Gasto
+              </button>
             </div>
           </div>
         </div>
-      </Modal>
+      )}
 
-      {/* Modal Solicitar Reposición — confirmation */}
-      <Modal
-        open={showReposicion}
-        onClose={() => setShowReposicion(false)}
-        title=""
-        maxWidth="max-w-[400px]"
-        footer={
-          <div className="flex justify-center w-full">
-            <Button size="sm" onClick={() => setShowReposicion(false)}>Entendido</Button>
-          </div>
-        }
-      >
-        <div className="text-center space-y-4 py-2">
-          <div className="text-[48px]">📬</div>
-          <div className="text-[15px] font-bold text-[#1E1B4B]">Reposición solicitada</div>
-          <div className="text-[13px] text-gray-500">{selectedCaja?.area}</div>
-          <div className="bg-[#F5F3FF] rounded-lg px-6 py-4 mx-auto inline-block">
-            <div className="text-[20px] font-bold text-[#6B21A8] tracking-widest font-mono">REP-2026-001</div>
-          </div>
-          <div className="bg-teal-50 border border-teal-200 rounded-lg px-4 py-3 text-[12px] text-teal-700 text-left">
-            ✉ Se ha enviado una notificación al área de Contabilidad y al correo del responsable con el código de reposición.
-          </div>
-        </div>
-      </Modal>
-
-      {/* Modal Ver Detalle Gasto */}
-      <Modal
-        open={showDetalleGasto && !!selectedGasto}
-        onClose={() => { setShowDetalleGasto(false); setSelectedGasto(null) }}
-        title="Detalle del Gasto"
-        maxWidth="max-w-[420px]"
-        footer={<Button variant="gray" size="sm" onClick={() => { setShowDetalleGasto(false); setSelectedGasto(null) }}>Cerrar</Button>}
-      >
-        {selectedGasto && (
-          <div className="space-y-3">
-            {[
-              { label: 'Fecha', value: selectedGasto.fecha },
-              { label: 'Descripción', value: selectedGasto.descripcion },
-              { label: 'Comprobante', value: selectedGasto.comprobante },
-              { label: 'Monto S/.', value: `S/. ${selectedGasto.monto.toFixed(2)}` },
-              { label: 'Área', value: activeCaja?.area ?? '—' },
-            ].map(({ label, value }) => (
-              <div key={label} className="flex justify-between text-[13px]">
-                <span className="text-gray-500 font-medium">{label}</span>
-                <span className="text-[#1E1B4B] font-semibold">{value}</span>
+      {/* ── Modal: Solicitar Reposición ── */}
+      {showReposicion && (
+        <div className="modal-overlay" onClick={() => setShowReposicion(false)}>
+          <div className="modal-box" style={{ maxWidth: 420 }} onClick={e => e.stopPropagation()}>
+            <div className="modal-hdr">
+              <div className="modal-title">Solicitar Reposición</div>
+              <button className="modal-close" onClick={() => setShowReposicion(false)}>×</button>
+            </div>
+            <div className="modal-body" style={{ textAlign: 'center', padding: '24px 20px' }}>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>📬</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: '#1E1B4B', marginBottom: 8 }}>Reposición solicitada</div>
+              <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 16 }}>{selectedCaja?.area}</div>
+              <div style={{ background: '#F5F3FF', borderRadius: 8, padding: 14, marginBottom: 16 }}>
+                <div className="text-xs text-gray mb-8">Código de solicitud</div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: '#6B21A8', letterSpacing: 2 }}>REP-2026-001</div>
               </div>
-            ))}
-            <div className="flex justify-between text-[13px] items-center">
-              <span className="text-gray-500 font-medium">Estado</span>
-              {gastoBadge(selectedGasto.estado)}
+              <div className="banner banner-teal" style={{ textAlign: 'left' }}>✉ Se ha enviado una notificación al área de Contabilidad y al correo del responsable con el código de reposición.</div>
+            </div>
+            <div className="modal-footer" style={{ justifyContent: 'center' }}>
+              <button className="btn btn-primary btn-sm" onClick={() => setShowReposicion(false)}>Entendido</button>
             </div>
           </div>
-        )}
-      </Modal>
+        </div>
+      )}
 
-      <Toast message={toastState.message} show={toastState.show} onHide={hideToast} />
+      {/* ── Modal: Ver Detalle Gasto ── */}
+      {showDetalleGasto && selectedGasto && (
+        <div className="modal-overlay" onClick={() => { setShowDetalleGasto(false); setSelectedGasto(null) }}>
+          <div className="modal-box" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}>
+            <div className="modal-hdr">
+              <div>
+                <div className="modal-title">Detalle de Gasto</div>
+                <div className="modal-subtitle">{activeCaja?.area}</div>
+              </div>
+              <button className="modal-close" onClick={() => { setShowDetalleGasto(false); setSelectedGasto(null) }}>×</button>
+            </div>
+            <div className="modal-body">
+              <div className="mb-12">{gastoBadge(selectedGasto.estado)}</div>
+              <div className="section-title-sm">DATOS DEL GASTO</div>
+              <div className="bien-detail-grid">
+                <div>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 2 }}>Fecha</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>{selectedGasto.fecha}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 2 }}>Comprobante</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>{selectedGasto.comprobante}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 2 }}>Monto S/.</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>S/. {selectedGasto.monto.toFixed(2)}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 2 }}>Área</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>{activeCaja?.area ?? '—'}</div>
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 2 }}>Descripción</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>{selectedGasto.descripcion}</div>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-gray btn-sm" onClick={() => { setShowDetalleGasto(false); setSelectedGasto(null) }}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: Gestionar Caja Chica ── */}
+      {showGestionar && (
+        <div className="modal-overlay" onClick={() => setShowGestionar(false)}>
+          <div className="modal-box" style={{ maxWidth: 780 }} onClick={e => e.stopPropagation()}>
+            <div className="modal-hdr">
+              <div>
+                <span className="modal-title">Gestionar Responsables — Caja Chica CMP</span>
+                <div className="modal-subtitle">Administración de responsables, gastos y reposiciones</div>
+              </div>
+              <button className="modal-close" onClick={() => setShowGestionar(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <div className="modal-tabs" style={{ marginTop: -4 }}>
+                <div className={`modal-tab${gestionarTab === 'responsables' ? ' active' : ''}`} onClick={() => setGestionarTab('responsables')}>👥 Responsables</div>
+                <div className={`modal-tab${gestionarTab === 'gastos' ? ' active' : ''}`} onClick={() => setGestionarTab('gastos')}>📋 Registro de Gastos</div>
+                <div className={`modal-tab${gestionarTab === 'reposiciones' ? ' active' : ''}`} onClick={() => setGestionarTab('reposiciones')}>🔄 Reposiciones</div>
+              </div>
+
+              {/* Pane: Responsables */}
+              {gestionarTab === 'responsables' && (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
+                    <button className="btn btn-primary btn-sm" onClick={() => alert('Formulario de nuevo responsable disponible en producción')}>+ Nuevo Responsable</button>
+                  </div>
+                  <div className="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Área</th>
+                          <th>SubÁrea</th>
+                          <th>Responsable</th>
+                          <th>Monto Asignado</th>
+                          <th>Gasto Mes</th>
+                          <th>Saldo Disponible</th>
+                          <th>Estado</th>
+                          <th>Reposición</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr><td>SEC. DE ECONOMIA Y FINANZAS</td><td>UN. DE FINANZAS</td><td className="fw-600">María Torres H.</td><td>S/. 3,000</td><td>S/. 1,200</td><td>S/. 1,800</td><td><span className="badge b-green">Al día</span></td><td className="text-gray">—</td></tr>
+                        <tr><td>SEC. DE ADMINISTRACION</td><td>UN. DE ADMINISTRACION</td><td className="fw-600">Lizzetti Díaz E.</td><td>S/. 4,000</td><td>S/. 2,100</td><td>S/. 1,900</td><td><span className="badge b-green">Al día</span></td><td className="text-gray">—</td></tr>
+                        <tr><td>UN. DE ADMINISTRACION</td><td>UN. DE ADMINISTRACION</td><td className="fw-600">Pedro Salas Q.</td><td>S/. 2,000</td><td>S/. 980</td><td>S/. 1,020</td><td><span className="badge b-green">Al día</span></td><td className="text-gray">—</td></tr>
+                        <tr><td>FONDO DE BIEN.SOCIAL DEL MED.</td><td>FOSEMED</td><td className="fw-600">Carmen Vega R.</td><td>S/. 3,500</td><td>S/. 850</td><td>S/. 2,650</td><td><span className="badge b-green">Al día</span></td><td className="text-gray">—</td></tr>
+                        <tr><td>SEMEFA</td><td>SEMEFA</td><td className="fw-600">Jorge Lima C.</td><td>S/. 2,500</td><td>S/. 1,050</td><td>S/. 1,450</td><td><span className="badge b-green">Al día</span></td><td className="text-gray">—</td></tr>
+                        <tr><td>DECANATO</td><td>DECANATO</td><td className="fw-600">Aaron Nuñez M.</td><td>S/. 3,000</td><td>S/. 250</td><td>S/. 2,750</td><td><span className="badge b-red">Pendiente sustento</span></td><td><span className="badge b-amber">Sí</span></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Pane: Registro de Gastos */}
+              {gestionarTab === 'gastos' && (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
+                    <button className="btn btn-primary btn-sm" onClick={() => { setShowGestionar(false); setSelectedCaja(cajas.find(c => c.area === 'Decanato') ?? null); setShowRegistrarGasto(true) }}>+ Registrar Gasto</button>
+                  </div>
+                  <div className="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Área</th>
+                          <th>Fecha</th>
+                          <th>Descripción</th>
+                          <th>Comprobante</th>
+                          <th>Monto S/.</th>
+                          <th>Estado</th>
+                          <th>Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr><td>SEC. DE ECONOMIA Y FINANZAS</td><td>15/03/2026</td><td>Servicio de courier</td><td>FAC-001-00892</td><td>S/. 180.00</td><td><span className="badge b-green">Declarado</span></td><td><button className="btn btn-gray btn-xs">Ver</button></td></tr>
+                        <tr><td>SEC. DE ECONOMIA Y FINANZAS</td><td>12/03/2026</td><td>Material de impresión</td><td>BOL-001-01203</td><td>S/. 95.00</td><td><span className="badge b-green">Declarado</span></td><td><button className="btn btn-gray btn-xs">Ver</button></td></tr>
+                        <tr><td>SEC. DE ADMINISTRACION</td><td>20/03/2026</td><td>Útiles de escritorio</td><td>FAC-001-02341</td><td>S/. 320.00</td><td><span className="badge b-green">Declarado</span></td><td><button className="btn btn-gray btn-xs">Ver</button></td></tr>
+                        <tr><td>SEC. DE ADMINISTRACION</td><td>14/03/2026</td><td>Refrigerio reunión directiva</td><td>BOL-001-00698</td><td>S/. 210.00</td><td><span className="badge b-yellow">Observado</span></td><td><button className="btn btn-gray btn-xs">Ver</button></td></tr>
+                        <tr><td>DECANATO</td><td>20/03/2026</td><td>Útiles de oficina</td><td>RHH-2026-001</td><td>S/. 85.00</td><td><span className="badge b-green">Declarado</span></td><td><button className="btn btn-gray btn-xs">Ver</button></td></tr>
+                        <tr><td>DECANATO</td><td>15/03/2026</td><td>Refrigerio reunión</td><td>RHH-2026-003</td><td>S/. 165.00</td><td><span className="badge b-red">Pendiente sustento</span></td><td><button className="btn btn-gray btn-xs">Ver</button></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Pane: Reposiciones */}
+              {gestionarTab === 'reposiciones' && (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <span className="text-xs text-gray">Selecciona un registro para habilitar la acción</span>
+                    <button className="btn btn-primary btn-sm" disabled>Solicitar Reposición</button>
+                  </div>
+                  <div className="section-title-sm">REGISTRO DE REPOSICIONES</div>
+                  <div className="table-wrap">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th style={{ width: 32 }}></th>
+                          <th>N° Rep.</th>
+                          <th>Área</th>
+                          <th>Responsable</th>
+                          <th>Monto S/.</th>
+                          <th>Fecha Solicitud</th>
+                          <th>Estado Flujo</th>
+                          <th>Aprobaciones</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr style={{ cursor: 'pointer' }}>
+                          <td><input type="radio" name="rep-sel" style={{ accentColor: '#6B21A8' }} /></td>
+                          <td className="fw-600">REP-2026-001</td><td>DECANATO</td><td>Aaron Nuñez M.</td><td>S/. 3,000</td><td>01/03/2026</td><td><span className="badge b-green">Aprobada</span></td><td>Contabilidad ✔</td>
+                        </tr>
+                        <tr style={{ cursor: 'pointer' }}>
+                          <td><input type="radio" name="rep-sel" style={{ accentColor: '#6B21A8' }} /></td>
+                          <td className="fw-600">REP-2026-002</td><td>SEC. DE ADMINISTRACION</td><td>Lizzetti Díaz E.</td><td>S/. 2,100</td><td>08/03/2026</td><td><span className="badge b-green">Aprobada</span></td><td>Contabilidad ✔</td>
+                        </tr>
+                        <tr style={{ cursor: 'pointer' }}>
+                          <td><input type="radio" name="rep-sel" style={{ accentColor: '#6B21A8' }} /></td>
+                          <td className="fw-600">REP-2026-003</td><td>SEMEFA</td><td>Jorge Lima C.</td><td>S/. 1,200</td><td>15/03/2026</td><td><span className="badge b-yellow">En revisión</span></td><td>Jefe Área ⏳</td>
+                        </tr>
+                        <tr style={{ cursor: 'pointer' }}>
+                          <td><input type="radio" name="rep-sel" style={{ accentColor: '#6B21A8' }} /></td>
+                          <td className="fw-600">REP-2026-004</td><td>FONDO DE BIEN.SOCIAL DEL MED.</td><td>Carmen Vega R.</td><td>S/. 900</td><td>20/03/2026</td><td><span className="badge b-red">Pendiente V°B°</span></td><td>Jefe Área ○</td>
+                        </tr>
+                        <tr style={{ cursor: 'pointer' }}>
+                          <td><input type="radio" name="rep-sel" style={{ accentColor: '#6B21A8' }} /></td>
+                          <td className="fw-600">REP-2026-005</td><td>SEC. DE ECONOMIA Y FINANZAS</td><td>María Torres H.</td><td>S/. 1,800</td><td>22/03/2026</td><td><span className="badge b-yellow">En revisión</span></td><td>Contabilidad ⏳</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-gray" onClick={() => setShowGestionar(false)}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

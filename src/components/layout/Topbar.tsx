@@ -1,4 +1,3 @@
-import { Bell, LogOut } from 'lucide-react'
 import { useAuth } from '../../lib/auth'
 import { useNavigate } from 'react-router-dom'
 
@@ -16,9 +15,9 @@ export function Topbar() {
 
   const nombreCorto = profile
     ? profile.nombres.split(' ')[0].toUpperCase() + ' ' + profile.apellidos.split(' ')[0].toUpperCase()
-    : 'USUARIO'
-  const rol = profile ? (ROL_LABEL[profile.rol] ?? profile.rol) : ''
-  const initials = profile?.avatar_initials ?? 'U'
+    : '—'
+  const rol = profile ? (ROL_LABEL[profile.rol] ?? profile.rol) : '—'
+  const initials = profile?.avatar_initials ?? '—'
 
   async function handleSignOut() {
     await signOut()
@@ -26,23 +25,23 @@ export function Topbar() {
   }
 
   return (
-    <header className="bg-[#6B21A8] h-14 flex items-center px-5 gap-3 flex-shrink-0">
-      <span className="text-white font-bold text-[15px] tracking-[1.5px] flex-1">INTRANET</span>
-      <Bell size={18} className="text-white/80 cursor-pointer" />
-      <div className="w-px h-6 bg-white/20" />
-      <div className="text-right">
-        <div className="text-white/90 text-[12px] font-semibold leading-tight">{nombreCorto}</div>
-        <div className="text-white/60 text-[11px]">{rol}</div>
+    <header className="topbar">
+      <span className="topbar-title">INTRANET</span>
+      <span className="topbar-icon">🔔</span>
+      <div className="topbar-divider" />
+      <div className="topbar-userinfo">
+        <div className="topbar-name">{nombreCorto}</div>
+        <div className="topbar-role">{rol}</div>
       </div>
-      <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white text-[12px] font-semibold flex-shrink-0">
-        {initials}
-      </div>
+      <div className="topbar-avatar">{initials}</div>
       <button
         onClick={handleSignOut}
         title="Cerrar sesión"
-        className="text-white/70 hover:text-white transition-colors ml-1"
+        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,.7)', fontSize: 16, padding: '4px 6px', borderRadius: 6, marginLeft: 4, transition: 'color .15s' }}
+        onMouseOver={e => ((e.currentTarget as HTMLElement).style.color = 'white')}
+        onMouseOut={e => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,.7)')}
       >
-        <LogOut size={16} />
+        ⏏
       </button>
     </header>
   )
