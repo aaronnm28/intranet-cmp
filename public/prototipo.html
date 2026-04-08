@@ -5856,10 +5856,12 @@ function cmpLogout() {
 }
 
 (function initAuth() {
+  // Si se abre directamente como archivo (file://) carga en modo demo sin auth
+  const isLocal = window.location.protocol === 'file:';
   const raw = localStorage.getItem('cmp_session');
-  if (!raw) { window.location.href = '/login'; return; }
+  if (!raw && !isLocal) { window.location.href = '/login'; return; }
   try {
-    const u = JSON.parse(raw);
+    const u = raw ? JSON.parse(raw) : { nombres: 'Demo', apellidos: 'Usuario', rol: 'admin', area: 'CMP' };
     const tbName = document.getElementById('tb-name');
     const tbRole = document.getElementById('tb-role');
     const tbAvatar = document.getElementById('tb-avatar');
@@ -5869,7 +5871,7 @@ function cmpLogout() {
     if (tbName) tbName.textContent = nombre;
     if (tbRole) tbRole.textContent = rol;
     if (tbAvatar) tbAvatar.textContent = initials;
-  } catch { window.location.href = '/login'; }
+  } catch { if (!isLocal) window.location.href = '/login'; }
 })();
 
 // Init: show result for default DNI
