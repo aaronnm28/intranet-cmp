@@ -431,7 +431,7 @@ export function PrestamosAdelantos() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span className="text-xs text-gray fw-600">FECHA:</span>
-                  <input type="date" className="form-input" defaultValue="2026-03-26" style={{ width: 140, padding: '4px 8px', fontSize: 12 }} />
+                  <input type="date" className="form-control" defaultValue="2026-03-26" style={{ width: 140, padding: '4px 8px', fontSize: 12 }} />
                 </div>
                 <button className="modal-close" onClick={() => setShowNueva(false)}>×</button>
               </div>
@@ -499,7 +499,7 @@ export function PrestamosAdelantos() {
                   <div className="form-row">
                     <div className="form-group">
                       <label className="form-label">Motivo de préstamo <span className="req">*</span></label>
-                      <select className="form-select" value={motivoSolicitud} onChange={e => setMotivoSolicitud(e.target.value)}>
+                      <select className="form-control" value={motivoSolicitud} onChange={e => setMotivoSolicitud(e.target.value)}>
                         <option value="">Seleccionar...</option>
                         <option>Salud</option>
                         <option>Educación</option>
@@ -513,7 +513,7 @@ export function PrestamosAdelantos() {
                       <label className="form-label">Monto solicitado (S/.) <span className="req">*</span></label>
                       <input
                         type="number"
-                        className="form-input"
+                        className="form-control"
                         placeholder="0.00"
                         value={montoSolicitud}
                         onChange={e => setMontoSolicitud(e.target.value)}
@@ -525,14 +525,14 @@ export function PrestamosAdelantos() {
                       <label className="form-label">Inicio de Descuento <span className="req">*</span></label>
                       <input
                         type="month"
-                        className="form-input"
+                        className="form-control"
                         value={inicioDescuento}
                         onChange={e => setInicioDescuento(e.target.value)}
                       />
                     </div>
                     <div className="form-group">
                       <label className="form-label">Término de Descuento</label>
-                      <input type="month" className="form-input" readOnly value={
+                      <input type="month" className="form-control" readOnly value={
                         inicioDescuento && numCuotas && parseInt(numCuotas) > 0
                           ? (() => {
                               const [y, m] = inicioDescuento.split('-').map(Number)
@@ -546,7 +546,7 @@ export function PrestamosAdelantos() {
                       <label className="form-label">N° de Cuotas <span className="req">*</span></label>
                       <input
                         type="number"
-                        className="form-input"
+                        className="form-control"
                         min={1}
                         max={12}
                         placeholder="1-12"
@@ -581,7 +581,7 @@ export function PrestamosAdelantos() {
                   <div className="form-row">
                     <div className="form-group">
                       <label className="form-label">Motivo de adelanto <span className="req">*</span></label>
-                      <select className="form-select" value={motivoSolicitud} onChange={e => setMotivoSolicitud(e.target.value)}>
+                      <select className="form-control" value={motivoSolicitud} onChange={e => setMotivoSolicitud(e.target.value)}>
                         <option value="">Seleccionar...</option>
                         <option>Salud</option>
                         <option>Educación</option>
@@ -595,7 +595,7 @@ export function PrestamosAdelantos() {
                       <label className="form-label">Monto solicitado (S/.) <span className="req">*</span></label>
                       <input
                         type="number"
-                        className="form-input"
+                        className="form-control"
                         placeholder="0.00"
                         value={montoSolicitud}
                         onChange={e => setMontoSolicitud(e.target.value)}
@@ -606,7 +606,7 @@ export function PrestamosAdelantos() {
                     <label className="form-label">Mes de Descuento <span className="req">*</span></label>
                     <input
                       type="month"
-                      className="form-input"
+                      className="form-control"
                       style={{ maxWidth: 200 }}
                       value={mesDescuentoAdelanto}
                       onChange={e => setMesDescuentoAdelanto(e.target.value)}
@@ -628,7 +628,7 @@ export function PrestamosAdelantos() {
               <div className="form-group">
                 <label className="form-label">Descripción del sustento</label>
                 <textarea
-                  className="form-input"
+                  className="form-control"
                   rows={2}
                   placeholder="Explica brevemente los documentos adjuntos (opcional)..."
                   value={justificacionSolicitud}
