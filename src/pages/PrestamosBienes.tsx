@@ -22,6 +22,59 @@ const BIENES_DISPONIBLES_PRESTAMO = [
   { id: '3', nombre: 'Tablet Samsung Tab S7',    codigo: 'CMP-038399', disponibles: 1 },
 ]
 
+type FlujoStep = { paso: string; icono: string; cargo: string; status: 'done'|'active'|'pending'; fecha: string; firmante: string; firmante2?: string; activeLabel?: string }
+interface PrestamoBienDetalle {
+  n: string; bien: string; marca: string; modelo: string; id_bien: string; qr: string
+  fechaSolicitud: string; fechaEntrega: string; fechaDevPactada: string; fechaDevReal: string
+  estadoEntrega: string; estado: string; estadoCls: string; colaborador: string; area: string
+  motivo: string; direccion: string; obs: string|null; flujo: FlujoStep[]
+}
+
+const PRESTAMOS_DATA: Record<string, PrestamoBienDetalle> = {
+  'PREST-2026-001': {
+    n:'PREST-2026-001', bien:'Laptop HP Pavilion', marca:'HP', modelo:'Pavilion 15', id_bien:'111025',
+    qr:'CMP-038390', fechaSolicitud:'05/03/2026', fechaEntrega:'06/03/2026', fechaDevPactada:'12/03/2026',
+    fechaDevReal:'12/03/2026', estadoEntrega:'Bueno', estado:'Devuelto — conforme',
+    estadoCls:'b-green', colaborador:'Aaron Samuel Nuñez Muñoz', area:'UN. DE TI', motivo:'Uso en evento externo',
+    direccion:'Av. Los Álamos 342, Miraflores', obs:null,
+    flujo:[
+      {paso:'Solicitud registrada', icono:'📋', cargo:'Colaborador — UN. DE TI', status:'done', fecha:'05/03/2026', firmante:'Aaron N.'},
+      {paso:'V°B° Jefe UN. DE TI', icono:'✔', cargo:'Roberto Limas — Jefe UN. DE TI', status:'done', fecha:'05/03/2026', firmante:'R. Limas'},
+      {paso:'Entrega del bien por Administración', icono:'📦', cargo:'Lizzetti Díaz — Sec. Administración', status:'done', fecha:'06/03/2026', firmante:'L. Díaz'},
+      {paso:'Recepción — firma del colaborador', icono:'🖊', cargo:'Aaron Samuel Nuñez Muñoz — UN. DE TI', status:'done', fecha:'06/03/2026', firmante:'Aaron N.'},
+      {paso:'Devolución del bien', icono:'📥', cargo:'Aaron Samuel Nuñez Muñoz — UN. DE TI', status:'done', fecha:'12/03/2026', firmante:'Aaron N.', firmante2:'L. Díaz — Administración confirmó'}
+    ]
+  },
+  'PREST-2026-002': {
+    n:'PREST-2026-002', bien:'Proyector Epson EB-X41', marca:'Epson', modelo:'EB-X41', id_bien:'111028',
+    qr:'CMP-038398', fechaSolicitud:'18/03/2026', fechaEntrega:'18/03/2026', fechaDevPactada:'25/03/2026',
+    fechaDevReal:'—', estadoEntrega:'Bueno', estado:'En préstamo',
+    estadoCls:'b-blue', colaborador:'Aaron Samuel Nuñez Muñoz', area:'UN. DE TI', motivo:'Presentación institucional',
+    direccion:'Jr. Huancavelica 472, Of. 301, Lima Centro', obs:null,
+    flujo:[
+      {paso:'Solicitud registrada', icono:'📋', cargo:'Colaborador — UN. DE TI', status:'done', fecha:'18/03/2026', firmante:'Aaron N.'},
+      {paso:'V°B° Jefe UN. DE TI', icono:'✔', cargo:'Roberto Limas — Jefe UN. DE TI', status:'done', fecha:'18/03/2026', firmante:'R. Limas'},
+      {paso:'Entrega del bien por Administración', icono:'📦', cargo:'Lizzetti Díaz — Sec. Administración', status:'done', fecha:'18/03/2026', firmante:'L. Díaz'},
+      {paso:'Recepción — firma del colaborador', icono:'🖊', cargo:'Aaron Samuel Nuñez Muñoz — UN. DE TI', status:'done', fecha:'18/03/2026', firmante:'Aaron N.'},
+      {paso:'Devolución del bien', icono:'📥', cargo:'Aaron Samuel Nuñez Muñoz — UN. DE TI', status:'active', fecha:'—', firmante:'', activeLabel:'Pendiente — firmar al devolver el bien'}
+    ]
+  },
+  'PREST-2026-003': {
+    n:'PREST-2026-003', bien:'Tablet Samsung Tab S7', marca:'Samsung', modelo:'Tab S7', id_bien:'111029',
+    qr:'CMP-038399', fechaSolicitud:'22/03/2026', fechaEntrega:'—', fechaDevPactada:'29/03/2026',
+    fechaDevReal:'—', estadoEntrega:'—', estado:'Pendiente aprobación',
+    estadoCls:'b-yellow', colaborador:'Aaron Samuel Nuñez Muñoz', area:'UN. DE TI', motivo:'Capacitación externa',
+    direccion:'Av. La Marina 2000, San Miguel', obs:null,
+    flujo:[
+      {paso:'Solicitud registrada', icono:'📋', cargo:'Colaborador — UN. DE TI', status:'done', fecha:'22/03/2026', firmante:'Aaron N.'},
+      {paso:'V°B° Jefe UN. DE TI', icono:'✔', cargo:'Roberto Limas — Jefe UN. DE TI', status:'active', fecha:'—', firmante:'', activeLabel:'Pendiente aprobación del Jefe TI'},
+      {paso:'Entrega del bien por Administración', icono:'📦', cargo:'Lizzetti Díaz — Sec. Administración', status:'pending', fecha:'—', firmante:''},
+      {paso:'Recepción — firma del colaborador', icono:'🖊', cargo:'Aaron Samuel Nuñez Muñoz — UN. DE TI', status:'pending', fecha:'—', firmante:''},
+      {paso:'Devolución del bien', icono:'📥', cargo:'Aaron Samuel Nuñez Muñoz — UN. DE TI', status:'pending', fecha:'—', firmante:''}
+    ]
+  }
+}
+
 function estadoBadge(estado: string) {
   if (estado === 'devuelto_conforme') return <span className="badge b-green">Devuelto — conforme</span>
   if (estado === 'en_prestamo')       return <span className="badge b-blue">En préstamo</span>
@@ -37,19 +90,6 @@ function diffDays(a: string, b: string): number {
   return Math.round((db.getTime() - da.getTime()) / (1000 * 60 * 60 * 24))
 }
 
-function stepperForPrestamo(estado: string) {
-  if (estado === 'devuelto_conforme') {
-    return { s: 'done', a: 'done', p: 'done', d: 'done' }
-  }
-  if (estado === 'en_prestamo') {
-    return { s: 'done', a: 'done', p: 'cur', d: 'pend' }
-  }
-  return { s: 'done', a: 'cur', p: 'pend', d: 'pend' }
-}
-
-function stepCirc(type: string, icon: string) {
-  return <div className={`step-circ ${type}`}>{icon}</div>
-}
 
 export function PrestamosBienes() {
   const [data, setData]                   = useState<PrestamoBienRow[]>([])
@@ -142,8 +182,6 @@ export function PrestamosBienes() {
     { title: 'V°B° Administración',   name: 'Lizzetti Díaz E.' },
   ]
 
-  const st = selected ? stepperForPrestamo(selected.estado) : null
-
   return (
     <div>
       {/* ── Breadcrumb ── */}
@@ -234,7 +272,7 @@ export function PrestamosBienes() {
                 <div className="form-group" style={{ flex: 2 }}>
                   <label className="form-label">Bien solicitado <span className="req">*</span></label>
                   <select
-                    className="form-select"
+                    className="form-control"
                     value={form.bien_id}
                     onChange={e => handleBienSelect(e.target.value)}
                   >
@@ -249,7 +287,7 @@ export function PrestamosBienes() {
                   <label className="form-label">Código inventariado</label>
                   <input
                     type="text"
-                    className="form-input"
+                    className="form-control"
                     readOnly
                     value={form.codigo}
                     placeholder="Auto-completado"
@@ -267,7 +305,7 @@ export function PrestamosBienes() {
                   <label className="form-label">Fecha de préstamo <span className="req">*</span></label>
                   <input
                     type="date"
-                    className="form-input"
+                    className="form-control"
                     value={form.fecha_prestamo}
                     onChange={e => setForm(f => ({ ...f, fecha_prestamo: e.target.value }))}
                   />
@@ -276,7 +314,7 @@ export function PrestamosBienes() {
                   <label className="form-label">Fecha estimada de devolución <span className="req">*</span></label>
                   <input
                     type="date"
-                    className="form-input"
+                    className="form-control"
                     value={form.fecha_devolucion}
                     onChange={e => setForm(f => ({ ...f, fecha_devolucion: e.target.value }))}
                   />
@@ -294,7 +332,7 @@ export function PrestamosBienes() {
                 <label className="form-label">Dirección donde se llevará el bien <span className="req">*</span></label>
                 <input
                   type="text"
-                  className="form-input"
+                  className="form-control"
                   value={form.direccion}
                   onChange={e => setForm(f => ({ ...f, direccion: e.target.value }))}
                   placeholder="Ej: Av. Los Álamos 342, Miraflores — domicilio trabajo remoto"
@@ -303,7 +341,7 @@ export function PrestamosBienes() {
               <div className="form-group">
                 <label className="form-label">Motivo del préstamo <span className="req">*</span></label>
                 <textarea
-                  className="form-input"
+                  className="form-control"
                   value={form.motivo}
                   onChange={e => setForm(f => ({ ...f, motivo: e.target.value }))}
                   rows={2}
@@ -316,7 +354,7 @@ export function PrestamosBienes() {
                 <label className="form-label">Jefe de área aprobador</label>
                 <input
                   type="text"
-                  className="form-input"
+                  className="form-control"
                   readOnly
                   value="Roberto Limas — Jefe TI (pre-asignado)"
                   style={{ background: '#F9FAFB' }}
@@ -400,73 +438,119 @@ export function PrestamosBienes() {
       {/* ════════════════════════════════════════════
           MODAL — Detalle Préstamo Bien Tecnológico
           ════════════════════════════════════════════ */}
-      {showDetalle && selected && (
-        <div className="modal-overlay" style={{ display: 'flex' }} onClick={() => setShowDetalle(false)}>
-          <div className="modal-box" style={{ maxWidth: 600 }} onClick={e => e.stopPropagation()}>
-            <div className="modal-hdr">
-              <div>
-                <span>Préstamo — {selected.bien}</span>
-                <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{selected.numero} · {selected.fecha_solicitud}</div>
-              </div>
-              <button className="modal-close" onClick={() => setShowDetalle(false)}>✕</button>
-            </div>
-            <div className="modal-body">
-
-              {/* Estado + N° */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
-                {estadoBadge(selected.estado)}
-                <span className="text-xs text-gray fw-600">{selected.numero}</span>
-              </div>
-
-              {/* Datos del registro */}
-              <div className="inv-grid" style={{ marginBottom: 16 }}>
-                <div className="inv-field"><div className="lbl">N° Préstamo</div><div className="val fw-600">{selected.numero}</div></div>
-                <div className="inv-field"><div className="lbl">Bien</div><div className="val">{selected.bien}</div></div>
-                <div className="inv-field"><div className="lbl">Fecha solicitud</div><div className="val">{selected.fecha_solicitud}</div></div>
-                <div className="inv-field"><div className="lbl">Dev. pactada</div><div className="val">{selected.fecha_devolucion}</div></div>
-              </div>
-
-              {/* Flujo del proceso — stepper */}
-              <div className="section-title-sm" style={{ marginTop: 4 }}>FLUJO DEL PROCESO</div>
-              {st && (
-                <div className="stepper" style={{ marginBottom: 16 }}>
-                  <div className="step">
-                    {stepCirc(st.s, st.s === 'done' ? '✔' : st.s === 'cur' ? '⏳' : '○')}
-                    <span className={`step-lbl ${st.s}`}>Solicitud</span>
-                  </div>
-                  <div className={`step-conn${st.s === 'done' ? ' done' : ''}`}></div>
-                  <div className="step">
-                    {stepCirc(st.a, st.a === 'done' ? '✔' : st.a === 'cur' ? '⏳' : '○')}
-                    <span className={`step-lbl ${st.a}`}>Aprobación</span>
-                  </div>
-                  <div className={`step-conn${st.a === 'done' ? ' done' : ''}`}></div>
-                  <div className="step">
-                    {stepCirc(st.p, st.p === 'done' ? '✔' : st.p === 'cur' ? '⏳' : '○')}
-                    <span className={`step-lbl ${st.p}`}>En préstamo</span>
-                  </div>
-                  <div className={`step-conn${st.p === 'done' ? ' done' : ''}`}></div>
-                  <div className="step">
-                    {stepCirc(st.d, st.d === 'done' ? '✔' : st.d === 'cur' ? '⏳' : '○')}
-                    <span className={`step-lbl ${st.d}`}>Devolución</span>
-                  </div>
+      {showDetalle && selected && (() => {
+        const d = PRESTAMOS_DATA[selected.numero]
+        return (
+          <div className="modal-overlay" onClick={() => setShowDetalle(false)}>
+            <div className="modal-box" style={{ maxWidth: 600, maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+              <div className="modal-hdr">
+                <div>
+                  <span className="modal-title">Préstamo — {selected.bien}</span>
+                  <div className="modal-subtitle" style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{selected.numero} · {selected.fecha_solicitud}</div>
                 </div>
-              )}
-
-            </div>
-            <div className="modal-footer">
-              <button className="btn btn-gray" onClick={() => setShowDetalle(false)}>Cerrar</button>
-              {selected.estado === 'en_prestamo' && (
-                <button
-                  className="btn btn-outline btn-sm"
-                  onClick={() => { setSelectedForDev(selected); setShowDetalle(false); setShowDevolucion(true) }}
-                >
-                  Registrar devolución
-                </button>
-              )}
+                <button className="modal-close" onClick={() => setShowDetalle(false)}>×</button>
+              </div>
+              <div className="modal-body">
+                {/* Estado + N° */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
+                  {estadoBadge(selected.estado)}
+                  <span className="text-xs text-gray fw-600">{selected.numero}</span>
+                </div>
+                {/* Datos del registro */}
+                <div className="inv-grid" style={{ marginBottom: 16 }}>
+                  <div className="inv-field"><div className="lbl">N° Préstamo</div><div className="val fw-600">{d?.n ?? selected.numero}</div></div>
+                  <div className="inv-field"><div className="lbl">Colaborador</div><div className="val">{d?.colaborador ?? '—'}</div></div>
+                  <div className="inv-field"><div className="lbl">Bien</div><div className="val">{selected.bien}</div></div>
+                  <div className="inv-field"><div className="lbl">Marca / Modelo</div><div className="val">{d ? `${d.marca} ${d.modelo}` : '—'}</div></div>
+                  <div className="inv-field"><div className="lbl">ID Inventario</div><div className="val"><code>{d?.id_bien ?? '—'}</code></div></div>
+                  <div className="inv-field"><div className="lbl">Código QR / Inv.</div><div className="val"><code>{d?.qr ?? '—'}</code></div></div>
+                  <div className="inv-field"><div className="lbl">Fecha solicitud</div><div className="val">{selected.fecha_solicitud}</div></div>
+                  <div className="inv-field"><div className="lbl">Fecha entrega</div><div className="val">{d?.fechaEntrega ?? '—'}</div></div>
+                  <div className="inv-field"><div className="lbl">Dev. pactada</div><div className="val">{selected.fecha_devolucion}</div></div>
+                  <div className="inv-field"><div className="lbl">Dev. real</div><div className="val">{d?.fechaDevReal ?? '—'}</div></div>
+                  <div className="inv-field"><div className="lbl">Estado al entregar</div><div className="val">{d?.estadoEntrega !== '—' ? <span className="badge b-green">{d?.estadoEntrega}</span> : '—'}</div></div>
+                  <div className="inv-field"><div className="lbl">Dirección destino</div><div className="val">{d?.direccion ?? '—'}</div></div>
+                  {d?.motivo && <div className="inv-field" style={{ gridColumn: '1/-1' }}><div className="lbl">Motivo</div><div className="val">{d.motivo}</div></div>}
+                </div>
+                {/* Flujo del proceso */}
+                <div className="section-title-sm" style={{ marginTop: 4 }}>FLUJO DEL PROCESO</div>
+                {d?.flujo.map((f, i) => (
+                  <div key={i} className="flow-step-block">
+                    <div className={`flow-step-hdr ${f.status}`} style={{ cursor: 'default' }}>
+                      <span>{f.status === 'done' ? '✔' : f.status === 'active' ? '⏳' : '○'} {f.icono} {f.paso}</span>
+                      <span style={{ fontSize: 11, color: '#9CA3AF' }}>{f.cargo}</span>
+                    </div>
+                    {f.status === 'done' && (
+                      <div className="flow-step-body">
+                        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                          <div>
+                            <div className="firma-label" style={{ textAlign: 'left', marginBottom: 4, fontSize: 10, color: '#9CA3AF' }}>Firmado por</div>
+                            <div className="firma-box" style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', minWidth: 140 }}>{f.firmante}</div>
+                            <div className="firma-label" style={{ fontSize: 10, marginTop: 4 }}>{f.cargo}</div>
+                          </div>
+                          {f.firmante2 && <div>
+                            <div className="firma-label" style={{ textAlign: 'left', marginBottom: 4, fontSize: 10, color: '#9CA3AF' }}>Confirmado por</div>
+                            <div className="firma-box" style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', minWidth: 140 }}>{f.firmante2}</div>
+                          </div>}
+                          <div className="inv-field"><div className="lbl">Fecha</div><div className="val">{f.fecha}</div></div>
+                        </div>
+                      </div>
+                    )}
+                    {f.status === 'active' && (
+                      <div className="flow-step-body">
+                        <div className="banner banner-purple" style={{ fontSize: 12, marginBottom: 8 }}>{f.activeLabel}</div>
+                        <div className="form-group" style={{ marginBottom: 8 }}>
+                          <label className="form-label" style={{ fontSize: 11 }}>Firma digital — {f.cargo}</label>
+                          <input type="text" className="form-control" placeholder="Escribe aquí tu firma..." style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', fontSize: 14, color: '#1E1B4B' }} />
+                        </div>
+                        <button className="btn btn-primary btn-sm" onClick={() => { setShowDetalle(false); alert('✓ Firma registrada. El bien ha sido registrado como devuelto.') }}>✔ Registrar firma</button>
+                      </div>
+                    )}
+                    {f.status === 'pending' && (
+                      <div className="flow-step-body">
+                        <p className="text-xs text-gray" style={{ fontStyle: 'italic' }}>🔒 Pendiente — se habilitará al completar el paso anterior.</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {/* Firmas del proceso */}
+                {d && (
+                  <div style={{ marginTop: 16 }}>
+                    <div className="section-title-sm">FIRMAS DEL PROCESO</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(d.flujo.length, 3)}, 1fr)`, gap: 10, marginTop: 8 }}>
+                      {d.flujo.map((f, fi) => {
+                        const borderColor = f.status === 'done' ? '#22C55E' : f.status === 'active' ? '#6B21A8' : '#D1D5DB'
+                        const bgColor = f.status === 'done' ? '#F0FDF4' : f.status === 'active' ? '#F5F3FF' : '#FAFAFA'
+                        return (
+                          <div key={fi} className="aprob-cell" style={{ border: `1px solid ${borderColor}`, background: bgColor }}>
+                            <div className="aprob-title" style={{ fontSize: 10 }}>{f.paso}</div>
+                            {f.status === 'done'
+                              ? <div className="firma-box" style={{ minWidth: '100%' }}>{f.firmante}{f.firmante2 && <div style={{ fontSize: 10, color: '#6B7280', marginTop: 3, fontStyle: 'italic' }}>{f.firmante2}</div>}</div>
+                              : f.status === 'active'
+                              ? <div className="aprob-zona" style={{ minHeight: 40 }}><span className="firma-placeholder" style={{ fontSize: 11 }}>Firmar aquí</span></div>
+                              : <div style={{ background: '#F3F4F6', border: '1px dashed #D1D5DB', borderRadius: 4, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: 11, color: '#9CA3AF' }}>Pendiente</span></div>
+                            }
+                            <div className="text-xs text-gray mt-4">{f.cargo}</div>
+                            <div className="text-xs text-gray">{f.fecha}</div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-gray" onClick={() => setShowDetalle(false)}>Cerrar</button>
+                {selected.estado === 'en_prestamo' && (
+                  <button className="btn btn-primary btn-sm" onClick={() => { setSelectedForDev(selected); setShowDetalle(false); setShowDevolucion(true) }}>
+                    📥 Registrar devolución
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* ════════════════════════════════════════════
           MODAL — Registrar Devolución de Préstamo
@@ -504,7 +588,7 @@ export function PrestamosBienes() {
               <div className="form-group">
                 <label className="form-label">Estado de devolución <span className="req">*</span></label>
                 <select
-                  className="form-select"
+                  className="form-control"
                   value={devForm.estado}
                   onChange={e => setDevForm(f => ({ ...f, estado: e.target.value }))}
                 >
@@ -518,7 +602,7 @@ export function PrestamosBienes() {
               <div className="form-group">
                 <label className="form-label">Observaciones</label>
                 <textarea
-                  className="form-input"
+                  className="form-control"
                   value={devForm.observaciones}
                   onChange={e => setDevForm(f => ({ ...f, observaciones: e.target.value }))}
                   maxLength={350}
@@ -533,7 +617,7 @@ export function PrestamosBienes() {
                 <label className="form-label">Fecha real de devolución</label>
                 <input
                   type="date"
-                  className="form-input"
+                  className="form-control"
                   value={devForm.fecha_real}
                   onChange={e => setDevForm(f => ({ ...f, fecha_real: e.target.value }))}
                 />
