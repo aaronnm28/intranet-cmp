@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { cajaChicaService } from '../services/db'
+import { supabase } from '../lib/supabase'
 import type { CajaChica as CajaChicaType } from '../types'
 
 interface GastoRow {
@@ -106,21 +106,48 @@ export function CajaChica() {
   })
 
   useEffect(() => {
-    cajaChicaService.getCajas()
-      .then(rows => { if (rows && rows.length > 0) setCajas(rows as CajaChicaType[]); else setCajas(MOCK_CAJAS) })
+    supabase.from('caja_chica_cajas')
+      .select('id,area,responsable,monto_inicial,monto_disponible,created_at')
+      .order('created_at', { ascending: true })
+      .then(({ data: rows }) => {
+        if (rows && rows.length > 0) {
+          setCajas(rows.map(r => ({
+            id: r.id,
+            area: r.area,
+            responsable: r.responsable,
+            monto_asignado: r.monto_inicial,
+            gastado_mes: r.monto_inicial - r.monto_disponible,
+            created_at: r.created_at,
+          })))
+        } else {
+          setCajas(MOCK_CAJAS)
+        }
+      })
       .catch(() => setCajas(MOCK_CAJAS))
       .finally(() => setLoading(false))
   }, [])
 
-  const handleRegistrarGasto = () => {
+  const handleRegistrarGasto = async () => {
     if (!selectedCaja) return
+    const monto = parseFloat(formGasto.monto)
+    if (!monto || monto <= 0) return
     const nuevoGasto: GastoRow = {
       fecha: formGasto.fecha ? formGasto.fecha.split('-').reverse().join('/') : new Date().toLocaleDateString('es-PE'),
       descripcion: formGasto.descripcion,
       comprobante: `${formGasto.tipo_comprobante.slice(0, 3).toUpperCase()}-${formGasto.num_comprobante}`,
-      monto: parseFloat(formGasto.monto),
+      monto,
       estado: 'declarado',
     }
+    const { error } = await supabase.from('caja_chica_gastos').insert({
+      caja_id: selectedCaja.id,
+      concepto: formGasto.descripcion,
+      monto,
+      tipo_comprobante: formGasto.tipo_comprobante,
+      numero_comprobante: formGasto.num_comprobante,
+      fecha: formGasto.fecha,
+      responsable: selectedCaja.responsable,
+    })
+    if (error) { alert(`Error: ${error.message}`); return }
     setGastosState(prev => ({
       ...prev,
       [selectedCaja.area]: [nuevoGasto, ...(prev[selectedCaja.area] ?? [])],
