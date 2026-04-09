@@ -2,6 +2,34 @@ import { useState, useEffect } from 'react'
 import { devolucionesService } from '../services/db'
 import type { Devolucion } from '../types'
 
+// ─── Firma intranet helpers ────────────────────────────────────────────────────
+
+function FirmaDone({ nombre, cargo, fecha }: { nombre: string; cargo: string; fecha: string }) {
+  return (
+    <div style={{ minHeight: 44, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '4px 6px', border: '1px solid #E5E7EB', borderRadius: 5, background: '#F9FAFB' }}>
+      <span style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', color: '#1E1B4B', fontSize: 11 }}>{nombre}</span>
+      <div style={{ fontSize: 9, color: '#6B7280', marginTop: 2 }}>{cargo}</div>
+      <div style={{ fontSize: 9, color: '#6B7280' }}>{fecha}</div>
+    </div>
+  )
+}
+function FirmaPendiente() {
+  return (
+    <div style={{ minHeight: 44, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '4px 6px', border: '1px dashed #FECACA', borderRadius: 5, background: '#FFF8F8' }}>
+      <span style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', color: '#991B1B', fontSize: 11 }}>Pendiente</span>
+      <div style={{ fontSize: 9, color: '#9CA3AF', marginTop: 2 }}>—</div>
+    </div>
+  )
+}
+function FirmaEspera() {
+  return (
+    <div style={{ minHeight: 44, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '4px 6px', border: '1px dashed #D1D5DB', borderRadius: 5, background: '#F9FAFB' }}>
+      <span style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', color: '#6B7280', fontSize: 11 }}>En espera</span>
+      <div style={{ fontSize: 9, color: '#9CA3AF', marginTop: 2 }}>—</div>
+    </div>
+  )
+}
+
 // ─── Data constants ────────────────────────────────────────────────────────────
 
 const MOCK_DATA: Devolucion[] = [
@@ -21,8 +49,8 @@ const BIENES_DEVOLUCION = [
 ]
 
 const ACCESORIOS_DEVOLUCION = [
-  { id: '20261106', nombre: 'Teclado HP', marca: 'HP', modelo: 'K1500', serie: 'SN20220301', codigo: '2026_ADM_0001', estado: 'bueno' },
-  { id: '20261107', nombre: 'USB Kingston', marca: 'Kingston', modelo: 'DataTraveler 32GB', serie: 'SN20230102', codigo: '2026_ADM_0002', estado: 'bueno' },
+  { id: '2026_ADM_0001', nombre: 'Teclado HP', marca: 'HP', modelo: 'K1500', serie: 'SN20220301', codigo: '2026_ADM_0001', estado: 'bueno' },
+  { id: '2026_ADM_0002', nombre: 'USB Kingston', marca: 'Kingston', modelo: 'DataTraveler 32GB', serie: 'SN20230102', codigo: '2026_ADM_0002', estado: 'bueno' },
 ]
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -100,7 +128,7 @@ function ModalRegistrarSalida({ onClose, onRegistrar }: ModalRegistrarSalidaProp
             <div style={{ display: 'flex', gap: 8 }}>
               <input
                 type="text"
-                className="form-input"
+                className="form-control"
                 id="salida-dni"
                 placeholder="Ingresa el DNI"
                 style={{ flex: 1 }}
@@ -124,21 +152,21 @@ function ModalRegistrarSalida({ onClose, onRegistrar }: ModalRegistrarSalidaProp
               <div className="form-row">
                 <div className="form-group">
                   <label className="form-label">Nombres y apellidos</label>
-                  <input type="text" className="form-input" readOnly value={colaboradorInfo.nombre} />
+                  <input type="text" className="form-control" readOnly value={colaboradorInfo.nombre} />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Área</label>
-                  <input type="text" className="form-input" readOnly value={colaboradorInfo.area} />
+                  <input type="text" className="form-control" readOnly value={colaboradorInfo.area} />
                 </div>
               </div>
               <div className="form-row">
                 <div className="form-group">
                   <label className="form-label">Cargo</label>
-                  <input type="text" className="form-input" readOnly value={colaboradorInfo.cargo} />
+                  <input type="text" className="form-control" readOnly value={colaboradorInfo.cargo} />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Sede</label>
-                  <input type="text" className="form-input" readOnly value={colaboradorInfo.sede} />
+                  <input type="text" className="form-control" readOnly value={colaboradorInfo.sede} />
                 </div>
               </div>
             </div>
@@ -149,7 +177,7 @@ function ModalRegistrarSalida({ onClose, onRegistrar }: ModalRegistrarSalidaProp
             <div className="form-group">
               <label className="form-label">Tipo de salida <span style={{ color: '#EF4444' }}>*</span></label>
               <select
-                className="form-select"
+                className="form-control"
                 value={form.tipo_salida}
                 onChange={e => setForm(f => ({ ...f, tipo_salida: e.target.value }))}
               >
@@ -164,7 +192,7 @@ function ModalRegistrarSalida({ onClose, onRegistrar }: ModalRegistrarSalidaProp
               <label className="form-label">Fecha efectiva de cese <span style={{ color: '#EF4444' }}>*</span></label>
               <input
                 type="date"
-                className="form-input"
+                className="form-control"
                 value={form.fecha_efectiva}
                 onChange={e => setForm(f => ({ ...f, fecha_efectiva: e.target.value }))}
               />
@@ -175,7 +203,7 @@ function ModalRegistrarSalida({ onClose, onRegistrar }: ModalRegistrarSalidaProp
           <div className="form-group">
             <label className="form-label">Motivo adicional</label>
             <textarea
-              className="form-input"
+              className="form-control"
               rows={2}
               placeholder="Opcional — información adicional..."
               value={form.motivo}
@@ -256,7 +284,7 @@ function ModalActaDevolucion({ bien, onClose, onFirmar }: ModalActaDevolucionPro
             <input type="text" className="inp-anio" placeholder="YYYY" defaultValue="2026" />
             se realiza la
             <select>
-              <option selected>Devolución</option>
+              <option>Devolución</option>
               <option>Entrega</option>
             </select>
             de los bienes solicitados.
@@ -315,14 +343,14 @@ function ModalActaDevolucion({ bien, onClose, onFirmar }: ModalActaDevolucionPro
                   <td>
                     <select>
                       <option>MB</option>
-                      <option selected>B</option>
+                      <option>B</option>
                       <option>R</option>
                       <option>M</option>
                     </select>
                   </td>
                   <td><input type="text" placeholder="—" /></td>
                   <td>
-                    <select className="form-select" style={{ fontSize: 10, padding: '2px 4px', minWidth: 150 }}>
+                    <select className="form-control" style={{ fontSize: 10, padding: '2px 4px', minWidth: 150 }}>
                       <option>UN. DE TI</option>
                       <option>UN. DE ADMINISTRACION</option>
                       <option>UN. DE COMUN. E IMAGEN INSTI.</option>
@@ -482,25 +510,25 @@ function ModalReporteDevolucion({ onClose }: ModalReporteDevolucionProps) {
                 <tr>
                   <td style={tdStyle}>111030</td><td style={tdStyle}>Laptop Dell Latitude 5420</td><td style={tdStyle}>CMP-038401</td>
                   <td style={tdStyle}>Bueno</td>
-                  <td style={tdStyle}><span style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', fontSize: 11, color: '#059669' }}>R. Limas ✓</span></td>
-                  <td style={tdStyle}><span style={{ color: '#991B1B', fontSize: 11 }}>⏳ Pendiente</span></td>
-                  <td style={tdStyle}><span style={{ color: '#991B1B', fontSize: 11 }}>○ En espera</span></td>
+                  <td style={{ ...tdStyle, padding: 5 }}><FirmaDone nombre="G. Palacios" cargo="Jefa UN. Administración" fecha="01/04/2026" /></td>
+                  <td style={{ ...tdStyle, padding: 5 }}><FirmaPendiente /></td>
+                  <td style={{ ...tdStyle, padding: 5 }}><FirmaEspera /></td>
                   <td style={{ ...tdStyle, color: '#D97706' }}>☐ Pendiente</td>
                 </tr>
                 <tr>
                   <td style={tdStyle}>111031</td><td style={tdStyle}>Mouse Logitech M185</td><td style={tdStyle}>CMP-038402</td>
                   <td style={tdStyle}>Bueno</td>
-                  <td style={tdStyle}><span style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', fontSize: 11, color: '#059669' }}>R. Limas ✓</span></td>
-                  <td style={tdStyle}><span style={{ color: '#991B1B', fontSize: 11 }}>⏳ Pendiente</span></td>
-                  <td style={tdStyle}><span style={{ color: '#991B1B', fontSize: 11 }}>○ En espera</span></td>
+                  <td style={{ ...tdStyle, padding: 5 }}><FirmaDone nombre="G. Palacios" cargo="Jefa UN. Administración" fecha="01/04/2026" /></td>
+                  <td style={{ ...tdStyle, padding: 5 }}><FirmaPendiente /></td>
+                  <td style={{ ...tdStyle, padding: 5 }}><FirmaEspera /></td>
                   <td style={{ ...tdStyle, color: '#D97706' }}>☐ Pendiente</td>
                 </tr>
                 <tr>
                   <td style={tdStyle}>200201</td><td style={tdStyle}>Silla ergonómica</td><td style={tdStyle}>CMP-ART-041</td>
                   <td style={tdStyle}>Regular</td>
-                  <td style={tdStyle}><span style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', fontSize: 11, color: '#D97706' }}>R. Limas ⚠</span></td>
-                  <td style={tdStyle}><span style={{ color: '#991B1B', fontSize: 11 }}>⏳ Pendiente</span></td>
-                  <td style={tdStyle}><span style={{ color: '#991B1B', fontSize: 11 }}>○ En espera</span></td>
+                  <td style={{ ...tdStyle, padding: 5 }}><FirmaDone nombre="G. Palacios" cargo="Jefa UN. Administración — ⚠ Obs." fecha="01/04/2026" /></td>
+                  <td style={{ ...tdStyle, padding: 5 }}><FirmaPendiente /></td>
+                  <td style={{ ...tdStyle, padding: 5 }}><FirmaEspera /></td>
                   <td style={{ ...tdStyle, color: '#EF4444' }}>⚠ Observado</td>
                 </tr>
               </tbody>
@@ -522,19 +550,19 @@ function ModalReporteDevolucion({ onClose }: ModalReporteDevolucionProps) {
               </thead>
               <tbody>
                 <tr>
-                  <td style={tdStyle}>20261106</td><td style={tdStyle}>Teclado HP K1500</td><td style={tdStyle}>HP</td>
+                  <td style={tdStyle}>2026_ADM_0001</td><td style={tdStyle}>Teclado HP K1500</td><td style={tdStyle}>HP</td>
                   <td style={tdStyle}>Bueno</td>
-                  <td style={tdStyle}><span style={{ color: '#991B1B', fontSize: 11 }}>⏳ Pendiente</span></td>
-                  <td style={tdStyle}><span style={{ color: '#991B1B', fontSize: 11 }}>○ En espera</span></td>
-                  <td style={tdStyle}><span style={{ color: '#991B1B', fontSize: 11 }}>○ En espera</span></td>
+                  <td style={{ ...tdStyle, padding: 5 }}><FirmaPendiente /></td>
+                  <td style={{ ...tdStyle, padding: 5 }}><FirmaEspera /></td>
+                  <td style={{ ...tdStyle, padding: 5 }}><FirmaEspera /></td>
                   <td style={{ ...tdStyle, color: '#D97706' }}>☐ Pendiente</td>
                 </tr>
                 <tr>
-                  <td style={tdStyle}>20261107</td><td style={tdStyle}>USB Kingston DataTraveler</td><td style={tdStyle}>Kingston</td>
+                  <td style={tdStyle}>2026_ADM_0002</td><td style={tdStyle}>USB Kingston DataTraveler</td><td style={tdStyle}>Kingston</td>
                   <td style={tdStyle}>Bueno</td>
-                  <td style={tdStyle}><span style={{ color: '#991B1B', fontSize: 11 }}>⏳ Pendiente</span></td>
-                  <td style={tdStyle}><span style={{ color: '#991B1B', fontSize: 11 }}>○ En espera</span></td>
-                  <td style={tdStyle}><span style={{ color: '#991B1B', fontSize: 11 }}>○ En espera</span></td>
+                  <td style={{ ...tdStyle, padding: 5 }}><FirmaPendiente /></td>
+                  <td style={{ ...tdStyle, padding: 5 }}><FirmaEspera /></td>
+                  <td style={{ ...tdStyle, padding: 5 }}><FirmaEspera /></td>
                   <td style={{ ...tdStyle, color: '#D97706' }}>☐ Pendiente</td>
                 </tr>
               </tbody>
