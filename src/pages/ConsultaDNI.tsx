@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { supabase } from '../lib/supabase'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -429,17 +430,54 @@ export function ConsultaDNI() {
   const [openCajaChica, setOpenCajaChica] = useState(true)
   const [openReporte, setOpenReporte] = useState(true)
 
-  const handleConsultar = () => {
+  const handleConsultar = async () => {
     const val = dniInput.trim()
     if (!val) return
     setNotFound(false)
-    const found = MOCK_MAP[val]
-    if (found) {
-      setResult(found)
-    } else {
-      setResult(null)
-      setNotFound(true)
-    }
+    // Primero buscar en mock
+    const mock = MOCK_MAP[val]
+    if (mock) { setResult(mock); return }
+    // Luego en Supabase
+    const { data: colab } = await supabase.from('colaboradores').select('*').eq('dni', val).maybeSingle()
+    if (!colab) { setResult(null); setNotFound(true); return }
+    const nombre = `${colab.nombres} ${colab.apellidos}`
+    const initials = (colab.nombres[0] + colab.apellidos[0]).toUpperCase()
+    const { data: solicitudes } = await supabase.from('solicitudes_asignacion').select('numero,bien_nombre,estado').eq('colaborador_dni', val)
+    const { data: adelantos } = await supabase.from('solicitudes_adelanto').select('numero,tipo,monto,cuotas,estado').eq('colaborador_dni', val)
+    setResult({
+      nombre,
+      initials,
+      meta: `DNI: ${val} · Cargo: ${colab.puesto ?? '—'} · Área: ${colab.area ?? '—'}`,
+      tags: [colab.sede ? `🏢 ${colab.sede}` : '🏢 Sede CMP'].filter(Boolean),
+      rightBadge: { label: '✔ Activo', variant: 'green' },
+      rightDate: null,
+      counters: [
+        { icon: '🖥', num: solicitudes?.length ?? 0, label: 'Solicitudes' },
+        { icon: '💰', num: adelantos?.length ?? 0, label: 'Adelantos' },
+        { icon: '📦', num: 0, label: 'Accesorios', green: true },
+        { icon: '⚠', num: 0, label: 'Caja chica', green: true },
+      ],
+      bienes: (solicitudes ?? []).map(s => ({
+        id: s.numero, desc: s.bien_nombre, tipo: 'Solicitud', codigo: s.numero,
+        estado: 'bueno' as const, devolucion: s.estado,
+        custodio: { status: 'pend' as const },
+        colaborador: { status: 'pend' as const },
+      })),
+      accesorios: [],
+      prestamosBienes: [],
+      prestamosAdelantos: (adelantos ?? []).map(a => ({
+        numero: a.numero, tipo: a.tipo === 'adelanto' ? 'Adelanto' : 'Préstamo',
+        monto: `S/. ${Number(a.monto).toLocaleString('es-PE')}`,
+        cuotas: String(a.cuotas ?? 1),
+        estado: 'revision' as const,
+        custodio: { status: 'pend' as const },
+        colaborador: { status: 'pend' as const },
+      })),
+      cajaChica: null,
+      reporte: [],
+      footerBanner: null,
+      footerSem: 'g',
+    })
   }
 
   const handleLimpiar = () => {
