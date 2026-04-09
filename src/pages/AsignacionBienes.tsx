@@ -355,6 +355,17 @@ export function AsignacionBienes() {
                 <td><span className="badge b-red">Pendiente conformidad</span></td>
                 <td><div className="actions-cell"><button className="btn btn-primary btn-xs" onClick={() => setShowConformidad(true)}>Firmar conformidad</button></div></td>
               </tr>
+              {solicitudesDB.map(s => (
+                <tr key={s.id}>
+                  <td className="fw-600">{s.numero}</td>
+                  <td>{s.bien_nombre}</td>
+                  <td><span className="badge b-gray">{s.tipo}</span></td>
+                  <td>{s.fecha_solicitud ?? '—'}</td>
+                  <td className="text-gray">—</td>
+                  <td><span className={`badge ${s.estado==='Aprobado'?'b-green':s.estado==='Rechazado'?'b-red':'b-yellow'}`}>{s.estado}</span></td>
+                  <td><div className="actions-cell"><button className="btn btn-gray btn-xs" onClick={() => toast.show(`Detalle: ${s.numero}`)}>Ver detalle</button></div></td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
