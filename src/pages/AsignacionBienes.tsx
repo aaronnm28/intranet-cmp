@@ -328,37 +328,9 @@ export function AsignacionBienes() {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="fw-600">SOL-2026-001</td><td>Laptop</td>
-                <td><span className="badge b-gray">Cómputo</span></td>
-                <td>10/03/2026</td><td className="text-gray">—</td>
-                <td><span className="badge b-yellow">En revisión</span></td>
-                <td><div className="actions-cell"><button className="btn btn-gray btn-xs" onClick={() => openDetalle('SOL-2026-001')}>Ver detalle</button></div></td>
-              </tr>
-              <tr>
-                <td className="fw-600">SOL-2026-002</td><td>Silla ergonómica</td>
-                <td><span className="badge b-gray">Mobiliario</span></td>
-                <td>08/03/2026</td><td>13/03/2026</td>
-                <td><span className="badge b-green">Aprobado</span></td>
-                <td><div className="actions-cell"><button className="btn btn-gray btn-xs" onClick={() => openDetalle('SOL-2026-002')}>Ver detalle</button></div></td>
-              </tr>
-              <tr>
-                <td className="fw-600">SOL-2026-003</td><td>Teléfono IP</td>
-                <td><span className="badge b-gray">Comunicaciones</span></td>
-                <td>05/03/2026</td><td className="text-gray">—</td>
-                <td><span className="badge b-yellow">Observado</span></td>
-                <td><div className="actions-cell">
-                  <button className="btn btn-gray btn-xs" onClick={() => openDetalle('SOL-2026-003')}>Ver detalle</button>
-                  <button className="btn btn-outline btn-xs" onClick={() => toast.show('Acción de subsanación registrada.')}>Subsanar</button>
-                </div></td>
-              </tr>
-              <tr>
-                <td className="fw-600">SOL-2026-004</td><td>Monitor 24"</td>
-                <td><span className="badge b-gray">Cómputo</span></td>
-                <td>01/03/2026</td><td>15/03/2026</td>
-                <td><span className="badge b-red">Pendiente conformidad</span></td>
-                <td><div className="actions-cell"><button className="btn btn-primary btn-xs" onClick={() => setShowConformidad(true)}>Firmar conformidad</button></div></td>
-              </tr>
+              {solicitudesDB.length === 0 && (
+                <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px 0', color: '#9CA3AF' }}>No hay solicitudes registradas</td></tr>
+              )}
               {solicitudesDB.map(s => (
                 <tr key={s.id}>
                   <td className="fw-600">{s.numero}</td>
@@ -366,7 +338,7 @@ export function AsignacionBienes() {
                   <td><span className="badge b-gray">{s.tipo}</span></td>
                   <td>{s.fecha_solicitud ?? '—'}</td>
                   <td className="text-gray">—</td>
-                  <td><span className={`badge ${s.estado==='Aprobado'?'b-green':s.estado==='Rechazado'?'b-red':'b-yellow'}`}>{s.estado}</span></td>
+                  <td><span className={`badge ${s.estado==='Aprobado'?'b-green':s.estado==='Rechazado'?'b-red':s.estado==='Observado'?'b-yellow':'b-yellow'}`}>{s.estado}</span></td>
                   <td><div className="actions-cell"><button className="btn btn-gray btn-xs" onClick={() => toast.show(`Detalle: ${s.numero}`)}>Ver detalle</button></div></td>
                 </tr>
               ))}

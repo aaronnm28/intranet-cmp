@@ -909,8 +909,8 @@ export function DevolucionBienes() {
           .select('id,colaborador_dni,colaborador_nombre,area,tipo_salida,fecha_inicio,estado,bienes_count,created_at')
           .order('created_at', { ascending: false })
         if (data && data.length > 0) setData(data as Devolucion[])
-        else setData(MOCK_DATA)
-      } catch { setData(MOCK_DATA) }
+        else setData([])
+      } catch { setData([]) }
       finally { setLoading(false) }
     }
     load()

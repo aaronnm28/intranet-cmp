@@ -161,9 +161,9 @@ export function PrestamosBienes() {
         if (rows && rows.length > 0) {
           setData(rows.map(r => ({ ...r, bien: r.bien_nombre, fecha_devolucion: r.fecha_devolucion ?? '—' })))
         } else {
-          setData(MOCK_DATA)
+          setData([])
         }
-      } catch { setData(MOCK_DATA) }
+      } catch { setData([]) }
       finally { setLoading(false) }
     }
     load()

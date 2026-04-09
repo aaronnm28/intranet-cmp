@@ -44,7 +44,7 @@ function calcularCuotas(monto: number, numCuotas: number): Array<{ cuota: number
 }
 
 export function PrestamosAdelantos() {
-  const [misSolicitudes, setMisSolicitudes] = useState<MisSolicitudRow[]>(MIS_SOLICITUDES)
+  const [misSolicitudes, setMisSolicitudes] = useState<MisSolicitudRow[]>([])
   const [activeTab, setActiveTab] = useState('mis')
   const [gdthSubTab, setGdthSubTab] = useState('sol')
   const [bienestarSubTab, setBienestarSubTab] = useState('sol')
@@ -232,59 +232,25 @@ export function PrestamosAdelantos() {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="fw-600">ADV-2026-001</td>
-                  <td>Adelanto de sueldo</td>
-                  <td>S/. 800</td>
-                  <td>01/03/2026</td>
-                  <td><span className="badge b-green">Aprobado</span></td>
-                  <td className="text-sm text-gray">Desembolso por Contabilidad</td>
-                  <td><button className="btn btn-gray btn-xs" onClick={() => openDetalle('ADV-2026-001')}>Ver detalle</button></td>
-                </tr>
-                <tr>
-                  <td className="fw-600">ADV-2026-002</td>
-                  <td>Préstamo personal</td>
-                  <td>S/. 2,500</td>
-                  <td>10/03/2026</td>
-                  <td><span className="badge b-yellow">En revisión — Bienestar</span></td>
-                  <td className="text-sm text-gray">Evaluación Bienestar</td>
-                  <td><button className="btn btn-gray btn-xs" onClick={() => openDetalle('ADV-2026-002')}>Ver detalle</button></td>
-                </tr>
-                <tr>
-                  <td className="fw-600">ADV-2026-003</td>
-                  <td>Adelanto de sueldo</td>
-                  <td>S/. 400</td>
-                  <td>18/03/2026</td>
-                  <td><span className="badge b-red">Rechazado</span></td>
-                  <td className="text-sm text-gray">—</td>
-                  <td><button className="btn btn-gray btn-xs" onClick={() => openDetalle('ADV-2026-003')}>Ver detalle</button></td>
-                </tr>
+                {misSolicitudes.length === 0 && (
+                  <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px 0', color: '#9CA3AF' }}>No hay solicitudes registradas</td></tr>
+                )}
+                {misSolicitudes.map(s => (
+                  <tr key={s.id}>
+                    <td className="fw-600">{s.numero}</td>
+                    <td>{s.tipo}</td>
+                    <td>{s.monto}</td>
+                    <td>{s.fecha}</td>
+                    <td><span className={`badge ${s.estado==='aprobado'?'b-green':s.estado==='rechazado'?'b-red':'b-yellow'}`}>{s.estado==='aprobado'?'Aprobado':s.estado==='rechazado'?'Rechazado':'En revisión'}</span></td>
+                    <td className="text-sm text-gray">{s.proximo}</td>
+                    <td><button className="btn btn-gray btn-xs" onClick={() => openDetalle(s.numero)}>Ver detalle</button></td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* Stepper ADV-2026-002 */}
-        <div className="card">
-          <div className="card-body">
-            <div className="flex-between mb-8">
-              <span className="text-sm fw-600 text-purple">ADV-2026-002 — Seguimiento de flujo</span>
-              <span className="badge b-yellow">En revisión — Bienestar</span>
-            </div>
-            <div className="stepper">
-              <div className="step"><div className="step-circ done">✔</div><span className="step-lbl done">Solicitud</span></div>
-              <div className="step-conn done"></div>
-              <div className="step"><div className="step-circ cur">⏳</div><span className="step-lbl cur">Bienestar</span></div>
-              <div className="step-conn"></div>
-              <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">Jefatura GDTH</span></div>
-              <div className="step-conn"></div>
-              <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">Sec. Administ.</span></div>
-              <div className="step-conn"></div>
-              <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">Contabilidad</span></div>
-            </div>
-            <div className="text-xs text-gray mt-8">Última actualización: Solicitud recibida por Bienestar — 11/03/2026</div>
-          </div>
-        </div>
       </div>
 
       {/* PANE: Bandeja GDTH */}
