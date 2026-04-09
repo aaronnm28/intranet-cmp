@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 type FlujoStatus = 'done' | 'active' | 'pending' | 'rejected'
@@ -144,13 +145,33 @@ export function AsignacionBienes() {
   // disponibilidad modal
   const [dispTab, setDispTab] = useState<'bienes'|'accs'>('bienes')
 
+  // solicitudes desde supabase
+  const [solicitudesDB, setSolicitudesDB] = useState<Array<{id:string;numero:string;bien_nombre:string;tipo:string;fecha_solicitud:string;estado:string;colaborador:string;area_encargada:string}>>([])
+
+  useEffect(() => {
+    supabase
+      .from('solicitudes_asignacion')
+      .select('id,numero,bien_nombre,tipo,fecha_solicitud,estado,colaborador,area_encargada')
+      .order('created_at', { ascending: false })
+      .then(({ data }) => { if (data && data.length > 0) setSolicitudesDB(data) })
+  }, [])
+
   // flujo info
   const flujoAreaMap: Record<string,string> = { computo:'UN. DE TI', mobiliario:'Administración', comunicaciones:'Comunicaciones' }
 
-  function buscarColab() {
-    const c = COLABS[nsDni.trim()]
-    if (c) { setNsColab(c); setNsDniErr(false) }
-    else   { setNsColab(null); setNsDniErr(true) }
+  async function buscarColab() {
+    const dni = nsDni.trim()
+    // primero mock local
+    const mock = COLABS[dni]
+    if (mock) { setNsColab(mock); setNsDniErr(false); return }
+    // luego Supabase
+    const { data } = await supabase.from('colaboradores').select('*').eq('dni', dni).maybeSingle()
+    if (data) {
+      setNsColab({ nombre: data.nombres, apellido: data.apellidos, puesto: data.puesto ?? '—', subarea: data.area ?? '—', consejo: 'Consejo Nacional', initials: (data.nombres[0] + data.apellidos[0]).toUpperCase() })
+      setNsDniErr(false)
+    } else {
+      setNsColab(null); setNsDniErr(true)
+    }
   }
 
   function toggleBien(id:string) {
@@ -171,10 +192,29 @@ export function AsignacionBienes() {
     toast.show(`Firma registrada en Paso ${paso}`)
   }
 
-  function enviarSolicitud() {
+  async function enviarSolicitud() {
     if (!nsColab) { toast.show('Busca un colaborador primero'); return }
     if (nsTab==='bienes' && !nsBienNom.trim()) { toast.show('Completa el nombre del bien'); return }
-    toast.show('✓ Solicitud enviada correctamente')
+    // Generar número correlativo
+    const { count } = await supabase.from('solicitudes_asignacion').select('*', { count: 'exact', head: true })
+    const num = `SOL-${new Date().getFullYear()}-${String((count ?? 0) + 1).padStart(3, '0')}`
+    const payload = {
+      numero: num,
+      colaborador_dni: nsDni.trim(),
+      colaborador: `${nsColab.nombre} ${nsColab.apellido}`,
+      bien_nombre: nsBienNom || (selBienes.size > 0 ? [...selBienes].join(', ') : 'Sin especificar'),
+      tipo: nsTipoBien || 'computo',
+      area_encargada: flujoAreaMap[nsTipoBien] ?? 'Administración',
+      puesto: nsColab.puesto,
+      sub_area: nsColab.subarea,
+      motivo: nsBienJust,
+      estado: 'En revisión',
+    }
+    const { data: newRec, error } = await supabase.from('solicitudes_asignacion').insert(payload).select().single()
+    if (!error && newRec) {
+      setSolicitudesDB(prev => [{ id: newRec.id, numero: newRec.numero, bien_nombre: newRec.bien_nombre, tipo: newRec.tipo, fecha_solicitud: newRec.fecha_solicitud ?? new Date().toLocaleDateString('es-PE'), estado: newRec.estado, colaborador: newRec.colaborador, area_encargada: newRec.area_encargada }, ...prev])
+    }
+    toast.show(`✓ Solicitud ${num} enviada correctamente`)
     setShowNueva(false)
     setNsDni(''); setNsColab(null); setNsBienNom(''); setNsBienJust(''); setNsTipoBien('')
   }

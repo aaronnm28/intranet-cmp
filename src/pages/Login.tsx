@@ -32,7 +32,7 @@ export function Login() {
         }
         localStorage.setItem('cmp_session', JSON.stringify(session))
       }
-      window.location.href = '/prototipo.html'
+      window.location.href = '/gestion/asignacion'
     } catch {
       setError('Correo o contraseña incorrectos. Verifica tus credenciales.')
     } finally {
