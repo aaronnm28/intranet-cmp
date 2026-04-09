@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { prestamosBienesService } from '../services/db'
+import { supabase } from '../lib/supabase'
 
 interface PrestamoBienRow {
   id: string
@@ -125,8 +125,16 @@ export function PrestamosBienes() {
     : false
 
   useEffect(() => {
-    prestamosBienesService.getAll()
-      .then(rows => { if (rows && rows.length > 0) setData(rows as PrestamoBienRow[]); else setData(MOCK_DATA) })
+    supabase.from('prestamos_bienes')
+      .select('id,numero,bien_nombre,fecha_solicitud,fecha_devolucion,estado')
+      .order('created_at', { ascending: false })
+      .then(({ data: rows }) => {
+        if (rows && rows.length > 0) {
+          setData(rows.map(r => ({ ...r, bien: r.bien_nombre, fecha_devolucion: r.fecha_devolucion ?? '—' })))
+        } else {
+          setData(MOCK_DATA)
+        }
+      })
       .catch(() => setData(MOCK_DATA))
       .finally(() => setLoading(false))
   }, [])
@@ -138,15 +146,27 @@ export function PrestamosBienes() {
 
   const handleSolicitar = async () => {
     const bien = BIENES_DISPONIBLES_PRESTAMO.find(b => b.id === form.bien_id)
+    const { count } = await supabase.from('prestamos_bienes').select('*', { count: 'exact', head: true })
+    const numero = `PREST-${new Date().getFullYear()}-${String((count ?? 0) + 1).padStart(3, '0')}`
+    const payload = {
+      numero,
+      bien_nombre: bien?.nombre ?? 'Bien',
+      bien_codigo: form.codigo,
+      fecha_devolucion: form.fecha_devolucion || null,
+      motivo: form.motivo,
+      estado: 'pendiente_aprobacion',
+      colaborador: 'Colaborador',
+    }
+    const { data: newRec, error } = await supabase.from('prestamos_bienes').insert(payload).select().single()
+    if (error) { alert(`Error: ${error.message}`); return }
     const nuevo: PrestamoBienRow = {
-      id: String(Date.now()),
-      numero: `PREST-2026-${String(data.length + 1).padStart(3, '0')}`,
+      id: newRec?.id ?? String(Date.now()),
+      numero,
       bien: bien?.nombre ?? 'Bien',
       fecha_solicitud: new Date().toLocaleDateString('es-PE'),
       fecha_devolucion: form.fecha_devolucion || '—',
       estado: 'pendiente_aprobacion',
     }
-    try { await (prestamosBienesService as Record<string, unknown> & { create?: (x: unknown) => Promise<unknown> }).create?.({ ...nuevo, motivo: form.motivo }) } catch { /* ignore */ }
     setData(prev => [nuevo, ...prev])
     setShowNuevo(false)
     setForm({ bien_id: '', codigo: '', fecha_prestamo: '', fecha_devolucion: '', direccion: '', motivo: '' })
@@ -156,7 +176,8 @@ export function PrestamosBienes() {
 
   const handleConfirmarDevolucion = async () => {
     if (!selectedForDev || !devForm.confirmado) return
-    try { await (prestamosBienesService as Record<string, unknown> & { devolver?: (id: string) => Promise<unknown> }).devolver?.(selectedForDev.id) } catch { /* ignore */ }
+    const { error } = await supabase.from('prestamos_bienes').update({ estado: 'devuelto_conforme' }).eq('id', selectedForDev.id)
+    if (error) { alert(`Error: ${error.message}`); return }
     setData(prev => prev.map(p => p.id === selectedForDev.id ? { ...p, estado: 'devuelto_conforme' } : p))
     setShowDevolucion(false)
     setSelectedForDev(null)
