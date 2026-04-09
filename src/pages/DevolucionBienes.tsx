@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { devolucionesService } from '../services/db'
+import { supabase } from '../lib/supabase'
 import type { Devolucion } from '../types'
 
 // ─── Firma intranet helpers ────────────────────────────────────────────────────
@@ -89,18 +89,34 @@ function ModalRegistrarSalida({ onClose, onRegistrar }: ModalRegistrarSalidaProp
   const [buscando, setBuscando] = useState(false)
   const [colaboradorInfo, setColaboradorInfo] = useState<{ nombre: string; area: string; cargo: string; sede: string } | null>(null)
 
-  const buscarColaborador = () => {
+  const buscarColaborador = async () => {
     setBuscando(true)
-    setTimeout(() => {
-      setColaboradorInfo(COLABORADORES[form.dni] ?? null)
-      setBuscando(false)
-    }, 600)
+    const mock = COLABORADORES[form.dni]
+    if (mock) { setColaboradorInfo(mock); setBuscando(false); return }
+    const { data } = await supabase.from('colaboradores').select('nombres,apellidos,area,puesto,sede').eq('dni', form.dni).maybeSingle()
+    if (data) {
+      setColaboradorInfo({ nombre: `${data.nombres} ${data.apellidos}`, area: data.area ?? '—', cargo: data.puesto ?? '—', sede: data.sede ?? '—' })
+    } else {
+      setColaboradorInfo(null)
+    }
+    setBuscando(false)
   }
 
   const handleRegistrar = async () => {
     if (!colaboradorInfo) return
+    const payload = {
+      colaborador_dni: form.dni,
+      colaborador_nombre: colaboradorInfo.nombre,
+      area: colaboradorInfo.area,
+      tipo_salida: form.tipo_salida,
+      fecha_inicio: form.fecha_efectiva || new Date().toLocaleDateString('es-PE'),
+      estado: 'en_proceso',
+      bienes_count: 0,
+    }
+    const { data: newRec, error } = await supabase.from('devoluciones').insert(payload).select().single()
+    if (error) { alert(`Error al guardar: ${error.message}`); return }
     const nueva: Devolucion = {
-      id: String(Date.now()),
+      id: newRec?.id ?? String(Date.now()),
       colaborador_dni: form.dni,
       colaborador_nombre: colaboradorInfo.nombre,
       area: colaboradorInfo.area,
@@ -110,7 +126,6 @@ function ModalRegistrarSalida({ onClose, onRegistrar }: ModalRegistrarSalidaProp
       bienes_count: 0,
       created_at: new Date().toISOString(),
     }
-    try { await devolucionesService.create(nueva as unknown as Record<string, unknown>) } catch { /* ignore */ }
     onRegistrar(nueva)
   }
 
@@ -885,8 +900,13 @@ export function DevolucionBienes() {
   const [showModalSalida, setShowModalSalida] = useState(false)
 
   useEffect(() => {
-    devolucionesService.getAll()
-      .then(rows => { if (rows && rows.length > 0) setData(rows as Devolucion[]); else setData(MOCK_DATA) })
+    supabase.from('devoluciones')
+      .select('id,colaborador_dni,colaborador_nombre,area,tipo_salida,fecha_inicio,estado,bienes_count,created_at')
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        if (data && data.length > 0) setData(data as Devolucion[])
+        else setData(MOCK_DATA)
+      })
       .catch(() => setData(MOCK_DATA))
       .finally(() => setLoading(false))
   }, [])
