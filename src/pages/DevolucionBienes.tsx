@@ -42,6 +42,7 @@ const COLABORADORES: Record<string, { nombre: string; area: string; cargo: strin
   '45231089': { nombre: 'Carlos Pérez Ramos',   area: 'UN. DE TI',              cargo: 'Analista de TI',         sede: 'Sede Malecón de la Reserva' },
   '32187654': { nombre: 'María Torres Huamán',  area: 'UN. DE GDTH',            cargo: 'Analista RR.HH.',         sede: 'Sede Malecón de la Reserva' },
   '77410231': { nombre: 'Jorge Lima Castillo',  area: 'UN. DE COMUN. E IMAGEN', cargo: 'Técnico Comunicaciones', sede: 'Sede Malecón de la Reserva' },
+  '77434028': { nombre: 'Aaron Samuel Nuñez Muñoz', area: 'UN. DE TI',         cargo: 'Analista de Sistemas',   sede: 'Sede Malecón de la Reserva' },
 }
 
 const BIENES_DEVOLUCION = [
