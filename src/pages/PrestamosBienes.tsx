@@ -120,6 +120,34 @@ export function PrestamosBienes() {
   const [firmaStates, setFirmaStates] = useState<Record<number, string>>({ 0: '', 1: '', 2: '' })
   const [firmaModo, setFirmaModo]     = useState<Record<number, boolean>>({ 0: false, 1: false, 2: false })
 
+  // DNI search
+  const [colabDni, setColabDni]   = useState('')
+  const [colabBuscando, setColabBuscando] = useState(false)
+  const [colabInfo, setColabInfo] = useState<{ nombre: string; area: string; puesto: string } | null>(null)
+  const [colabErr, setColabErr]   = useState(false)
+
+  const COLAB_MOCK: Record<string, { nombre: string; area: string; puesto: string }> = {
+    '77434028': { nombre: 'Aaron Samuel Nuñez Muñoz', area: 'UN. DE TI',              puesto: 'Analista de Sistemas'   },
+    '45231089': { nombre: 'Carlos Pérez Ramos',        area: 'UN. DE GDTH',            puesto: 'Analista de TI'         },
+    '32187654': { nombre: 'María Torres Huamán',       area: 'UN. DE GDTH',            puesto: 'Analista RR.HH.'        },
+    '77410231': { nombre: 'Jorge Lima Castillo',       area: 'UN. DE COMUN. E IMAGEN', puesto: 'Técnico Comunicaciones' },
+  }
+
+  const buscarColab = async () => {
+    const dni = colabDni.trim()
+    setColabErr(false)
+    const mock = COLAB_MOCK[dni]
+    if (mock) { setColabInfo(mock); return }
+    setColabBuscando(true)
+    const { data: row } = await supabase.from('colaboradores').select('nombres,apellidos,area,puesto').eq('dni', dni).maybeSingle()
+    if (row) {
+      setColabInfo({ nombre: `${row.nombres} ${row.apellidos}`, area: row.area ?? '—', puesto: row.puesto ?? '—' })
+    } else {
+      setColabInfo(null); setColabErr(true)
+    }
+    setColabBuscando(false)
+  }
+
   const exceedsDays = form.fecha_prestamo && form.fecha_devolucion
     ? diffDays(form.fecha_prestamo, form.fecha_devolucion) > 15
     : false
@@ -147,17 +175,21 @@ export function PrestamosBienes() {
   }
 
   const handleSolicitar = async () => {
+    if (!colabInfo) { alert('Busca un colaborador primero'); return }
     const bien = BIENES_DISPONIBLES_PRESTAMO.find(b => b.id === form.bien_id)
+    if (!bien) { alert('Selecciona un bien'); return }
     const { count } = await supabase.from('prestamos_bienes').select('*', { count: 'exact', head: true })
     const numero = `PREST-${new Date().getFullYear()}-${String((count ?? 0) + 1).padStart(3, '0')}`
     const payload = {
       numero,
-      bien_nombre: bien?.nombre ?? 'Bien',
+      colaborador_dni: colabDni.trim(),
+      colaborador: colabInfo.nombre,
+      bien_nombre: bien.nombre,
       bien_codigo: form.codigo,
       fecha_devolucion: form.fecha_devolucion || null,
       motivo: form.motivo,
+      direccion: form.direccion,
       estado: 'pendiente_aprobacion',
-      colaborador: 'Colaborador',
     }
     const { data: newRec, error } = await supabase.from('prestamos_bienes').insert(payload).select().single()
     if (error) { alert(`Error: ${error.message}`); return }
@@ -191,6 +223,7 @@ export function PrestamosBienes() {
     setForm({ bien_id: '', codigo: '', fecha_prestamo: '', fecha_devolucion: '', direccion: '', motivo: '' })
     setFirmaStates({ 0: '', 1: '', 2: '' })
     setFirmaModo({ 0: false, 1: false, 2: false })
+    setColabDni(''); setColabInfo(null); setColabErr(false)
   }
 
   const closeDevolucion = () => {
@@ -288,6 +321,43 @@ export function PrestamosBienes() {
               <button className="modal-close" onClick={closeNuevo}>✕</button>
             </div>
             <div className="modal-body">
+
+              {/* DNI Colaborador */}
+              <div className="section-title-sm">COLABORADOR SOLICITANTE</div>
+              <div className="form-group">
+                <label className="form-label">DNI del colaborador <span className="req">*</span></label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Ingresa el DNI"
+                    maxLength={8}
+                    value={colabDni}
+                    onChange={e => { setColabDni(e.target.value); setColabInfo(null); setColabErr(false) }}
+                    style={{ flex: 1 }}
+                  />
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={buscarColab}
+                    disabled={colabDni.length < 8 || colabBuscando}
+                  >
+                    🔍 {colabBuscando ? 'Buscando...' : 'Buscar'}
+                  </button>
+                </div>
+                {colabErr && <div style={{ fontSize: 12, color: '#EF4444', marginTop: 4 }}>DNI no encontrado</div>}
+              </div>
+              {colabInfo && (
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Nombre</label>
+                    <input type="text" className="form-control" readOnly value={colabInfo.nombre} style={{ background: '#F9FAFB' }} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Área / Puesto</label>
+                    <input type="text" className="form-control" readOnly value={`${colabInfo.area} — ${colabInfo.puesto}`} style={{ background: '#F9FAFB' }} />
+                  </div>
+                </div>
+              )}
 
               {/* Datos del bien */}
               <div className="section-title-sm">DATOS DEL BIEN</div>
