@@ -211,7 +211,11 @@ export function AsignacionBienes() {
       estado: 'En revisión',
     }
     const { data: newRec, error } = await supabase.from('solicitudes_asignacion').insert(payload).select().single()
-    if (!error && newRec) {
+    if (error) {
+      toast.show(`Error: ${error.message}`)
+      return
+    }
+    if (newRec) {
       setSolicitudesDB(prev => [{ id: newRec.id, numero: newRec.numero, bien_nombre: newRec.bien_nombre, tipo: newRec.tipo, fecha_solicitud: newRec.fecha_solicitud ?? new Date().toLocaleDateString('es-PE'), estado: newRec.estado, colaborador: newRec.colaborador, area_encargada: newRec.area_encargada }, ...prev])
     }
     toast.show(`✓ Solicitud ${num} enviada correctamente`)
