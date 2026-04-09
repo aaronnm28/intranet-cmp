@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { solicitudesAdelantoService } from '../services/db'
-import type { SolicitudAdelanto } from '../types'
+import { supabase } from '../lib/supabase'
 
 interface MisSolicitudRow {
   id: string
@@ -45,7 +44,7 @@ function calcularCuotas(monto: number, numCuotas: number): Array<{ cuota: number
 }
 
 export function PrestamosAdelantos() {
-  const [, setData] = useState<SolicitudAdelanto[]>([])
+  const [misSolicitudes, setMisSolicitudes] = useState<MisSolicitudRow[]>(MIS_SOLICITUDES)
   const [activeTab, setActiveTab] = useState('mis')
   const [gdthSubTab, setGdthSubTab] = useState('sol')
   const [bienestarSubTab, setBienestarSubTab] = useState('sol')
@@ -73,12 +72,48 @@ export function PrestamosAdelantos() {
     : []
 
   useEffect(() => {
-    solicitudesAdelantoService.getAll()
-      .then(rows => { if (rows && rows.length > 0) setData(rows as SolicitudAdelanto[]); else setData([]) })
-      .catch(() => setData([]))
+    supabase.from('solicitudes_adelanto')
+      .select('id,numero,tipo,monto,motivo,cuotas,estado,fecha_solicitud')
+      .order('created_at', { ascending: false })
+      .then(({ data: rows }) => {
+        if (rows && rows.length > 0) {
+          setMisSolicitudes(rows.map(r => ({
+            id: r.id,
+            numero: r.numero,
+            tipo: r.tipo === 'adelanto' ? 'Adelanto de sueldo' : 'Préstamo personal',
+            monto: `S/. ${Number(r.monto).toLocaleString('es-PE')}`,
+            fecha: r.fecha_solicitud ?? '—',
+            estado: r.estado,
+            proximo: r.estado === 'aprobado' ? 'Desembolso por Contabilidad' : r.estado === 'en_revision' ? 'Evaluación Bienestar' : '—',
+          })))
+        }
+      })
+      .catch(() => {})
   }, [])
 
-  const handleEnviarSolicitud = () => {
+  const handleEnviarSolicitud = async () => {
+    const monto = parseFloat(montoSolicitud)
+    if (!monto || monto <= 0) { alert('Ingresa un monto válido'); return }
+    const { count } = await supabase.from('solicitudes_adelanto').select('*', { count: 'exact', head: true })
+    const numero = `ADV-${new Date().getFullYear()}-${String((count ?? 0) + 1).padStart(3, '0')}`
+    const payload = {
+      numero,
+      tipo: tipoSolicitud,
+      monto,
+      motivo: motivoSolicitud,
+      cuotas: tipoSolicitud === 'prestamo' ? parseInt(numCuotas) || 1 : 1,
+      estado: 'en_revision',
+      colaborador: 'Colaborador',
+    }
+    const { data: newRec, error } = await supabase.from('solicitudes_adelanto').insert(payload).select().single()
+    if (error) { alert(`Error: ${error.message}`); return }
+    if (newRec) {
+      setMisSolicitudes(prev => [{
+        id: newRec.id, numero, tipo: tipoSolicitud === 'adelanto' ? 'Adelanto de sueldo' : 'Préstamo personal',
+        monto: `S/. ${monto.toLocaleString('es-PE')}`, fecha: new Date().toLocaleDateString('es-PE'),
+        estado: 'en_revision', proximo: 'Evaluación Bienestar',
+      }, ...prev])
+    }
     setShowNueva(false)
     setDomicilio('')
     setMontoSolicitud('')
@@ -97,7 +132,7 @@ export function PrestamosAdelantos() {
     setShowDetalle(true)
   }
 
-  const selectedRow = MIS_SOLICITUDES.find(r => r.numero === selectedNumero) ?? null
+  const selectedRow = misSolicitudes.find(r => r.numero === selectedNumero) ?? null
 
   // Matriz table (shared between GDTH and Bienestar tabs)
   const MatrizTable = () => (
