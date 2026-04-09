@@ -72,10 +72,11 @@ export function PrestamosAdelantos() {
     : []
 
   useEffect(() => {
-    supabase.from('solicitudes_adelanto')
-      .select('id,numero,tipo,monto,motivo,cuotas,estado,fecha_solicitud')
-      .order('created_at', { ascending: false })
-      .then(({ data: rows }) => {
+    const load = async () => {
+      try {
+        const { data: rows } = await supabase.from('solicitudes_adelanto')
+          .select('id,numero,tipo,monto,motivo,cuotas,estado,fecha_solicitud')
+          .order('created_at', { ascending: false })
         if (rows && rows.length > 0) {
           setMisSolicitudes(rows.map(r => ({
             id: r.id,
@@ -87,8 +88,9 @@ export function PrestamosAdelantos() {
             proximo: r.estado === 'aprobado' ? 'Desembolso por Contabilidad' : r.estado === 'en_revision' ? 'Evaluación Bienestar' : '—',
           })))
         }
-      })
-      .catch(() => {})
+      } catch { /* mantiene mock */ }
+    }
+    load()
   }, [])
 
   const handleEnviarSolicitud = async () => {

@@ -900,15 +900,17 @@ export function DevolucionBienes() {
   const [showModalSalida, setShowModalSalida] = useState(false)
 
   useEffect(() => {
-    supabase.from('devoluciones')
-      .select('id,colaborador_dni,colaborador_nombre,area,tipo_salida,fecha_inicio,estado,bienes_count,created_at')
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
+    const load = async () => {
+      try {
+        const { data } = await supabase.from('devoluciones')
+          .select('id,colaborador_dni,colaborador_nombre,area,tipo_salida,fecha_inicio,estado,bienes_count,created_at')
+          .order('created_at', { ascending: false })
         if (data && data.length > 0) setData(data as Devolucion[])
         else setData(MOCK_DATA)
-      })
-      .catch(() => setData(MOCK_DATA))
-      .finally(() => setLoading(false))
+      } catch { setData(MOCK_DATA) }
+      finally { setLoading(false) }
+    }
+    load()
   }, [])
 
   const handleVerProceso = (d: Devolucion) => {

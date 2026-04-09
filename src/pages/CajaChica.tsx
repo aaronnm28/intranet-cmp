@@ -106,10 +106,11 @@ export function CajaChica() {
   })
 
   useEffect(() => {
-    supabase.from('caja_chica_cajas')
-      .select('id,area,responsable,monto_inicial,monto_disponible,created_at')
-      .order('created_at', { ascending: true })
-      .then(({ data: rows }) => {
+    const load = async () => {
+      try {
+        const { data: rows } = await supabase.from('caja_chica_cajas')
+          .select('id,area,responsable,monto_inicial,monto_disponible,created_at')
+          .order('created_at', { ascending: true })
         if (rows && rows.length > 0) {
           setCajas(rows.map(r => ({
             id: r.id,
@@ -122,9 +123,10 @@ export function CajaChica() {
         } else {
           setCajas(MOCK_CAJAS)
         }
-      })
-      .catch(() => setCajas(MOCK_CAJAS))
-      .finally(() => setLoading(false))
+      } catch { setCajas(MOCK_CAJAS) }
+      finally { setLoading(false) }
+    }
+    load()
   }, [])
 
   const handleRegistrarGasto = async () => {

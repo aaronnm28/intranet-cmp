@@ -125,18 +125,20 @@ export function PrestamosBienes() {
     : false
 
   useEffect(() => {
-    supabase.from('prestamos_bienes')
-      .select('id,numero,bien_nombre,fecha_solicitud,fecha_devolucion,estado')
-      .order('created_at', { ascending: false })
-      .then(({ data: rows }) => {
+    const load = async () => {
+      try {
+        const { data: rows } = await supabase.from('prestamos_bienes')
+          .select('id,numero,bien_nombre,fecha_solicitud,fecha_devolucion,estado')
+          .order('created_at', { ascending: false })
         if (rows && rows.length > 0) {
           setData(rows.map(r => ({ ...r, bien: r.bien_nombre, fecha_devolucion: r.fecha_devolucion ?? '—' })))
         } else {
           setData(MOCK_DATA)
         }
-      })
-      .catch(() => setData(MOCK_DATA))
-      .finally(() => setLoading(false))
+      } catch { setData(MOCK_DATA) }
+      finally { setLoading(false) }
+    }
+    load()
   }, [])
 
   const handleBienSelect = (id: string) => {
