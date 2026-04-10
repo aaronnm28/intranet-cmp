@@ -11,11 +11,6 @@ interface MisSolicitudRow {
   proximo: string
 }
 
-const MIS_SOLICITUDES: MisSolicitudRow[] = [
-  { id: '1', numero: 'ADV-2026-001', tipo: 'Adelanto de sueldo', monto: 'S/. 800', fecha: '01/03/2026', estado: 'aprobado', proximo: 'Desembolso por Contabilidad' },
-  { id: '2', numero: 'ADV-2026-002', tipo: 'Préstamo personal', monto: 'S/. 2,500', fecha: '10/03/2026', estado: 'en_revision', proximo: 'Evaluación Bienestar' },
-  { id: '3', numero: 'ADV-2026-003', tipo: 'Adelanto de sueldo', monto: 'S/. 400', fecha: '18/03/2026', estado: 'rechazado', proximo: '—' },
-]
 
 const MATRIZ_DATA = [
   { n: 1, area: 'UN. DE TI', puesto: 'Analista Sistemas', nombre: 'NUÑEZ MUÑOZ, Aaron Samuel', dni: '77434028', tipo: 'adelanto', motivo: 'PERSONALES', monto: 'S/ 800', fecha: '01/03/2026', cuotas: 2, mes_descuento: 'Mar-26 / Abr-26\n(S/ 400 c/u)', aprueba: 'Jefa GDTH — Karla Mendoza', abono_fecha: '05/03/2026', documento: 'ADV-2026-001' },

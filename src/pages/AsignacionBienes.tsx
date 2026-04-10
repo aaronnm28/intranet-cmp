@@ -52,9 +52,20 @@ const SOLICITUDES: Record<string, Solicitud> = {
 }
 
 const COLABS: Record<string, { nombre:string; apellido:string; puesto:string; subarea:string; consejo:string; initials:string }> = {
-  '77434028': {nombre:'Aaron Samuel',apellido:'Nuñez Muñoz',puesto:'Analista de Sistemas',subarea:'Tecnología de Información',consejo:'Consejo Nacional',initials:'AN'},
-  '45231089': {nombre:'Carlos',apellido:'Pérez Ramos',puesto:'Analista Contable',subarea:'UN. DE GDTH',consejo:'Consejo Nacional',initials:'CP'},
-  '32187654': {nombre:'Ana María',apellido:'Flores Vega',puesto:'Asistente Administrativa',subarea:'SEC. ADMINISTRACIÓN',consejo:'Consejo Nacional',initials:'FA'},
+  '77434028': {nombre:'Aaron Samuel',      apellido:'Nuñez Muñoz',          puesto:'Analista de TI',                        subarea:'UN. DE TI',             consejo:'Consejo Nacional',initials:'AN'},
+  '72224207': {nombre:'Julieth Zenina',    apellido:'Carbajal Garro',        puesto:'Jefa de GDTH',                          subarea:'UN. DE GDTH',           consejo:'Consejo Nacional',initials:'JC'},
+  '46521663': {nombre:'Jesús Luman',       apellido:'Marcos Aragon',         puesto:'Jefe de TI',                            subarea:'UN. DE TI',             consejo:'Consejo Nacional',initials:'JM'},
+  '45103078': {nombre:'Nataly',            apellido:'De Rutte Vergara',      puesto:'Jefa de Planificación',                 subarea:'UN. DE PLANIFICACION',  consejo:'Consejo Nacional',initials:'ND'},
+  '71926735': {nombre:'Marino Eduardo',    apellido:'Espinoza Vega',         puesto:'Jefa de Planificación',                 subarea:'UN. DE PLANIFICACION',  consejo:'Consejo Nacional',initials:'ME'},
+  '71489337': {nombre:'Ariana Sarita',     apellido:'Alvines Zapata',        puesto:'Trabajadora Social',                    subarea:'UN. DE GDTH',           consejo:'Consejo Nacional',initials:'AA'},
+  '45438744': {nombre:'Hamer',             apellido:'Chonlon Escudero',      puesto:'Analista de Planilla y Compensaciones', subarea:'UN. DE GDTH',           consejo:'Consejo Nacional',initials:'HC'},
+  '40555090': {nombre:'Guissela Del Rocio',apellido:'Palacios Alvarez',      puesto:'Jefa de Administración',                subarea:'UN. DE ADM',            consejo:'Consejo Nacional',initials:'GP'},
+  '48277741': {nombre:'Anali Jasmin',      apellido:'Chafloque Cordova',     puesto:'Asistente Administrativo',              subarea:'UN. DE ADM',            consejo:'Consejo Nacional',initials:'AC'},
+  '47272523': {nombre:'Edwin Jesus',       apellido:'Chozo Santisteban',     puesto:'Contador General',                      subarea:'UN. DE CONTA',          consejo:'Consejo Nacional',initials:'EC'},
+  '72651020': {nombre:'Maria del Rosario', apellido:'Rojas Gutierrez',       puesto:'Sub Contadora',                         subarea:'UN. DE CONTA',          consejo:'Consejo Nacional',initials:'MR'},
+  '40812969': {nombre:'Santiago Masaichi', apellido:'Hayashi Delgado',       puesto:'Jefe de Patrimonio',                    subarea:'UN. DE PATR',           consejo:'Consejo Nacional',initials:'SH'},
+  '10609810': {nombre:'David Augusto',     apellido:'Cadillo Alfaro',        puesto:'Analista de Activos Muebles',           subarea:'UN. DE PATR',           consejo:'Consejo Nacional',initials:'DC'},
+  '43422937': {nombre:'David Leoncio',     apellido:'Salazar Ttito',         puesto:'Supervisor de Activos Muebles',         subarea:'UN. DE PATR',           consejo:'Consejo Nacional',initials:'DS'},
 }
 
 const BIENES_DISP = [
@@ -339,7 +350,7 @@ export function AsignacionBienes() {
                   <td>{s.fecha_solicitud ?? '—'}</td>
                   <td className="text-gray">—</td>
                   <td><span className={`badge ${s.estado==='Aprobado'?'b-green':s.estado==='Rechazado'?'b-red':s.estado==='Observado'?'b-yellow':'b-yellow'}`}>{s.estado}</span></td>
-                  <td><div className="actions-cell"><button className="btn btn-gray btn-xs" onClick={() => toast.show(`Detalle: ${s.numero}`)}>Ver detalle</button></div></td>
+                  <td><div className="actions-cell"><button className="btn btn-gray btn-xs" onClick={() => openDetalle(s.numero)}>Ver detalle</button></div></td>
                 </tr>
               ))}
             </tbody>

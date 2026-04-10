@@ -10,11 +10,6 @@ interface PrestamoBienRow {
   estado: string
 }
 
-const MOCK_DATA: PrestamoBienRow[] = [
-  { id: '1', numero: 'PREST-2026-001', bien: 'Laptop HP Pavilion',  fecha_solicitud: '05/03/2026', fecha_devolucion: '12/03/2026', estado: 'devuelto_conforme' },
-  { id: '2', numero: 'PREST-2026-002', bien: 'Proyector Epson',      fecha_solicitud: '18/03/2026', fecha_devolucion: '25/03/2026', estado: 'en_prestamo' },
-  { id: '3', numero: 'PREST-2026-003', bien: 'Tablet Samsung',       fecha_solicitud: '22/03/2026', fecha_devolucion: '29/03/2026', estado: 'pendiente_aprobacion' },
-]
 
 const BIENES_DISPONIBLES_PRESTAMO = [
   { id: '1', nombre: 'Laptop HP Pavilion',       codigo: 'CMP-038412', disponibles: 1 },
@@ -127,10 +122,20 @@ export function PrestamosBienes() {
   const [colabErr, setColabErr]   = useState(false)
 
   const COLAB_MOCK: Record<string, { nombre: string; area: string; puesto: string }> = {
-    '77434028': { nombre: 'Aaron Samuel Nuñez Muñoz', area: 'UN. DE TI',              puesto: 'Analista de Sistemas'   },
-    '45231089': { nombre: 'Carlos Pérez Ramos',        area: 'UN. DE GDTH',            puesto: 'Analista de TI'         },
-    '32187654': { nombre: 'María Torres Huamán',       area: 'UN. DE GDTH',            puesto: 'Analista RR.HH.'        },
-    '77410231': { nombre: 'Jorge Lima Castillo',       area: 'UN. DE COMUN. E IMAGEN', puesto: 'Técnico Comunicaciones' },
+    '77434028': { nombre: 'Aaron Samuel Nuñez Muñoz',            area: 'UN. DE TI',            puesto: 'Analista de TI'                        },
+    '72224207': { nombre: 'Julieth Zenina Carbajal Garro',       area: 'UN. DE GDTH',          puesto: 'Jefa de GDTH'                          },
+    '46521663': { nombre: 'Jesús Luman Marcos Aragon',           area: 'UN. DE TI',            puesto: 'Jefe de TI'                            },
+    '45103078': { nombre: 'Nataly De Rutte Vergara',             area: 'UN. DE PLANIFICACION', puesto: 'Jefa de Planificación'                 },
+    '71926735': { nombre: 'Marino Eduardo Espinoza Vega',        area: 'UN. DE PLANIFICACION', puesto: 'Jefa de Planificación'                 },
+    '71489337': { nombre: 'Ariana Sarita Alvines Zapata',        area: 'UN. DE GDTH',          puesto: 'Trabajadora Social'                    },
+    '45438744': { nombre: 'Hamer Chonlon Escudero',              area: 'UN. DE GDTH',          puesto: 'Analista de Planilla y Compensaciones' },
+    '40555090': { nombre: 'Guissela Del Rocio Palacios Alvarez', area: 'UN. DE ADM',           puesto: 'Jefa de Administración'                },
+    '48277741': { nombre: 'Anali Jasmin Chafloque Cordova',      area: 'UN. DE ADM',           puesto: 'Asistente Administrativo'              },
+    '47272523': { nombre: 'Edwin Jesus Chozo Santisteban',       area: 'UN. DE CONTA',         puesto: 'Contador General'                      },
+    '72651020': { nombre: 'Maria del Rosario Rojas Gutierrez',   area: 'UN. DE CONTA',         puesto: 'Sub Contadora'                         },
+    '40812969': { nombre: 'Santiago Masaichi Hayashi Delgado',   area: 'UN. DE PATR',          puesto: 'Jefe de Patrimonio'                    },
+    '10609810': { nombre: 'David Augusto Cadillo Alfaro',        area: 'UN. DE PATR',          puesto: 'Analista de Activos Muebles'           },
+    '43422937': { nombre: 'David Leoncio Salazar Ttito',         area: 'UN. DE PATR',          puesto: 'Supervisor de Activos Muebles'         },
   }
 
   const buscarColab = async () => {

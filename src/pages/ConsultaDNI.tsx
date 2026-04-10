@@ -415,6 +415,25 @@ function AprobFirmaTd({ f }: { f: FirmaInfo }) {
   )
 }
 
+// ── Recordatorio helpers ────────────────────────────────────────────────────
+
+const TIPOS_RECORDATORIO = [
+  { value: 'proceso_salida',    label: 'Proceso de salida — todos los pendientes' },
+  { value: 'devolucion_bienes', label: 'Devolución de bienes y accesorios' },
+  { value: 'prestamo',          label: 'Liquidación de préstamo / adelanto' },
+  { value: 'urgente',           label: 'Recordatorio urgente — plazo vencido' },
+]
+
+function buildMensaje(tipo: string, nombre: string, bienesStr: string, prestamosStr: string, total: number): string {
+  if (tipo === 'devolucion_bienes')
+    return `Estimado/a ${nombre},\n\nLe recordamos que tiene bienes y/o accesorios institucionales pendientes de devolución:\n\n${bienesStr || '• Sin bienes pendientes'}\n\nPor favor, coordine la entrega con el área de Administración a la brevedad.\n\nAtentamente,\nÁrea de GDTH — CMP`
+  if (tipo === 'prestamo')
+    return `Estimado/a ${nombre},\n\nLe recordamos que tiene el siguiente préstamo/adelanto pendiente de liquidación:\n\n${prestamosStr || '• Sin pendientes registrados'}\n\nPor favor, regularice este pendiente con el área de Finanzas.\n\nAtentamente,\nÁrea de GDTH — CMP`
+  if (tipo === 'urgente')
+    return `Estimado/a ${nombre},\n\n⚠ RECORDATORIO URGENTE\n\nEl plazo para la regularización de sus pendientes institucionales ha vencido. Se requiere acción inmediata.\n\nPendientes: ${total} ítem(s) por regularizar.\n\nComuníquese con GDTH de manera urgente.\n\nAtentamente,\nÁrea de GDTH — CMP`
+  return `Estimado/a ${nombre},\n\nPor medio del presente correo, GDTH le recuerda que tiene pendientes por regularizar en el marco de su proceso de salida:\n\n${bienesStr ? bienesStr + '\n' : ''}${prestamosStr ? prestamosStr + '\n' : ''}${total === 0 ? '• Sin pendientes registrados\n' : ''}\nSolicitamos regularizar estos pendientes a la brevedad. Adjuntamos el acta detallada.\n\nAtentamente,\nÁrea de GDTH — CMP`
+}
+
 // ── Main component ─────────────────────────────────────────────────────────
 
 export function ConsultaDNI() {
@@ -429,6 +448,22 @@ export function ConsultaDNI() {
   const [openPrestamosAdelantos, setOpenPrestamosAdelantos] = useState(true)
   const [openCajaChica, setOpenCajaChica] = useState(true)
   const [openReporte, setOpenReporte] = useState(true)
+
+  // Modal: Recordatorio
+  const [showRecordatorio, setShowRecordatorio] = useState(false)
+  const [recCorreo, setRecCorreo] = useState('')
+  const [recTipo, setRecTipo] = useState('proceso_salida')
+  const [recMensaje, setRecMensaje] = useState('')
+  const [recCopiaJefe, setRecCopiaJefe] = useState(true)
+  const [recCanal, setRecCanal] = useState('correo')
+  const [recFechaLimite, setRecFechaLimite] = useState(() => {
+    const d = new Date(); d.setDate(d.getDate() + 7); return d.toISOString().split('T')[0]
+  })
+
+  // Modal: Acta de Pendientes
+  const [showActa, setShowActa] = useState(false)
+
+  const hoy = new Date().toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' })
 
   const handleConsultar = async () => {
     const val = dniInput.trim()
@@ -484,6 +519,40 @@ export function ConsultaDNI() {
     setDniInput('')
     setResult(null)
     setNotFound(false)
+  }
+
+  const getPendientes = (r: ColaboradorData) => {
+    const bienes = r.bienes.filter(b => b.devolucion === 'pendiente' || b.devolucion === 'observado').map(b => `• ${b.desc}`)
+    const accesorios = r.accesorios.map(a => `• ${a.nombre}`)
+    const prestamos = [...r.prestamosBienes, ...r.prestamosAdelantos]
+      .filter(p => p.estado === 'active' || p.estado === 'revision')
+      .map(p => `• ${p.numero} (${p.tipo} — ${p.monto})`)
+    return { bienes, accesorios, prestamos, total: bienes.length + accesorios.length + prestamos.length }
+  }
+
+  const openRecordatorio = () => {
+    if (!result) return
+    const pend = getPendientes(result)
+    const correo = `${dniInput}@cmp.org.pe`
+    setRecCorreo(correo)
+    setRecTipo('proceso_salida')
+    setRecMensaje(buildMensaje('proceso_salida', result.nombre, pend.bienes.join('\n'), pend.prestamos.join('\n'), pend.total))
+    setRecCopiaJefe(true)
+    const d = new Date(); d.setDate(d.getDate() + 7)
+    setRecFechaLimite(d.toISOString().split('T')[0])
+    setShowRecordatorio(true)
+  }
+
+  const handleTipoChange = (tipo: string) => {
+    if (!result) return
+    setRecTipo(tipo)
+    const pend = getPendientes(result)
+    setRecMensaje(buildMensaje(tipo, result.nombre, pend.bienes.join('\n'), pend.prestamos.join('\n'), pend.total))
+  }
+
+  const confirmarRecordatorio = () => {
+    if (!recCorreo.trim()) return
+    setShowRecordatorio(false)
   }
 
   return (
@@ -881,16 +950,15 @@ export function ConsultaDNI() {
               </div>
             )}
             <div className="flex-row" style={{ flexWrap: 'wrap', gap: 8 }}>
-              <button className="btn btn-outline btn-sm" onClick={() => alert('Generando acta de pendientes...')}>📄 Generar acta de pendientes</button>
+              <button className="btn btn-outline btn-sm" onClick={() => setShowActa(true)}>📄 Generar acta de pendientes</button>
               <button
                 className={`btn btn-sm ${result.footerBanner ? 'btn-disabled' : 'btn-gray'}`}
                 disabled={!!result.footerBanner}
                 title={result.footerBanner ? 'Completa todas las devoluciones y pendientes' : undefined}
-                onClick={() => !result.footerBanner && alert('Cerrando proceso de salida...')}
               >
                 ✔ Cerrar proceso de salida
               </button>
-              <button className="btn btn-primary btn-sm" onClick={() => alert('Recordatorio enviado.')}>📤 Enviar recordatorio al colaborador</button>
+              <button className="btn btn-primary btn-sm" onClick={openRecordatorio}>📤 Enviar recordatorio al colaborador</button>
             </div>
           </div>
 
@@ -900,6 +968,217 @@ export function ConsultaDNI() {
       <div className="text-xs text-gray" style={{ marginTop: 8, fontStyle: 'italic' }}>
         📌 Nota de diseño: Datos consumidos vía API REST desde Activos y Bienes (.NET 9) — GET /api/bienes/&#123;dni&#125; — Autenticación: token inter-servicio
       </div>
+
+      {/* ── Modal: Enviar Recordatorio ── */}
+      {showRecordatorio && result && (
+        <div className="modal-overlay" onClick={() => setShowRecordatorio(false)}>
+          <div className="modal-box" style={{ maxWidth: 600 }} onClick={e => e.stopPropagation()}>
+            <div className="modal-hdr">
+              <div>
+                <div className="modal-title">Enviar Recordatorio al Colaborador</div>
+                <div className="modal-subtitle">Notificación formal de pendientes — generado por GDTH</div>
+              </div>
+              <button className="modal-close" onClick={() => setShowRecordatorio(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              {/* Info colaborador */}
+              <div style={{ background: '#F5F3FF', border: '1px solid #DDD6FE', borderRadius: 8, padding: '12px 14px', marginBottom: 14 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                  <div style={{ width: 36, height: 36, background: '#6B21A8', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: 13, flexShrink: 0 }}>{result.initials}</div>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#1E1B4B' }}>{result.nombre}</div>
+                    <div style={{ fontSize: 11, color: '#6B7280' }}>{result.meta}</div>
+                  </div>
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label">Correo electrónico <span style={{ fontSize: 10, color: '#9CA3AF' }}>(editable)</span></label>
+                  <input type="email" className="form-control" value={recCorreo} onChange={e => setRecCorreo(e.target.value)} />
+                </div>
+              </div>
+
+              {/* Tipo recordatorio */}
+              <div className="form-group">
+                <label className="form-label">Tipo de recordatorio <span className="req">*</span></label>
+                <select className="form-control" value={recTipo} onChange={e => handleTipoChange(e.target.value)}>
+                  {TIPOS_RECORDATORIO.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
+              </div>
+
+              {/* Pendientes banner */}
+              {(() => {
+                const pend = getPendientes(result)
+                return pend.total > 0 ? (
+                  <div className="banner banner-amber" style={{ fontSize: 12 }}>
+                    ⚠ <strong>Pendientes detectados:</strong>{' '}
+                    {[pend.bienes.length ? `${pend.bienes.length} bien(es)` : '', pend.accesorios.length ? `${pend.accesorios.length} accesorio(s)` : '', pend.prestamos.length ? `${pend.prestamos.length} préstamo(s)` : ''].filter(Boolean).join(' · ')}
+                  </div>
+                ) : (
+                  <div className="banner banner-teal" style={{ fontSize: 12 }}>✓ <strong>Sin pendientes registrados</strong> — el colaborador está al día.</div>
+                )
+              })()}
+
+              {/* Copia jefe */}
+              <div className="form-group">
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, color: '#374151' }}>
+                  <input type="checkbox" checked={recCopiaJefe} onChange={e => setRecCopiaJefe(e.target.checked)} style={{ accentColor: '#6B21A8' }} />
+                  Enviar copia al jefe de área
+                </label>
+                {recCopiaJefe && (
+                  <div style={{ marginTop: 6, background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 6, padding: '6px 12px', fontSize: 12, display: 'flex', justifyContent: 'space-between' }}>
+                    <span className="fw-600" style={{ color: '#1E1B4B' }}>Jefe del Área</span>
+                    <span style={{ color: '#9CA3AF' }}>gdth@cmp.org.pe</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Mensaje */}
+              <div className="form-group">
+                <label className="form-label">Mensaje del recordatorio <span className="req">*</span></label>
+                <textarea className="form-control" rows={7} value={recMensaje} onChange={e => setRecMensaje(e.target.value)} style={{ resize: 'none' }} />
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>El correo incluirá el listado de pendientes adjunto en PDF.</div>
+              </div>
+
+              {/* Fecha límite + canal */}
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Fecha límite de respuesta</label>
+                  <input type="date" className="form-control" value={recFechaLimite} onChange={e => setRecFechaLimite(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Canal adicional</label>
+                  <select className="form-control" value={recCanal} onChange={e => setRecCanal(e.target.value)}>
+                    <option value="correo">Solo correo electrónico</option>
+                    <option value="correo_teams">Correo + Teams</option>
+                    <option value="correo_whatsapp">Correo + WhatsApp</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-gray" onClick={() => setShowRecordatorio(false)}>Cancelar</button>
+              <button className="btn btn-primary" onClick={confirmarRecordatorio}>📤 Confirmar envío</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: Acta de Pendientes Institucionales ── */}
+      {showActa && result && (() => {
+        const pend = getPendientes(result)
+        const renderItems = (items: string[], empty: string) => items.length > 0
+          ? items.map((item, i) => (
+              <tr key={i}>
+                <td style={{ border: '1px solid #E5E7EB', padding: '6px 12px', fontSize: 12 }}>{item}</td>
+                <td style={{ border: '1px solid #E5E7EB', padding: '6px 12px', fontSize: 12, color: '#D97706', textAlign: 'center', width: 110 }}>Pendiente</td>
+              </tr>
+            ))
+          : [<tr key="e"><td colSpan={2} style={{ border: '1px solid #E5E7EB', padding: '6px 12px', fontSize: 12, color: '#9CA3AF', textAlign: 'center', fontStyle: 'italic' }}>{empty}</td></tr>]
+
+        return (
+          <div className="modal-overlay" onClick={() => setShowActa(false)}>
+            <div className="modal-box" style={{ maxWidth: 720, maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+              <div className="modal-hdr">
+                <div>
+                  <div className="modal-title">Acta de Pendientes Institucionales</div>
+                  <div className="modal-subtitle">Generado el {hoy} · Uso interno GDTH</div>
+                </div>
+                <button className="modal-close" onClick={() => setShowActa(false)}>×</button>
+              </div>
+              <div className="modal-body">
+                {/* Encabezado */}
+                <div style={{ textAlign: 'center', borderBottom: '2px solid #6B21A8', paddingBottom: 12, marginBottom: 16 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#6B21A8', textTransform: 'uppercase' }}>Colegio Médico del Perú — GDTH</div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: '#1E1B4B', marginTop: 4 }}>Acta de Pendientes Institucionales</div>
+                </div>
+
+                {/* Datos colaborador */}
+                <div style={{ background: '#F5F3FF', border: '1px solid #DDD6FE', borderRadius: 8, padding: '12px 14px', marginBottom: 14 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#6B21A8', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Datos del Colaborador</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 24px', fontSize: 12 }}>
+                    <div><span style={{ color: '#6B7280' }}>Nombre:</span> <strong>{result.nombre}</strong></div>
+                    <div><span style={{ color: '#6B7280' }}>DNI:</span> <strong>{dniInput}</strong></div>
+                    <div style={{ gridColumn: '1/-1' }}><span style={{ color: '#6B7280' }}>Datos:</span> {result.meta}</div>
+                  </div>
+                </div>
+
+                {/* Resumen */}
+                <div style={{ borderRadius: 8, border: `1px solid ${pend.total > 0 ? '#FECACA' : '#BBF7D0'}`, background: pend.total > 0 ? '#FEF2F2' : '#F0FDF4', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+                  <span style={{ fontSize: 20 }}>{pend.total > 0 ? '⚠' : '✓'}</span>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: pend.total > 0 ? '#991B1B' : '#065F46' }}>
+                      {pend.total > 0 ? `${pend.total} ítem(s) pendientes de regularización` : 'Sin pendientes — colaborador al día'}
+                    </div>
+                    <div style={{ fontSize: 11, color: '#6B7280' }}>Estado global del proceso</div>
+                  </div>
+                </div>
+
+                {/* Secciones */}
+                {[
+                  { title: '📦 Bienes Institucionales', items: pend.bienes, empty: 'Sin bienes pendientes' },
+                  { title: '🔌 Accesorios Institucionales', items: pend.accesorios, empty: 'Sin accesorios pendientes' },
+                  { title: '💰 Préstamos y Adelantos', items: pend.prestamos, empty: 'Sin préstamos ni adelantos pendientes' },
+                ].map(sec => (
+                  <div key={sec.title} style={{ marginBottom: 12 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: '#374151', background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '6px 6px 0 0', padding: '6px 12px', display: 'flex', justifyContent: 'space-between' }}>
+                      <span>{sec.title}</span>
+                      <span style={{ fontSize: 11, fontWeight: 400, color: sec.items.length ? '#D97706' : '#059669' }}>{sec.items.length ? `${sec.items.length} pendiente(s)` : '✓ Al día'}</span>
+                    </div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr style={{ background: '#F9FAFB' }}>
+                          <th style={{ border: '1px solid #E5E7EB', padding: '5px 12px', fontSize: 11, color: '#6B7280', fontWeight: 600, textAlign: 'left' }}>Ítem</th>
+                          <th style={{ border: '1px solid #E5E7EB', padding: '5px 12px', fontSize: 11, color: '#6B7280', fontWeight: 600, textAlign: 'center', width: 110 }}>Estado</th>
+                        </tr>
+                      </thead>
+                      <tbody>{renderItems(sec.items, sec.empty)}</tbody>
+                    </table>
+                  </div>
+                ))}
+
+                {/* Caja Chica */}
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#374151', background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '6px 6px 0 0', padding: '6px 12px', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>🏧 Caja Chica</span>
+                    <span style={{ fontSize: 11, fontWeight: 400, color: '#059669' }}>✓ No designado</span>
+                  </div>
+                  <div style={{ border: '1px solid #E5E7EB', borderTop: 'none', borderRadius: '0 0 6px 6px', padding: '8px 12px', fontSize: 12, color: '#9CA3AF', fontStyle: 'italic' }}>
+                    No figura como responsable de Caja Chica. No aplica proceso de liquidación.
+                  </div>
+                </div>
+
+                {/* Firmas */}
+                <div style={{ border: '1px solid #E5E7EB', borderRadius: 8, padding: '14px 16px', marginTop: 8 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 }}>Firmas de Conformidad</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 24, textAlign: 'center' }}>
+                    {[
+                      { nombre: result.nombre, cargo: 'Colaborador' },
+                      { nombre: 'Jefe del Área', cargo: 'Área responsable' },
+                      { nombre: 'Responsable GDTH', cargo: 'Gestión del Talento Humano' },
+                    ].map((f, i) => (
+                      <div key={i}>
+                        <div style={{ height: 40 }} />
+                        <div style={{ borderTop: '1px solid #9CA3AF', paddingTop: 6 }}>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: '#374151' }}>{f.nombre}</div>
+                          <div style={{ fontSize: 10, color: '#9CA3AF' }}>{f.cargo}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ textAlign: 'center', fontSize: 10, color: '#9CA3AF', marginTop: 12 }}>
+                  Documento generado por el Sistema de Gestión Interna — CMP · {hoy} · Uso interno
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-gray" onClick={() => setShowActa(false)}>Cerrar</button>
+                <button className="btn btn-outline" onClick={() => window.print()}>🖨 Imprimir</button>
+                <button className="btn btn-primary" onClick={() => window.print()}>📄 Descargar PDF</button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }

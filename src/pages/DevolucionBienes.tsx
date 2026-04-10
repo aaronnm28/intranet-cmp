@@ -32,17 +32,22 @@ function FirmaEspera() {
 
 // ─── Data constants ────────────────────────────────────────────────────────────
 
-const MOCK_DATA: Devolucion[] = [
-  { id: '1', colaborador_dni: '45231089', colaborador_nombre: 'Carlos Pérez Ramos', area: 'UN. DE TI', tipo_salida: 'cese', fecha_inicio: '31/03/2026', estado: 'en_proceso', bienes_count: 5, created_at: '' },
-  { id: '2', colaborador_dni: '32187654', colaborador_nombre: 'María Torres Huamán', area: 'UN. DE GDTH', tipo_salida: 'cese', fecha_inicio: '28/03/2026', estado: 'observado', bienes_count: 3, created_at: '' },
-  { id: '3', colaborador_dni: '77410231', colaborador_nombre: 'Jorge Lima Castillo', area: 'UN. DE COMUN. E IMAGEN INSTI.', tipo_salida: 'cese', fecha_inicio: '20/03/2026', estado: 'bloqueado', bienes_count: 2, created_at: '' },
-]
 
 const COLABORADORES: Record<string, { nombre: string; area: string; cargo: string; sede: string }> = {
-  '45231089': { nombre: 'Carlos Pérez Ramos',   area: 'UN. DE TI',              cargo: 'Analista de TI',         sede: 'Sede Malecón de la Reserva' },
-  '32187654': { nombre: 'María Torres Huamán',  area: 'UN. DE GDTH',            cargo: 'Analista RR.HH.',         sede: 'Sede Malecón de la Reserva' },
-  '77410231': { nombre: 'Jorge Lima Castillo',  area: 'UN. DE COMUN. E IMAGEN', cargo: 'Técnico Comunicaciones', sede: 'Sede Malecón de la Reserva' },
-  '77434028': { nombre: 'Aaron Samuel Nuñez Muñoz', area: 'UN. DE TI',         cargo: 'Analista de Sistemas',   sede: 'Sede Malecón de la Reserva' },
+  '77434028': { nombre: 'Aaron Samuel Nuñez Muñoz',        area: 'UN. DE TI',            cargo: 'Analista de TI',                        sede: 'SEDE 28 DE JULIO' },
+  '72224207': { nombre: 'Julieth Zenina Carbajal Garro',   area: 'UN. DE GDTH',          cargo: 'Jefa de GDTH',                          sede: 'SEDE 28 DE JULIO' },
+  '46521663': { nombre: 'Jesús Luman Marcos Aragon',       area: 'UN. DE TI',            cargo: 'Jefe de TI',                            sede: 'SEDE 28 DE JULIO' },
+  '45103078': { nombre: 'Nataly De Rutte Vergara',         area: 'UN. DE PLANIFICACION', cargo: 'Jefa de Planificación',                 sede: 'SEDE 28 DE JULIO' },
+  '71926735': { nombre: 'Marino Eduardo Espinoza Vega',    area: 'UN. DE PLANIFICACION', cargo: 'Jefa de Planificación',                 sede: 'SEDE 28 DE JULIO' },
+  '71489337': { nombre: 'Ariana Sarita Alvines Zapata',    area: 'UN. DE GDTH',          cargo: 'Trabajadora Social',                    sede: 'SEDE 28 DE JULIO' },
+  '45438744': { nombre: 'Hamer Chonlon Escudero',          area: 'UN. DE GDTH',          cargo: 'Analista de Planilla y Compensaciones', sede: 'SEDE 28 DE JULIO' },
+  '40555090': { nombre: 'Guissela Del Rocio Palacios Alvarez', area: 'UN. DE ADM',       cargo: 'Jefa de Administración',                sede: 'SEDE 28 DE JULIO' },
+  '48277741': { nombre: 'Anali Jasmin Chafloque Cordova',  area: 'UN. DE ADM',           cargo: 'Asistente Administrativo',              sede: 'SEDE 28 DE JULIO' },
+  '47272523': { nombre: 'Edwin Jesus Chozo Santisteban',   area: 'UN. DE CONTA',         cargo: 'Contador General',                      sede: 'SEDE 28 DE JULIO' },
+  '72651020': { nombre: 'Maria del Rosario Rojas Gutierrez', area: 'UN. DE CONTA',       cargo: 'Sub Contadora',                         sede: 'SEDE 28 DE JULIO' },
+  '40812969': { nombre: 'Santiago Masaichi Hayashi Delgado', area: 'UN. DE PATR',        cargo: 'Jefe de Patrimonio',                    sede: 'SEDE 28 DE JULIO' },
+  '10609810': { nombre: 'David Augusto Cadillo Alfaro',    area: 'UN. DE PATR',          cargo: 'Analista de Activos Muebles',           sede: 'SEDE 28 DE JULIO' },
+  '43422937': { nombre: 'David Leoncio Salazar Ttito',     area: 'UN. DE PATR',          cargo: 'Supervisor de Activos Muebles',         sede: 'SEDE 28 DE JULIO' },
 }
 
 const BIENES_DEVOLUCION = [

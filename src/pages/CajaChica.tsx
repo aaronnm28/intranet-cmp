@@ -296,6 +296,11 @@ export function CajaChica() {
                 </div>
               </div>
 
+              <div className="flex gap-8 mb-12">
+                <button className="btn btn-primary btn-sm" onClick={() => { setSelectedCaja(activeCaja); setShowRegistrarGasto(true) }}>+ Registrar Gasto</button>
+                <button className="btn btn-outline btn-sm" onClick={() => { setSelectedCaja(activeCaja); setShowReposicion(true) }}>Solicitar Reposición</button>
+              </div>
+
               <div className="card">
                 <div className="table-wrap">
                   <table>
