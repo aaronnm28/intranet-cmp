@@ -92,19 +92,19 @@ const MOCK_MAP: Record<string, ColaboradorData> = {
       {
         id: '111030', desc: 'Laptop Dell', tipo: 'Activo', codigo: 'CMP-038401', estado: 'bueno',
         devolucion: 'pendiente',
-        custodio: { status: 'done', nombre: 'R. Limas', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
+        custodio: { status: 'done', nombre: 'J. Luman', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
         colaborador: { status: 'pend' },
       },
       {
         id: '111031', desc: 'Mouse Logitech', tipo: 'Activo', codigo: 'CMP-038402', estado: 'bueno',
         devolucion: 'pendiente',
-        custodio: { status: 'done', nombre: 'R. Limas', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
+        custodio: { status: 'done', nombre: 'J. Luman', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
         colaborador: { status: 'pend' },
       },
       {
         id: '200201', desc: 'Silla ergonómica', tipo: 'Artículo', codigo: 'CMP-ART-041', estado: 'regular',
         devolucion: 'observado',
-        custodio: { status: 'done', nombre: 'R. Limas', cargo: 'Jefe Admin. CMP', fecha: '⚠ Observado' },
+        custodio: { status: 'done', nombre: 'G. Palacios', cargo: 'Jefa de Administración', fecha: '⚠ Observado' },
         colaborador: { status: 'pend' },
       },
     ],
@@ -132,19 +132,19 @@ const MOCK_MAP: Record<string, ColaboradorData> = {
     reporte: [
       {
         id: '111030', desc: 'Laptop Dell', tipo: 'Activo', codigo: 'CMP-038401', estado: 'bueno',
-        custodio: { status: 'done', nombre: 'R. Limas', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
+        custodio: { status: 'done', nombre: 'J. Luman', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
         colaborador: { status: 'pend' },
         estadoFirma: 'pendiente',
       },
       {
         id: '111031', desc: 'Mouse Logitech', tipo: 'Activo', codigo: 'CMP-038402', estado: 'bueno',
-        custodio: { status: 'done', nombre: 'R. Limas', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
+        custodio: { status: 'done', nombre: 'J. Luman', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
         colaborador: { status: 'pend' },
         estadoFirma: 'pendiente',
       },
       {
         id: '200201', desc: 'Silla ergonómica', tipo: 'Artículo', codigo: 'CMP-ART-041', estado: 'regular',
-        custodio: { status: 'done', nombre: 'R. Limas', cargo: 'Jefe Admin. CMP', fecha: '⚠ Observado' },
+        custodio: { status: 'done', nombre: 'G. Palacios', cargo: 'Jefa de Administración', fecha: '⚠ Observado' },
         colaborador: { status: 'pend' },
         estadoFirma: 'pendiente',
       },
@@ -182,13 +182,13 @@ const MOCK_MAP: Record<string, ColaboradorData> = {
       {
         id: 'SOL-2026-001', desc: 'Laptop HP EliteBook 840', tipo: 'Activo', codigo: 'CMP-038410', estado: 'bueno',
         devolucion: 'n/a',
-        custodio: { status: 'done', nombre: 'R. Limas', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
+        custodio: { status: 'done', nombre: 'J. Luman', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
         colaborador: { status: 'done', nombre: 'Aaron N.', cargo: 'Analista de Sistemas — UN. DE TI', fecha: '28/03/2026' },
       },
       {
         id: '111033', desc: 'Monitor HP 24"', tipo: 'Activo', codigo: 'CMP-038411', estado: 'bueno',
         devolucion: 'n/a',
-        custodio: { status: 'done', nombre: 'R. Limas', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
+        custodio: { status: 'done', nombre: 'J. Luman', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
         colaborador: { status: 'done', nombre: 'Aaron N.', cargo: 'Analista de Sistemas — UN. DE TI', fecha: '28/03/2026' },
       },
       {
@@ -201,12 +201,12 @@ const MOCK_MAP: Record<string, ColaboradorData> = {
     accesorios: [
       {
         id: '2026_ADM_0006', nombre: 'Teclado Logitech MK270', marca: 'Logitech', estado: 'bueno',
-        custodio: { status: 'done', nombre: 'R. Limas', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
+        custodio: { status: 'done', nombre: 'J. Luman', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
         colaborador: { status: 'done', nombre: 'Aaron N.', cargo: 'Analista de Sistemas — UN. DE TI', fecha: '28/03/2026' },
       },
       {
         id: '2026_ADM_0007', nombre: 'Mouse Logitech M185', marca: 'Logitech', estado: 'bueno',
-        custodio: { status: 'done', nombre: 'R. Limas', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
+        custodio: { status: 'done', nombre: 'J. Luman', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
         colaborador: { status: 'done', nombre: 'Aaron N.', cargo: 'Analista de Sistemas — UN. DE TI', fecha: '28/03/2026' },
       },
       {
@@ -233,13 +233,13 @@ const MOCK_MAP: Record<string, ColaboradorData> = {
     reporte: [
       {
         id: 'SOL-2026-001', desc: 'Laptop HP EliteBook 840', tipo: 'Activo', codigo: 'CMP-038410', estado: 'bueno',
-        custodio: { status: 'done', nombre: 'R. Limas', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
+        custodio: { status: 'done', nombre: 'J. Luman', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
         colaborador: { status: 'done', nombre: 'Aaron N.', cargo: 'Analista de Sistemas — UN. DE TI', fecha: '28/03/2026' },
         estadoFirma: 'completado',
       },
       {
         id: '111033', desc: 'Monitor HP 24"', tipo: 'Activo', codigo: 'CMP-038411', estado: 'bueno',
-        custodio: { status: 'done', nombre: 'R. Limas', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
+        custodio: { status: 'done', nombre: 'J. Luman', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
         colaborador: { status: 'done', nombre: 'Aaron N.', cargo: 'Analista de Sistemas — UN. DE TI', fecha: '28/03/2026' },
         estadoFirma: 'completado',
       },
@@ -251,13 +251,13 @@ const MOCK_MAP: Record<string, ColaboradorData> = {
       },
       {
         id: '2026_ADM_0006', desc: 'Teclado Logitech MK270', tipo: 'Accesorio', codigo: '2026_ADM_0006', estado: 'bueno',
-        custodio: { status: 'done', nombre: 'R. Limas', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
+        custodio: { status: 'done', nombre: 'J. Luman', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
         colaborador: { status: 'done', nombre: 'Aaron N.', cargo: 'Analista de Sistemas — UN. DE TI', fecha: '28/03/2026' },
         estadoFirma: 'completado',
       },
       {
         id: '2026_ADM_0007', desc: 'Mouse Logitech M185', tipo: 'Accesorio', codigo: '2026_ADM_0007', estado: 'bueno',
-        custodio: { status: 'done', nombre: 'R. Limas', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
+        custodio: { status: 'done', nombre: 'J. Luman', cargo: 'Jefe UN. DE TI', fecha: '28/03/2026' },
         colaborador: { status: 'done', nombre: 'Aaron N.', cargo: 'Analista de Sistemas — UN. DE TI', fecha: '28/03/2026' },
         estadoFirma: 'completado',
       },
@@ -289,14 +289,14 @@ const MOCK_MAP: Record<string, ColaboradorData> = {
       {
         id: 'TEL-001', desc: 'Teléfono IP Fanvil', tipo: 'Activo', codigo: 'ADM-TEL-002', estado: 'bueno',
         devolucion: 'n/a',
-        custodio: { status: 'done', nombre: 'R. Limas', cargo: 'Jefe Admin. CMP', fecha: '10/01/2026' },
-        colaborador: { status: 'done', nombre: 'A. Flores', cargo: 'Asistente — SEC. ADMINISTRACIÓN', fecha: '10/01/2026' },
+        custodio: { status: 'done', nombre: 'G. Palacios', cargo: 'Jefa de Administración', fecha: '10/01/2026' },
+        colaborador: { status: 'done', nombre: 'A. Chafloque', cargo: 'Anali J. Chafloque — Asistente Administrativo', fecha: '10/01/2026' },
       },
       {
         id: 'SIL-001', desc: 'Silla ejecutiva', tipo: 'Artículo', codigo: 'ADM-ART-007', estado: 'bueno',
         devolucion: 'n/a',
-        custodio: { status: 'done', nombre: 'R. Limas', cargo: 'Jefe Admin. CMP', fecha: '10/01/2026' },
-        colaborador: { status: 'done', nombre: 'A. Flores', cargo: 'Asistente — SEC. ADMINISTRACIÓN', fecha: '10/01/2026' },
+        custodio: { status: 'done', nombre: 'G. Palacios', cargo: 'Jefa de Administración', fecha: '10/01/2026' },
+        colaborador: { status: 'done', nombre: 'A. Chafloque', cargo: 'Anali J. Chafloque — Asistente Administrativo', fecha: '10/01/2026' },
       },
     ],
     accesorios: [],
@@ -306,14 +306,14 @@ const MOCK_MAP: Record<string, ColaboradorData> = {
     reporte: [
       {
         id: 'TEL-001', desc: 'Teléfono IP Fanvil', tipo: 'Activo', codigo: 'ADM-TEL-002', estado: 'bueno',
-        custodio: { status: 'done', nombre: 'R. Limas', cargo: 'Jefe Admin. CMP', fecha: '10/01/2026' },
-        colaborador: { status: 'done', nombre: 'A. Flores', cargo: 'Asistente — SEC. ADMINISTRACIÓN', fecha: '10/01/2026' },
+        custodio: { status: 'done', nombre: 'G. Palacios', cargo: 'Jefa de Administración', fecha: '10/01/2026' },
+        colaborador: { status: 'done', nombre: 'A. Chafloque', cargo: 'Anali J. Chafloque — Asistente Administrativo', fecha: '10/01/2026' },
         estadoFirma: 'completado',
       },
       {
         id: 'SIL-001', desc: 'Silla ejecutiva', tipo: 'Artículo', codigo: 'ADM-ART-007', estado: 'bueno',
-        custodio: { status: 'done', nombre: 'R. Limas', cargo: 'Jefe Admin. CMP', fecha: '10/01/2026' },
-        colaborador: { status: 'done', nombre: 'A. Flores', cargo: 'Asistente — SEC. ADMINISTRACIÓN', fecha: '10/01/2026' },
+        custodio: { status: 'done', nombre: 'G. Palacios', cargo: 'Jefa de Administración', fecha: '10/01/2026' },
+        colaborador: { status: 'done', nombre: 'A. Chafloque', cargo: 'Anali J. Chafloque — Asistente Administrativo', fecha: '10/01/2026' },
         estadoFirma: 'completado',
       },
     ],
@@ -1152,8 +1152,8 @@ export function ConsultaDNI() {
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 24, textAlign: 'center' }}>
                     {[
                       { nombre: result.nombre, cargo: 'Colaborador' },
-                      { nombre: 'Jefe del Área', cargo: 'Área responsable' },
-                      { nombre: 'Responsable GDTH', cargo: 'Gestión del Talento Humano' },
+                      { nombre: 'Jesús Luman Marcos Aragon', cargo: 'Jefe de TI' },
+                      { nombre: 'Julieth Z. Carbajal Garro', cargo: 'Jefa de GDTH' },
                     ].map((f, i) => (
                       <div key={i}>
                         <div style={{ height: 40 }} />

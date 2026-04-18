@@ -13,15 +13,15 @@ interface MisSolicitudRow {
 
 
 const MATRIZ_DATA = [
-  { n: 1, area: 'UN. DE TI', puesto: 'Analista Sistemas', nombre: 'NUÑEZ MUÑOZ, Aaron Samuel', dni: '77434028', tipo: 'adelanto', motivo: 'PERSONALES', monto: 'S/ 800', fecha: '01/03/2026', cuotas: 2, mes_descuento: 'Mar-26 / Abr-26\n(S/ 400 c/u)', aprueba: 'Jefa GDTH — Karla Mendoza', abono_fecha: '05/03/2026', documento: 'ADV-2026-001' },
-  { n: 2, area: 'SEC. DE ADMINISTRACION', puesto: 'Secretaria Administrativa', nombre: 'DÍAZ ESPINOZA, Lizzetti', dni: '45123890', tipo: 'prestamo', motivo: 'SALUD', monto: 'S/ 2,500', fecha: '10/03/2026', cuotas: 5, mes_descuento: 'Abr-26 a Ago-26\n(S/ 500 c/u)', aprueba: 'Jefa GDTH — Karla Mendoza', abono_fecha: 'pendiente', documento: 'ADV-2026-002' },
-  { n: 3, area: 'UN. DE TI', puesto: 'Analista Sistemas', nombre: 'NUÑEZ MUÑOZ, Aaron Samuel', dni: '77434028', tipo: 'adelanto', motivo: 'PERSONALES', monto: 'S/ 400', fecha: '18/03/2026', cuotas: 1, mes_descuento: 'Abr-26', aprueba: 'Jefa GDTH — Karla Mendoza', abono_fecha: 'rechazado', documento: 'ADV-2026-003' },
-  { n: 4, area: 'UN. DE GDTH', puesto: 'Analista RR.HH.', nombre: 'TORRES HUAMÁN, María', dni: '32145678', tipo: 'adelanto', motivo: 'FAMILIARES', monto: 'S/ 1,200', fecha: '15/02/2026', cuotas: 1, mes_descuento: 'Mar-26', aprueba: 'Jefa GDTH — Karla Mendoza', abono_fecha: 'en_proceso', documento: 'ADV-2026-004' },
-  { n: 5, area: 'SEC. DE ECONOMIA Y FINANZAS', puesto: 'Economista', nombre: 'SALAS QUISPE, Pedro', dni: '56789012', tipo: 'prestamo', motivo: 'VIVIENDA', monto: 'S/ 3,000', fecha: '05/01/2026', cuotas: 6, mes_descuento: 'Feb-26 a Jul-26\n(S/ 500 c/u)', aprueba: 'Jefa GDTH — Karla Mendoza', abono_fecha: '10/01/2026', documento: '' },
-  { n: 6, area: 'FONDO DE BIEN.SOCIAL DEL MED.', puesto: 'Técnica Enfermería', nombre: 'VEGA RÍOS, Carmen', dni: '67890123', tipo: 'adelanto', motivo: 'SALUD', monto: 'S/ 600', fecha: '20/02/2026', cuotas: 1, mes_descuento: 'Mar-26', aprueba: 'Jefa GDTH — Karla Mendoza', abono_fecha: '25/02/2026', documento: '' },
-  { n: 7, area: 'SEMEFA', puesto: 'Técnico Especialista', nombre: 'LIMA CASTRO, Jorge', dni: '78901234', tipo: 'adelanto', motivo: 'EDUCACIÓN', monto: 'S/ 400', fecha: '10/02/2026', cuotas: 1, mes_descuento: 'Mar-26', aprueba: 'Jefa GDTH — Karla Mendoza', abono_fecha: '15/02/2026', documento: '' },
-  { n: 8, area: 'DECANATO', puesto: 'Asistente Decanato', nombre: 'RÍOS PALOMINO, Ana', dni: '89012345', tipo: 'prestamo', motivo: 'SITUACIÓN FAMILIAR', monto: 'S/ 2,000', fecha: '03/03/2026', cuotas: 4, mes_descuento: 'Abr-26 a Jul-26\n(S/ 500 c/u)', aprueba: 'Jefa GDTH — Karla Mendoza', abono_fecha: '08/03/2026', documento: '' },
-  { n: 9, area: 'UN. DE ADMINISTRACION', puesto: 'Asistente Administrativo', nombre: 'GÓMEZ VARGAS, Luis', dni: '90123456', tipo: 'adelanto', motivo: 'PERSONALES', monto: 'S/ 800', fecha: '25/01/2026', cuotas: 1, mes_descuento: 'Feb-26', aprueba: 'Jefa GDTH — Karla Mendoza', abono_fecha: '29/01/2026', documento: '' },
+  { n: 1, area: 'UN. DE TI', puesto: 'Analista Sistemas', nombre: 'NUÑEZ MUÑOZ, Aaron Samuel', dni: '77434028', tipo: 'adelanto', motivo: 'PERSONALES', monto: 'S/ 800', fecha: '01/03/2026', cuotas: 2, mes_descuento: 'Mar-26 / Abr-26\n(S/ 400 c/u)', aprueba: 'Jefa GDTH — Julieth Z. Carbajal', abono_fecha: '05/03/2026', documento: 'ADV-2026-001' },
+  { n: 2, area: 'SEC. DE ADMINISTRACION', puesto: 'Secretaria Administrativa', nombre: 'DÍAZ ESPINOZA, Lizzetti', dni: '45123890', tipo: 'prestamo', motivo: 'SALUD', monto: 'S/ 2,500', fecha: '10/03/2026', cuotas: 5, mes_descuento: 'Abr-26 a Ago-26\n(S/ 500 c/u)', aprueba: 'Jefa GDTH — Julieth Z. Carbajal', abono_fecha: 'pendiente', documento: 'ADV-2026-002' },
+  { n: 3, area: 'UN. DE TI', puesto: 'Analista Sistemas', nombre: 'NUÑEZ MUÑOZ, Aaron Samuel', dni: '77434028', tipo: 'adelanto', motivo: 'PERSONALES', monto: 'S/ 400', fecha: '18/03/2026', cuotas: 1, mes_descuento: 'Abr-26', aprueba: 'Jefa GDTH — Julieth Z. Carbajal', abono_fecha: 'rechazado', documento: 'ADV-2026-003' },
+  { n: 4, area: 'UN. DE GDTH', puesto: 'Analista RR.HH.', nombre: 'TORRES HUAMÁN, María', dni: '32145678', tipo: 'adelanto', motivo: 'FAMILIARES', monto: 'S/ 1,200', fecha: '15/02/2026', cuotas: 1, mes_descuento: 'Mar-26', aprueba: 'Jefa GDTH — Julieth Z. Carbajal', abono_fecha: 'en_proceso', documento: 'ADV-2026-004' },
+  { n: 5, area: 'SEC. DE ECONOMIA Y FINANZAS', puesto: 'Economista', nombre: 'SALAS QUISPE, Pedro', dni: '56789012', tipo: 'prestamo', motivo: 'VIVIENDA', monto: 'S/ 3,000', fecha: '05/01/2026', cuotas: 6, mes_descuento: 'Feb-26 a Jul-26\n(S/ 500 c/u)', aprueba: 'Jefa GDTH — Julieth Z. Carbajal', abono_fecha: '10/01/2026', documento: '' },
+  { n: 6, area: 'FONDO DE BIEN.SOCIAL DEL MED.', puesto: 'Técnica Enfermería', nombre: 'VEGA RÍOS, Carmen', dni: '67890123', tipo: 'adelanto', motivo: 'SALUD', monto: 'S/ 600', fecha: '20/02/2026', cuotas: 1, mes_descuento: 'Mar-26', aprueba: 'Jefa GDTH — Julieth Z. Carbajal', abono_fecha: '25/02/2026', documento: '' },
+  { n: 7, area: 'SEMEFA', puesto: 'Técnico Especialista', nombre: 'LIMA CASTRO, Jorge', dni: '78901234', tipo: 'adelanto', motivo: 'EDUCACIÓN', monto: 'S/ 400', fecha: '10/02/2026', cuotas: 1, mes_descuento: 'Mar-26', aprueba: 'Jefa GDTH — Julieth Z. Carbajal', abono_fecha: '15/02/2026', documento: '' },
+  { n: 8, area: 'DECANATO', puesto: 'Asistente Decanato', nombre: 'RÍOS PALOMINO, Ana', dni: '89012345', tipo: 'prestamo', motivo: 'SITUACIÓN FAMILIAR', monto: 'S/ 2,000', fecha: '03/03/2026', cuotas: 4, mes_descuento: 'Abr-26 a Jul-26\n(S/ 500 c/u)', aprueba: 'Jefa GDTH — Julieth Z. Carbajal', abono_fecha: '08/03/2026', documento: '' },
+  { n: 9, area: 'UN. DE ADMINISTRACION', puesto: 'Asistente Administrativo', nombre: 'GÓMEZ VARGAS, Luis', dni: '90123456', tipo: 'adelanto', motivo: 'PERSONALES', monto: 'S/ 800', fecha: '25/01/2026', cuotas: 1, mes_descuento: 'Feb-26', aprueba: 'Jefa GDTH — Julieth Z. Carbajal', abono_fecha: '29/01/2026', documento: '' },
 ]
 
 function calcularCuotas(monto: number, numCuotas: number): Array<{ cuota: number; mes: string; montoStr: string }> {
@@ -43,11 +43,34 @@ export function PrestamosAdelantos() {
   const [activeTab, setActiveTab] = useState('mis')
   const [gdthSubTab, setGdthSubTab] = useState('sol')
   const [bienestarSubTab, setBienestarSubTab] = useState('sol')
-  const [showNueva, setShowNueva] = useState(false)
+  const [showNueva, setShowNueva] = useState(false)          // Modal "Nueva Ficha" (ficha completa)
+  const [showNuevaSol, setShowNuevaSol] = useState(false)   // Modal "Nueva Solicitud" simplificado (Obs 6)
   const [showDetalle, setShowDetalle] = useState(false)
+  const [showEvalGDTH, setShowEvalGDTH] = useState(false)   // Modal Evaluación GDTH (Obs 7)
   const [selectedNumero, setSelectedNumero] = useState('')
+  const [selectedGDTHRow, setSelectedGDTHRow] = useState<typeof MATRIZ_DATA[0]|null>(null)
 
-  // Nueva solicitud form state
+  // Nueva Solicitud simplificada (Obs 6)
+  const [nssDni, setNssDni] = useState('')
+  const [nssColab, setNssColab] = useState<{nombre:string;area:string;puesto:string}|null>(null)
+  const [nssDniErr, setNssDniErr] = useState(false)
+  const [nssBuscando, setNssBuscando] = useState(false)
+  const [nssTipo, setNssTipo] = useState<'prestamo'|'adelanto'>('prestamo')
+  const [nssMonto, setNssMonto] = useState('')
+  const [nssTipoSolicitud, setNssTipoSolicitud] = useState('')
+  const [nssMotivo, setNssMotivo] = useState('')
+
+  // Evaluación GDTH (Obs 7)
+  const [evalDni, setEvalDni] = useState('')
+  const [evalColab, setEvalColab] = useState<{nombre:string;area:string;puesto:string;subarea?:string;salario?:string;inicio?:string;fin?:string;vigencia?:string}|null>(null)
+  const [evalDniErr, setEvalDniErr] = useState(false)
+  const [evalBuscando, setEvalBuscando] = useState(false)
+  const [evalResultado, setEvalResultado] = useState('')
+  const [evalMontoAprobado, setEvalMontoAprobado] = useState('')
+  const [evalMontoEditable, setEvalMontoEditable] = useState(false)
+  const [evalCuotas, setEvalCuotas] = useState('')
+
+  // Nueva solicitud form state (ficha completa — movida al detalle Obs 6)
   const [tipoSolicitud, setTipoSolicitud] = useState<'prestamo' | 'adelanto'>('prestamo')
   const [domicilio, setDomicilio] = useState('')
   const [montoSolicitud, setMontoSolicitud] = useState('')
@@ -129,6 +152,55 @@ export function PrestamosAdelantos() {
     setShowDetalle(true)
   }
 
+  const COLAB_MOCK_ADV: Record<string,{nombre:string;area:string;puesto:string;subarea:string;salario:string;inicio:string;fin:string}> = {
+    '77434028': {nombre:'Aaron Samuel Nuñez Muñoz',     area:'UN. DE TI',   puesto:'Analista de TI',          subarea:'UN. DE TI',   salario:'S/. 3,200',inicio:'2023-01-15',fin:'2026-12-31'},
+    '72224207': {nombre:'Julieth Zenina Carbajal Garro',area:'UN. DE GDTH', puesto:'Jefa de GDTH',             subarea:'UN. DE GDTH', salario:'S/. 5,800',inicio:'2020-03-01',fin:'2026-12-31'},
+    '46521663': {nombre:'Jesús Luman Marcos Aragon',    area:'UN. DE TI',   puesto:'Jefe de TI',               subarea:'UN. DE TI',   salario:'S/. 6,500',inicio:'2019-06-15',fin:'2026-12-31'},
+    '45103078': {nombre:'Nataly De Rutte Vergara',      area:'UN. DE PLAN', puesto:'Jefa de Planificación',    subarea:'UN. DE PLAN', salario:'S/. 5,200',inicio:'2021-02-01',fin:'2026-06-30'},
+    '45438744': {nombre:'Hamer Chonlon Escudero',       area:'UN. DE GDTH', puesto:'Analista de Planilla',     subarea:'UN. DE GDTH', salario:'S/. 3,800',inicio:'2022-07-01',fin:'2026-12-31'},
+    '40555090': {nombre:'Guissela Palacios Alvarez',    area:'UN. DE ADM',  puesto:'Jefa de Administración',   subarea:'UN. DE ADM',  salario:'S/. 6,200',inicio:'2018-09-01',fin:'2026-12-31'},
+  }
+
+  function calcularVigencia(fin: string): string {
+    const hoy = new Date()
+    const finDate = new Date(fin)
+    if (isNaN(finDate.getTime())) return '—'
+    const diffMs = finDate.getTime() - hoy.getTime()
+    if (diffMs <= 0) return 'Contrato vencido'
+    const diffDias = Math.floor(diffMs / (1000*60*60*24))
+    const meses = Math.floor(diffDias / 30)
+    const dias = diffDias % 30
+    return meses > 0 ? `${meses} mes(es) y ${dias} día(s)` : `${dias} día(s)`
+  }
+
+  async function buscarColabNSS() {
+    setNssDniErr(false); setNssColab(null); setNssBuscando(true)
+    const mock = COLAB_MOCK_ADV[nssDni.trim()]
+    if (mock) { setNssColab(mock); setNssBuscando(false); return }
+    const { data } = await supabase.from('colaboradores').select('nombres,apellidos,area,puesto').eq('dni', nssDni.trim()).maybeSingle()
+    if (data) setNssColab({ nombre:`${data.nombres} ${data.apellidos}`, area:data.area??'—', puesto:data.puesto??'—' })
+    else setNssDniErr(true)
+    setNssBuscando(false)
+  }
+
+  async function buscarColabEval() {
+    setEvalDniErr(false); setEvalColab(null); setEvalBuscando(true)
+    const mock = COLAB_MOCK_ADV[evalDni.trim()]
+    if (mock) {
+      setEvalColab({ ...mock, vigencia: calcularVigencia(mock.fin) })
+      setEvalBuscando(false); return
+    }
+    const { data } = await supabase.from('colaboradores').select('nombres,apellidos,area,puesto').eq('dni', evalDni.trim()).maybeSingle()
+    if (data) setEvalColab({ nombre:`${data.nombres} ${data.apellidos}`, area:data.area??'—', puesto:data.puesto??'—', vigencia:'—' })
+    else setEvalDniErr(true)
+    setEvalBuscando(false)
+  }
+
+  const evalMontoNum = parseFloat(evalMontoAprobado.replace(/[^0-9.]/g,''))
+  const evalCuotasData = evalResultado==='Aprobado' && evalMontoNum>0 && parseInt(evalCuotas)>0
+    ? calcularCuotas(evalMontoNum, parseInt(evalCuotas))
+    : []
+
   const selectedRow = misSolicitudes.find(r => r.numero === selectedNumero) ?? null
 
   // Matriz table (shared between GDTH and Bienestar tabs)
@@ -203,7 +275,7 @@ export function PrestamosAdelantos() {
           <div className="page-subtitle">Gestión de solicitudes de préstamo personal y adelanto de sueldo</div>
         </div>
         <div className="header-actions">
-          <button className="btn btn-primary" onClick={() => setShowNueva(true)}>+ Nueva Solicitud</button>
+          <button className="btn btn-primary" onClick={() => setShowNuevaSol(true)}>+ Nueva Solicitud</button>
         </div>
       </div>
 
@@ -260,7 +332,7 @@ export function PrestamosAdelantos() {
           <div className="page-header" style={{ marginBottom: 12 }}>
             <div>
               <div style={{ fontSize: 14, fontWeight: 600, color: '#1E1B4B' }}>Solicitudes pendientes de aprobación GDTH</div>
-              <div className="text-xs text-gray mt-4">Solicitudes que han pasado evaluación de Bienestar y requieren V°B° de Jefatura GDTH</div>
+              <div className="text-xs text-gray mt-4">Solicitudes que han pasado evaluación de Bienestar y requieren V°B° de J. Carbajal — GDTH</div>
             </div>
           </div>
           <div className="card">
@@ -284,8 +356,7 @@ export function PrestamosAdelantos() {
                     <td className="text-sm text-gray">Bienestar — 18/02/2026</td>
                     <td>
                       <div className="actions-cell">
-                        <button className="btn btn-gray btn-xs" onClick={() => openDetalle('ADV-2026-004')}>Ver detalle</button>
-                        <button className="btn btn-primary btn-xs">✔ Aprobar</button>
+                        <button className="btn btn-gray btn-xs" onClick={() => { const row = MATRIZ_DATA.find(r=>r.documento==='ADV-2026-004')??null; setSelectedGDTHRow(row); setEvalDni(''); setEvalColab(null); setEvalResultado(''); setEvalMontoAprobado(row?.monto??''); setEvalCuotas(''); setShowEvalGDTH(true) }}>Ver detalle</button>
                       </div>
                     </td>
                   </tr>
@@ -416,7 +487,131 @@ export function PrestamosAdelantos() {
         </div>
       </div>
 
-      {/* Modal Nueva Solicitud */}
+      {/* ══════════════════════════════════════════════════════════════
+           MODAL — Nueva Solicitud Préstamo/Adelanto (simplificado, Obs 6)
+         ══════════════════════════════════════════════════════════════ */}
+      {showNuevaSol && (
+        <div className="modal-overlay" onClick={() => setShowNuevaSol(false)}>
+          <div className="modal" style={{ maxWidth: 600 }} onClick={e => e.stopPropagation()}>
+            <div className="modal-hdr">
+              <div>
+                <div className="modal-title">Nueva Solicitud Préstamo/Adelanto</div>
+                <div className="modal-subtitle">Completa los datos para registrar tu solicitud</div>
+              </div>
+              <button className="modal-close" onClick={() => setShowNuevaSol(false)}>×</button>
+            </div>
+            <div className="modal-body">
+
+              {/* Buscar colaborador */}
+              <div className="section-title-sm">BUSCAR COLABORADOR</div>
+              <div style={{ display:'flex', gap:8, alignItems:'flex-end', marginBottom:8 }}>
+                <div style={{ flex:1 }}>
+                  <label className="form-label">DNI del colaborador <span className="req">*</span></label>
+                  <input type="text" className="form-control" placeholder="Ingresa el DNI" maxLength={8}
+                    value={nssDni} onChange={e => { setNssDni(e.target.value); setNssColab(null); setNssDniErr(false) }}
+                    onKeyDown={e => e.key==='Enter' && buscarColabNSS()} />
+                </div>
+                <button className="btn btn-primary btn-sm" onClick={buscarColabNSS} disabled={nssDni.length < 8 || nssBuscando}>
+                  🔍 {nssBuscando ? 'Buscando...' : 'Buscar'}
+                </button>
+              </div>
+              {nssDniErr && <div className="banner banner-amber mb-12">⚠ No se encontró colaborador con ese DNI.</div>}
+              {nssColab && (
+                <div className="colab-found mb-12">
+                  <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                    <div style={{ width:34, height:34, background:'#6B21A8', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', color:'white', fontSize:12, fontWeight:700 }}>
+                      {nssColab.nombre.split(' ').map(w=>w[0]).slice(0,2).join('')}
+                    </div>
+                    <div>
+                      <div style={{ fontSize:13, fontWeight:700, color:'#1E1B4B' }}>{nssColab.nombre}</div>
+                      <div style={{ fontSize:11, color:'#6B7280' }}>{nssColab.puesto} · {nssColab.area}</div>
+                    </div>
+                    <span className="badge b-green">✓ Encontrado</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="h-divider" />
+
+              {/* Tipo: Préstamo / Adelanto */}
+              <div className="section-title-sm">TIPO</div>
+              <div className="radio-cards" style={{ marginBottom:16 }}>
+                <div className={`radio-card${nssTipo==='prestamo'?' selected':''}`} onClick={() => setNssTipo('prestamo')}>
+                  <div className="radio-card-icon">💼</div>
+                  <div className="radio-card-label">PRÉSTAMO</div>
+                </div>
+                <div className={`radio-card${nssTipo==='adelanto'?' selected':''}`} onClick={() => setNssTipo('adelanto')}>
+                  <div className="radio-card-icon">⚡</div>
+                  <div className="radio-card-label">ADELANTO DE SUELDO</div>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Monto solicitado (S/.) <span className="req">*</span></label>
+                  <input type="number" className="form-control" placeholder="0.00" value={nssMonto} onChange={e => setNssMonto(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Tipo de solicitud <span className="req">*</span></label>
+                  <select className="form-control" value={nssTipoSolicitud} onChange={e => setNssTipoSolicitud(e.target.value)}>
+                    <option value="">Seleccionar...</option>
+                    <option value="campana">Préstamo por campaña</option>
+                    <option value="regular">Préstamo regular</option>
+                    <option value="adelanto">Adelanto de sueldo</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Motivo <span className="req">*</span></label>
+                <select className="form-control" value={nssMotivo} onChange={e => setNssMotivo(e.target.value)}>
+                  <option value="">Seleccionar...</option>
+                  <option value="escolaridad">Escolaridad</option>
+                  <option value="salud">Salud</option>
+                  <option value="educacion">Educación</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Sustento (documentos)</label>
+                <div className="dropzone">
+                  <div className="dropzone-icon">📎</div>
+                  <div style={{ fontSize:13 }}>Arrastra archivos aquí o haz clic para seleccionar</div>
+                  <div className="dropzone-text">PDF, DOC, DOCX, PNG, JPG — máx 5MB por archivo</div>
+                  <input type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style={{ display:'none' }} id="nss-file-input" />
+                  <label htmlFor="nss-file-input" className="btn btn-gray btn-sm" style={{ marginTop:8, cursor:'pointer' }}>Seleccionar archivo</label>
+                </div>
+              </div>
+
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-gray" onClick={() => setShowNuevaSol(false)}>Cancelar</button>
+              <button className="btn btn-primary" onClick={async () => {
+                if (!nssColab) { alert('Busca un colaborador primero'); return }
+                const monto = parseFloat(nssMonto)
+                if (!monto || monto <= 0) { alert('Ingresa un monto válido'); return }
+                const { count } = await supabase.from('solicitudes_adelanto').select('*', { count:'exact', head:true })
+                const numero = `ADV-${new Date().getFullYear()}-${String((count??0)+1).padStart(3,'0')}`
+                const { data: newRec, error } = await supabase.from('solicitudes_adelanto').insert({
+                  numero, tipo: nssTipo, monto, motivo: nssMotivo, cuotas: 1, estado:'en_revision',
+                  colaborador: nssColab.nombre,
+                }).select().single()
+                if (error) { alert(`Error: ${error.message}`); return }
+                if (newRec) {
+                  setMisSolicitudes(prev => [{ id:newRec.id, numero, tipo:nssTipo==='adelanto'?'Adelanto de sueldo':'Préstamo personal',
+                    monto:`S/. ${monto.toLocaleString('es-PE')}`, fecha:new Date().toLocaleDateString('es-PE'),
+                    estado:'en_revision', proximo:'Evaluación Bienestar' }, ...prev])
+                }
+                setShowNuevaSol(false); setNssDni(''); setNssColab(null); setNssMonto(''); setNssMotivo(''); setNssTipoSolicitud('')
+              }}>📤 Enviar solicitud</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════════════
+           MODAL — Nueva Ficha Préstamo/Adelanto (ficha completa, Obs 6)
+         ══════════════════════════════════════════════════════════════ */}
       {showNueva && (
         <div className="modal-overlay" onClick={() => setShowNueva(false)}>
           <div className="modal" style={{ maxWidth: 640 }} onClick={e => e.stopPropagation()}>
@@ -729,11 +924,11 @@ export function PrestamosAdelantos() {
                   <div className="step-conn"></div>
                   <div className="step"><div className="step-circ pend" style={{ fontSize: 9, width: 22, height: 22 }}>2</div><span className="step-lbl pend" style={{ fontSize: 10 }}>Bienestar</span></div>
                   <div className="step-conn"></div>
-                  <div className="step"><div className="step-circ pend" style={{ fontSize: 9, width: 22, height: 22 }}>3</div><span className="step-lbl pend" style={{ fontSize: 10 }}>Jefatura GDTH</span></div>
+                  <div className="step"><div className="step-circ pend" style={{ fontSize: 9, width: 22, height: 22 }}>3</div><span className="step-lbl pend" style={{ fontSize: 10 }}>J. Carbajal — GDTH</span></div>
                   <div className="step-conn"></div>
-                  <div className="step"><div className="step-circ pend" style={{ fontSize: 9, width: 22, height: 22 }}>4</div><span className="step-lbl pend" style={{ fontSize: 10 }}>Sec. Administ.</span></div>
+                  <div className="step"><div className="step-circ pend" style={{ fontSize: 9, width: 22, height: 22 }}>4</div><span className="step-lbl pend" style={{ fontSize: 10 }}>G. Palacios — Adm.</span></div>
                   <div className="step-conn"></div>
-                  <div className="step"><div className="step-circ pend" style={{ fontSize: 9, width: 22, height: 22 }}>5</div><span className="step-lbl pend" style={{ fontSize: 10 }}>Contabilidad</span></div>
+                  <div className="step"><div className="step-circ pend" style={{ fontSize: 9, width: 22, height: 22 }}>5</div><span className="step-lbl pend" style={{ fontSize: 10 }}>E. Chozo — Conta.</span></div>
                 </div>
               </div>
             </div>
@@ -794,11 +989,11 @@ export function PrestamosAdelantos() {
                     <div className="step-conn done"></div>
                     <div className="step"><div className="step-circ done">✔</div><span className="step-lbl done">Bienestar</span></div>
                     <div className="step-conn done"></div>
-                    <div className="step"><div className="step-circ done">✔</div><span className="step-lbl done">Jefatura GDTH</span></div>
+                    <div className="step"><div className="step-circ done">✔</div><span className="step-lbl done">J. Carbajal — GDTH</span></div>
                     <div className="step-conn done"></div>
-                    <div className="step"><div className="step-circ cur">⏳</div><span className="step-lbl cur">Sec. Administ.</span></div>
+                    <div className="step"><div className="step-circ cur">⏳</div><span className="step-lbl cur">G. Palacios — Adm.</span></div>
                     <div className="step-conn"></div>
-                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">Contabilidad</span></div>
+                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">E. Chozo — Conta.</span></div>
                   </>
                 ) : selectedRow?.estado === 'rechazado' ? (
                   <>
@@ -806,11 +1001,11 @@ export function PrestamosAdelantos() {
                     <div className="step-conn done"></div>
                     <div className="step"><div className="step-circ done">✔</div><span className="step-lbl done">Bienestar</span></div>
                     <div className="step-conn"></div>
-                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">Jefatura GDTH</span></div>
+                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">J. Carbajal — GDTH</span></div>
                     <div className="step-conn"></div>
-                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">Sec. Administ.</span></div>
+                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">G. Palacios — Adm.</span></div>
                     <div className="step-conn"></div>
-                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">Contabilidad</span></div>
+                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">E. Chozo — Conta.</span></div>
                   </>
                 ) : (
                   <>
@@ -818,11 +1013,11 @@ export function PrestamosAdelantos() {
                     <div className="step-conn done"></div>
                     <div className="step"><div className="step-circ cur">⏳</div><span className="step-lbl cur">Bienestar</span></div>
                     <div className="step-conn"></div>
-                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">Jefatura GDTH</span></div>
+                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">J. Carbajal — GDTH</span></div>
                     <div className="step-conn"></div>
-                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">Sec. Administ.</span></div>
+                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">G. Palacios — Adm.</span></div>
                     <div className="step-conn"></div>
-                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">Contabilidad</span></div>
+                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">E. Chozo — Conta.</span></div>
                   </>
                 )}
               </div>
@@ -836,6 +1031,153 @@ export function PrestamosAdelantos() {
             </div>
             <div className="modal-footer">
               <button className="btn btn-gray" onClick={() => setShowDetalle(false)}>Cerrar</button>
+              <button
+                className="btn btn-primary btn-sm"
+                style={selectedRow?.estado !== 'aprobado' ? {opacity:0.45,cursor:'not-allowed'} : {}}
+                disabled={selectedRow?.estado !== 'aprobado'}
+                title={selectedRow?.estado !== 'aprobado' ? 'Disponible solo cuando GDTH apruebe la solicitud' : undefined}
+                onClick={() => { if (selectedRow?.estado === 'aprobado') { setShowDetalle(false); setShowNueva(true) } }}
+              >
+                📄 +Nueva Ficha Préstamo/Adelanto
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════════════
+           MODAL — Evaluación GDTH (Obs 7)
+         ══════════════════════════════════════════════════════════════ */}
+      {showEvalGDTH && selectedGDTHRow && (
+        <div className="modal-overlay" onClick={() => setShowEvalGDTH(false)}>
+          <div className="modal" style={{ maxWidth: 680, maxHeight:'90vh', overflowY:'auto' }} onClick={e => e.stopPropagation()}>
+            <div className="modal-hdr">
+              <div>
+                <div className="modal-title">Evaluación GDTH — {selectedGDTHRow.documento}</div>
+                <div className="modal-subtitle">{selectedGDTHRow.nombre} · DNI: {selectedGDTHRow.dni}</div>
+              </div>
+              <button className="modal-close" onClick={() => setShowEvalGDTH(false)}>×</button>
+            </div>
+            <div className="modal-body">
+
+              {/* Datos del solicitante */}
+              <div className="section-title-sm">DATOS DE LA SOLICITUD</div>
+              <div className="inv-grid" style={{ marginBottom:14 }}>
+                <div className="inv-field"><div className="lbl">N° Documento</div><div className="val fw-600">{selectedGDTHRow.documento}</div></div>
+                <div className="inv-field"><div className="lbl">Colaborador</div><div className="val">{selectedGDTHRow.nombre}</div></div>
+                <div className="inv-field"><div className="lbl">DNI</div><div className="val">{selectedGDTHRow.dni}</div></div>
+                <div className="inv-field"><div className="lbl">Área</div><div className="val">{selectedGDTHRow.area}</div></div>
+                <div className="inv-field"><div className="lbl">Puesto</div><div className="val">{selectedGDTHRow.puesto}</div></div>
+                <div className="inv-field"><div className="lbl">Tipo</div><div className="val"><span className={`badge ${selectedGDTHRow.tipo==='adelanto'?'b-purple':'b-blue'}`}>{selectedGDTHRow.tipo==='adelanto'?'ADELANTO DE SUELDO':'PRÉSTAMO PERSONAL'}</span></div></div>
+                <div className="inv-field"><div className="lbl">Motivo</div><div className="val">{selectedGDTHRow.motivo}</div></div>
+                <div className="inv-field"><div className="lbl">Monto solicitado</div><div className="val fw-600">{selectedGDTHRow.monto}</div></div>
+                <div className="inv-field"><div className="lbl">Fecha solicitud</div><div className="val">{selectedGDTHRow.fecha}</div></div>
+                <div className="inv-field"><div className="lbl">Cuotas</div><div className="val">{selectedGDTHRow.cuotas}</div></div>
+                <div className="inv-field"><div className="lbl">Mes de descuento</div><div className="val">{selectedGDTHRow.mes_descuento}</div></div>
+                <div className="inv-field"><div className="lbl">Aprueba</div><div className="val">{selectedGDTHRow.aprueba}</div></div>
+              </div>
+
+              <div className="h-divider" />
+
+              {/* Bloque Evaluación — búsqueda por DNI del colaborador */}
+              <div className="section-title-sm">EVALUACIÓN</div>
+              <div className="banner banner-purple" style={{ marginBottom:12, fontSize:12 }}>
+                🔍 Busca al colaborador por DNI para ver su información contractual antes de evaluar
+              </div>
+              <div style={{ display:'flex', gap:8, alignItems:'flex-end', marginBottom:8 }}>
+                <div style={{ flex:1 }}>
+                  <label className="form-label">DNI del colaborador <span className="req">*</span></label>
+                  <input type="text" className="form-control" placeholder="Ingresa el DNI" maxLength={8}
+                    value={evalDni} onChange={e => { setEvalDni(e.target.value); setEvalColab(null); setEvalDniErr(false) }}
+                    onKeyDown={e => e.key==='Enter' && buscarColabEval()} />
+                </div>
+                <button className="btn btn-primary btn-sm" onClick={buscarColabEval} disabled={evalDni.length<8||evalBuscando}>
+                  🔍 {evalBuscando?'Buscando...':'Buscar'}
+                </button>
+              </div>
+              {evalDniErr && <div className="banner banner-amber mb-8">⚠ No se encontró colaborador con ese DNI.</div>}
+              {evalColab && (
+                <div className="inv-grid" style={{ background:'#F5F3FF', border:'1px solid #DDD6FE', borderRadius:8, padding:'12px 14px', marginBottom:14 }}>
+                  <div className="inv-field"><div className="lbl">Colaborador</div><div className="val fw-600">{evalColab.nombre}</div></div>
+                  <div className="inv-field"><div className="lbl">Área</div><div className="val">{evalColab.area}</div></div>
+                  <div className="inv-field"><div className="lbl">Puesto</div><div className="val">{evalColab.puesto}</div></div>
+                  {evalColab.subarea && <div className="inv-field"><div className="lbl">Sub-Área</div><div className="val">{evalColab.subarea}</div></div>}
+                  {evalColab.salario && <div className="inv-field"><div className="lbl">Salario</div><div className="val fw-600">{evalColab.salario}</div></div>}
+                  {evalColab.inicio && <div className="inv-field"><div className="lbl">Inicio contrato</div><div className="val">{new Date(evalColab.inicio).toLocaleDateString('es-PE')}</div></div>}
+                  {evalColab.fin && <div className="inv-field"><div className="lbl">Fin contrato</div><div className="val">{new Date(evalColab.fin).toLocaleDateString('es-PE')}</div></div>}
+                  {evalColab.vigencia && <div className="inv-field"><div className="lbl">Vigencia restante</div><div className="val fw-600" style={{ color:'#1E1B4B' }}>{evalColab.vigencia}</div></div>}
+                </div>
+              )}
+
+              <div className="h-divider" />
+
+              {/* Bloque Resultado */}
+              <div className="section-title-sm">RESULTADO</div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Resultado <span className="req">*</span></label>
+                  <select className="form-control" value={evalResultado} onChange={e => setEvalResultado(e.target.value)}>
+                    <option value="">Seleccionar...</option>
+                    <option value="Aprobado">Aprobado</option>
+                    <option value="Rechazado">Rechazado</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Monto Aprobado (S/.) <span className="req">*</span></label>
+                  <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+                    <input type="text" className="form-control" value={evalMontoAprobado}
+                      readOnly={!evalMontoEditable}
+                      style={{ background: evalMontoEditable ? undefined : '#F9FAFB' }}
+                      onChange={e => setEvalMontoAprobado(e.target.value)} />
+                    <button className="btn btn-outline btn-xs" onClick={() => setEvalMontoEditable(p=>!p)}
+                      title={evalMontoEditable ? 'Bloquear monto' : 'Editar monto'}>
+                      {evalMontoEditable ? '🔒' : '✏️'}
+                    </button>
+                  </div>
+                  <div className="form-hint">Monto jalado de la solicitud — editable si se aprueba un monto menor</div>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">N° de Cuotas</label>
+                  <select className="form-control" value={evalCuotas} onChange={e => setEvalCuotas(e.target.value)}>
+                    <option value="">Seleccionar...</option>
+                    {Array.from({length:12},(_,i)=><option key={i+1} value={String(i+1)}>{i+1} cuota{i>0?'s':''}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              {/* Cronograma de pagos */}
+              {evalCuotasData.length > 0 && (
+                <div style={{ marginBottom:16 }}>
+                  <div className="section-title-sm">CRONOGRAMA DE PAGOS</div>
+                  <table className="cuotas-table">
+                    <thead><tr><th>CUOTA N°</th><th>MES</th><th>MONTO (S/.)</th></tr></thead>
+                    <tbody>
+                      {evalCuotasData.map(c => (
+                        <tr key={c.cuota}><td>{c.cuota}</td><td>{c.mes}</td><td>{c.montoStr}</td></tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-gray" onClick={() => setShowEvalGDTH(false)}>Cancelar</button>
+              <button
+                className="btn btn-primary"
+                disabled={!evalResultado}
+                style={!evalResultado?{opacity:0.5,cursor:'not-allowed'}:{}}
+                onClick={() => {
+                  if (!evalResultado) { alert('Selecciona un resultado'); return }
+                  alert(`✓ ${evalResultado === 'Aprobado' ? 'Préstamo/Adelanto generado' : 'Solicitud rechazada'} correctamente`)
+                  setShowEvalGDTH(false)
+                }}
+              >
+                ✔ Generar Préstamo/Adelanto
+              </button>
             </div>
           </div>
         </div>

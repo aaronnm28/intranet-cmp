@@ -51,9 +51,9 @@ const COLABORADORES: Record<string, { nombre: string; area: string; cargo: strin
 }
 
 const BIENES_DEVOLUCION = [
-  { id: '111030', desc: 'Laptop Dell', codigo: 'CMP-038401', marca: 'Dell', modelo: 'Latitude 5420', serie: 'SN20241001', custodio: 'UN. DE TI', estado: 'bueno', devolucion: 'pendiente' },
-  { id: '111031', desc: 'Mouse Logitech', codigo: 'CMP-038402', marca: 'Logitech', modelo: 'M185', serie: 'SN20231002', custodio: 'UN. DE TI', estado: 'bueno', devolucion: 'pendiente' },
-  { id: '200201', desc: 'Silla ergonómica', codigo: 'CMP-ART-041', marca: 'Ergosit', modelo: 'Modelo A', serie: '—', custodio: 'Administración', estado: 'regular', devolucion: 'observado' },
+  { id: '111030', desc: 'Laptop Dell', codigo: 'CMP-038401', marca: 'Dell', modelo: 'Latitude 5420', serie: 'SN20241001', custodio: 'Jesús Luman Marcos Aragon — Jefe de TI', estado: 'bueno', devolucion: 'pendiente' },
+  { id: '111031', desc: 'Mouse Logitech', codigo: 'CMP-038402', marca: 'Logitech', modelo: 'M185', serie: 'SN20231002', custodio: 'Jesús Luman Marcos Aragon — Jefe de TI', estado: 'bueno', devolucion: 'pendiente' },
+  { id: '200201', desc: 'Silla ergonómica', codigo: 'CMP-ART-041', marca: 'Ergosit', modelo: 'Modelo A', serie: '—', custodio: 'Guissela Palacios Alvarez — Jefa de Administración', estado: 'regular', devolucion: 'observado' },
 ]
 
 const ACCESORIOS_DEVOLUCION = [
@@ -96,6 +96,7 @@ function ModalRegistrarSalida({ onClose, onRegistrar }: ModalRegistrarSalidaProp
   const [form, setForm] = useState({ dni: '', tipo_salida: 'cese', fecha_efectiva: '', motivo: '', notificar: true })
   const [buscando, setBuscando] = useState(false)
   const [colaboradorInfo, setColaboradorInfo] = useState<{ nombre: string; area: string; cargo: string; sede: string } | null>(null)
+  const [notifConfirmada, setNotifConfirmada] = useState(false)
 
   const buscarColaborador = async () => {
     setBuscando(true)
@@ -134,7 +135,14 @@ function ModalRegistrarSalida({ onClose, onRegistrar }: ModalRegistrarSalidaProp
       bienes_count: 0,
       created_at: new Date().toISOString(),
     }
-    onRegistrar(nueva)
+    // Obs 10 — Notificación a todas las áreas involucradas
+    if (form.notificar) {
+      setNotifConfirmada(true)
+      // Simula envío; en producción llamaría a un servicio de notificaciones
+      setTimeout(() => { onRegistrar(nueva) }, 1800)
+    } else {
+      onRegistrar(nueva)
+    }
   }
 
   return (
@@ -234,7 +242,7 @@ function ModalRegistrarSalida({ onClose, onRegistrar }: ModalRegistrarSalidaProp
             />
           </div>
 
-          {/* Checkbox */}
+          {/* Checkbox — Obs 10 */}
           <div className="chk-group">
             <input
               type="checkbox"
@@ -242,8 +250,20 @@ function ModalRegistrarSalida({ onClose, onRegistrar }: ModalRegistrarSalidaProp
               checked={form.notificar}
               onChange={e => setForm(f => ({ ...f, notificar: e.target.checked }))}
             />
-            <label htmlFor="chk-notificar-salida">Notificar automáticamente a TI, Administración y Comunicaciones</label>
+            <label htmlFor="chk-notificar-salida">Notificar automáticamente a todas las áreas involucradas en la devolución</label>
           </div>
+          {form.notificar && (
+            <div className="banner" style={{ background:'#F5F3FF', border:'1px solid #DDD6FE', fontSize:12, color:'#4A1272', marginTop:8 }}>
+              📨 Se enviará notificación a: <strong>UN. DE TI · Administración · Comunicaciones · GDTH · Contabilidad · Patrimonio</strong> — informando la salida del colaborador y activando el proceso de devolución en cada área.
+            </div>
+          )}
+
+          {/* Confirmación de notificación enviada — Obs 10 */}
+          {notifConfirmada && (
+            <div className="banner" style={{ background:'#ECFDF5', border:'1px solid #6EE7B7', color:'#065F46', marginTop:10 }}>
+              ✅ Notificaciones enviadas a todas las áreas. Cerrando y registrando proceso...
+            </div>
+          )}
 
           {/* Banner */}
           <div className="banner banner-purple mt-12">
@@ -271,19 +291,29 @@ interface ActaBien {
   serie: string
 }
 
+interface ColaboradorActa {
+  nombre: string; dni: string; area: string; cargo: string; sede: string
+}
+
 interface ModalActaDevolucionProps {
   bien: ActaBien
+  colaborador: ColaboradorActa
   onClose: () => void
   onFirmar: () => void
 }
 
-function ModalActaDevolucion({ bien, onClose, onFirmar }: ModalActaDevolucionProps) {
-  const [firmaActiva, setFirmaActiva] = useState(false)
-  const [firmaTexto, setFirmaTexto] = useState('')
+function ModalActaDevolucion({ bien, colaborador, onClose, onFirmar }: ModalActaDevolucionProps) {
+  const [notifEnviada, setNotifEnviada] = useState(false)
+  const [aceptado, setAceptado] = useState(false)
+  const hoy = new Date()
+  const dd = String(hoy.getDate()).padStart(2,'0')
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
+  const mes = meses[hoy.getMonth()]
+  const anio = hoy.getFullYear()
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" style={{ maxWidth: 700 }} onClick={e => e.stopPropagation()}>
+      <div className="modal" style={{ maxWidth: 700, maxHeight:'92vh', overflowY:'auto' }} onClick={e => e.stopPropagation()}>
         <div className="modal-hdr">
           <div>
             <div className="acta-logo-hdr">
@@ -300,11 +330,11 @@ function ModalActaDevolucion({ bien, onClose, onFirmar }: ModalActaDevolucionPro
           {/* Encabezado del acta */}
           <div className="acta-date-line">
             En la fecha
-            <input type="text" className="inp-dd" placeholder="DD" defaultValue="28" />
+            <input type="text" className="inp-dd" placeholder="DD" defaultValue={dd} />
             de
-            <input type="text" className="inp-mes" placeholder="mes" defaultValue="marzo" />
+            <input type="text" className="inp-mes" placeholder="mes" defaultValue={mes} />
             del
-            <input type="text" className="inp-anio" placeholder="YYYY" defaultValue="2026" />
+            <input type="text" className="inp-anio" placeholder="YYYY" defaultValue={String(anio)} />
             se realiza la
             <select>
               <option>Devolución</option>
@@ -313,27 +343,25 @@ function ModalActaDevolucion({ bien, onClose, onFirmar }: ModalActaDevolucionPro
             de los bienes solicitados.
           </div>
 
-          {/* Sección 1 */}
+          {/* Sección 1 — datos del colaborador del registro de salida (Obs 4) */}
           <div className="section-title-sm">Sección 1: INFORMACIÓN DEL USUARIO</div>
           <table className="inst-grid">
             <tbody>
               <tr>
                 <td className="lbl-cell">Nombres y Apellidos</td>
-                <td className="val-cell">Carlos Pérez Ramos</td>
+                <td className="val-cell">{colaborador.nombre}</td>
                 <td className="lbl-cell">Sede</td>
-                <td className="val-cell">Sede Malecón de la Reserva</td>
+                <td className="val-cell">{colaborador.sede}</td>
               </tr>
               <tr>
                 <td className="lbl-cell">DNI</td>
-                <td className="val-cell">45231089</td>
+                <td className="val-cell">{colaborador.dni}</td>
                 <td className="lbl-cell">Puesto</td>
-                <td className="val-cell">Analista Contable</td>
+                <td className="val-cell">{colaborador.cargo}</td>
               </tr>
               <tr>
                 <td className="lbl-cell">Área</td>
-                <td className="val-cell">SEC. DE ADMINISTRACION</td>
-                <td className="lbl-cell">Sub-Área</td>
-                <td className="val-cell">UN. DE TI</td>
+                <td className="val-cell" colSpan={3}>{colaborador.area}</td>
               </tr>
             </tbody>
           </table>
@@ -387,47 +415,75 @@ function ModalActaDevolucion({ bien, onClose, onFirmar }: ModalActaDevolucionPro
           <div className="text-xs text-gray mt-8">*Estado: Muy Bueno (MB) / Bueno (B) / Regular (R) / Malo (M)</div>
           <div className="text-xs text-gray mb-12">**Recibe: cómputo → UN. DE TI, bienes muebles → UN. DE ADMINISTRACION, comunicaciones → UN. DE COMUN. E IMAGEN INSTI.</div>
 
-          {/* Responsabilidades */}
+          {/* Responsabilidades + Párrafo de aceptación (Obs 9) */}
           <div className="resp-block">
-            <strong>Responsabilidades del trabajador:</strong>
+            <strong>Responsabilidades y aceptación del trabajador:</strong>
             <ul>
-              <li>Proteger y conservar los bienes otorgados.</li>
-              <li>Darles el uso para lo que han sido asignados.</li>
+              <li>Proteger y conservar los bienes otorgados durante el tiempo de uso.</li>
+              <li>Darles el uso exclusivo para el cual han sido asignados, conforme a las políticas institucionales.</li>
               <li>Responsabilizarse de la existencia física, permanencia y conservación de los bienes a su cargo.</li>
               <li>Tomar las medidas necesarias para prevenir pérdidas, hurto, robo y deterioro.</li>
+              <li><strong>En caso de pérdida, hurto o daño irreparable:</strong> el colaborador asume la responsabilidad económica del bien según su valor de reposición al momento del evento, pudiendo aplicarse descuento en planilla o liquidación según la normativa vigente del CMP.</li>
+              <li><strong>En caso de daño parcial:</strong> el área custodio evaluará el estado del bien y determinará si corresponde observación, reparación a cargo del colaborador o aceptación con descargo documentado.</li>
+              <li>La firma de este documento tiene carácter de Declaración Jurada y otorga conformidad expresa de las condiciones establecidas.</li>
             </ul>
           </div>
 
-          {/* Firma digital */}
-          <div className="firma-card">
-            <div className="firma-card-title">Usuario del Bien — Firma digital</div>
-            <div
-              className="firma-zona"
-              onClick={() => setFirmaActiva(true)}
-            >
-              {!firmaActiva && <span className="firma-placeholder">Haz clic aquí para firmar</span>}
-              {firmaActiva && (
-                <input
-                  type="text"
-                  className="firma-input"
-                  placeholder="Escribe tu nombre como firma"
-                  value={firmaTexto}
-                  onChange={e => setFirmaTexto(e.target.value)}
-                  autoFocus
-                />
-              )}
+          {/* Firma vía correo electrónico (Obs 8) */}
+          <div className="banner banner-purple" style={{ marginBottom: 14 }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>📧 Firma digital por notificación de correo</div>
+            La aceptación y firma final de entrega/devolución de bienes y accesorios se realiza mediante una notificación enviada al correo institucional del colaborador (<strong>{colaborador.nombre}</strong>). Al aceptar el correo, el colaborador registra su conformidad en el sistema.
+          </div>
+
+          {notifEnviada ? (
+            <div className="banner" style={{ background:'#ECFDF5', border:'1px solid #6EE7B7', color:'#065F46', marginBottom:14 }}>
+              ✅ Notificación enviada al correo del colaborador el {dd}/{meses.indexOf(mes)+1 < 10 ? '0'+(meses.indexOf(mes)+1) : meses.indexOf(mes)+1}/{anio}. En espera de aceptación.
             </div>
-            <div className="flex-row mt-8" style={{ gap: 16 }}>
-              <div><div className="text-xs text-gray">Nombres y apellidos</div><div className="text-sm fw-600">Carlos Pérez Ramos</div></div>
-              <div><div className="text-xs text-gray">Fecha de firma</div><div className="text-sm fw-600">28/03/2026</div></div>
+          ) : (
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:8 }}>
+                <input type="checkbox" id="chk-acepto" checked={aceptado} onChange={e => setAceptado(e.target.checked)} />
+                <label htmlFor="chk-acepto" style={{ fontSize:12, color:'#374151' }}>
+                  Confirmo que los datos del acta son correctos y autorizo el envío de la notificación de firma al colaborador
+                </label>
+              </div>
+              <button
+                className="btn btn-primary btn-sm"
+                disabled={!aceptado}
+                style={!aceptado ? { opacity:0.5, cursor:'not-allowed' } : {}}
+                onClick={() => setNotifEnviada(true)}
+              >
+                📧 Enviar notificación de firma al colaborador
+              </button>
+            </div>
+          )}
+
+          {/* Grid firmas del acta */}
+          <div className="section-title-sm">FIRMAS DEL ACTA</div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:14 }}>
+            <div className="aprob-cell">
+              <div className="aprob-title">Responsable que entrega</div>
+              <div className="aprob-zona"><span className="firma-placeholder">Firmar aquí</span></div>
+              <div className="text-xs text-gray mt-4">Administración CMP</div>
+            </div>
+            <div className="aprob-cell">
+              <div className="aprob-title">Colaborador — firma por correo</div>
+              <div className="aprob-zona" style={{ background:'#F5F3FF', border:'1px dashed #6B21A8' }}>
+                {notifEnviada
+                  ? <span style={{ fontSize:11, color:'#6B21A8', fontStyle:'italic' }}>⏳ Pendiente de aceptación por correo</span>
+                  : <span style={{ fontSize:11, color:'#9CA3AF' }}>Notificación no enviada aún</span>}
+              </div>
+              <div className="text-xs text-gray mt-4">{colaborador.nombre}</div>
             </div>
           </div>
         </div>
         <div className="modal-footer">
-          <span className="modal-note">Al firmar, se registra la devolución y se actualiza el inventario en Activos y Bienes.</span>
+          <span className="modal-note">La firma del colaborador se registra vía aceptación del correo de notificación.</span>
           <button className="btn btn-gray" onClick={onClose}>Cancelar</button>
           <button className="btn btn-outline">💾 Guardar borrador</button>
-          <button className="btn btn-primary" onClick={onFirmar}>✔ Firmar y registrar devolución</button>
+          <button className="btn btn-primary" onClick={onFirmar} disabled={!notifEnviada} style={!notifEnviada?{opacity:0.5,cursor:'not-allowed'}:{}}>
+            ✔ Registrar devolución
+          </button>
         </div>
       </div>
     </div>
@@ -446,7 +502,7 @@ function ModalVerObs({ bienId, onClose }: ModalVerObsProps) {
     '200201': {
       tipo: 'Bien mueble',
       estado: 'Regular',
-      autor: 'R. Limas',
+      autor: 'Jesús Luman Marcos Aragon',
       fecha: '27/03/2026',
       detalle: 'La silla ergonómica presenta desgaste visible en el tapizado y uno de los apoyabrazos muestra fisuras. Se recomienda evaluar si procede descuento o aceptación con observación firmada.',
     },
@@ -533,7 +589,7 @@ function ModalReporteDevolucion({ onClose }: ModalReporteDevolucionProps) {
                 <tr>
                   <td style={tdStyle}>111030</td><td style={tdStyle}>Laptop Dell Latitude 5420</td><td style={tdStyle}>CMP-038401</td>
                   <td style={tdStyle}>Bueno</td>
-                  <td style={{ ...tdStyle, padding: 5 }}><FirmaDone nombre="G. Palacios" cargo="Jefa UN. Administración" fecha="01/04/2026" /></td>
+                  <td style={{ ...tdStyle, padding: 5 }}><FirmaDone nombre="G. Palacios" cargo="Guissela Palacios Alvarez — Jefa de Administración" fecha="01/04/2026" /></td>
                   <td style={{ ...tdStyle, padding: 5 }}><FirmaPendiente /></td>
                   <td style={{ ...tdStyle, padding: 5 }}><FirmaEspera /></td>
                   <td style={{ ...tdStyle, color: '#D97706' }}>☐ Pendiente</td>
@@ -541,7 +597,7 @@ function ModalReporteDevolucion({ onClose }: ModalReporteDevolucionProps) {
                 <tr>
                   <td style={tdStyle}>111031</td><td style={tdStyle}>Mouse Logitech M185</td><td style={tdStyle}>CMP-038402</td>
                   <td style={tdStyle}>Bueno</td>
-                  <td style={{ ...tdStyle, padding: 5 }}><FirmaDone nombre="G. Palacios" cargo="Jefa UN. Administración" fecha="01/04/2026" /></td>
+                  <td style={{ ...tdStyle, padding: 5 }}><FirmaDone nombre="G. Palacios" cargo="Guissela Palacios Alvarez — Jefa de Administración" fecha="01/04/2026" /></td>
                   <td style={{ ...tdStyle, padding: 5 }}><FirmaPendiente /></td>
                   <td style={{ ...tdStyle, padding: 5 }}><FirmaEspera /></td>
                   <td style={{ ...tdStyle, color: '#D97706' }}>☐ Pendiente</td>
@@ -654,6 +710,49 @@ function DetailView({ devolucion, onBack }: DetailViewProps) {
   const [verObsId, setVerObsId] = useState('')
   const [showReporte, setShowReporte] = useState(false)
 
+  // Obs 4 — data real del colaborador desde Supabase
+  const [bienesColab, setBienesColab] = useState<typeof BIENES_DEVOLUCION>([])
+  const [accsColab, setAccsColab] = useState<typeof ACCESORIOS_DEVOLUCION>([])
+  const [prestamosColab, setPrestamosColab] = useState<Array<{id:string;bien:string;fecha_devolucion:string;estado:string}>>([])
+  const [adelantosColab, setAdelantosColab] = useState<Array<{id:string;numero:string;tipo:string;monto:number;estado:string}>>([])
+  const [dataLoading, setDataLoading] = useState(true)
+
+  useEffect(() => {
+    const load = async () => {
+      setDataLoading(true)
+      try {
+        // Bienes asignados al colaborador
+        const { data: bienesDB } = await supabase.from('solicitudes_asignacion')
+          .select('id,bien_nombre,tipo')
+          .eq('colaborador_dni', devolucion.colaborador_dni)
+          .eq('estado', 'Aprobado')
+        if (bienesDB && bienesDB.length > 0) {
+          setBienesColab(bienesDB.map((b, i) => ({
+            id: String(i+1), desc: b.bien_nombre, codigo: `CMP-${String(i+1).padStart(6,'0')}`,
+            marca: '—', modelo: '—', serie: '—', custodio: b.tipo==='computo'?'Jesús Luman Marcos Aragon — Jefe de TI':'Guissela Palacios Alvarez — Jefa de Administración',
+            estado: 'bueno', devolucion: 'pendiente',
+          })))
+        } else {
+          setBienesColab(BIENES_DEVOLUCION)
+        }
+        // Préstamos bienes tecnológicos
+        const { data: prestDB } = await supabase.from('prestamos_bienes')
+          .select('id,bien_nombre,fecha_devolucion,estado')
+          .eq('colaborador_dni', devolucion.colaborador_dni)
+          .not('estado', 'eq', 'devuelto_conforme')
+        if (prestDB) setPrestamosColab(prestDB.map(p => ({ id:p.id, bien:p.bien_nombre, fecha_devolucion:p.fecha_devolucion??'—', estado:p.estado })))
+        // Préstamos y adelantos
+        const { data: advDB } = await supabase.from('solicitudes_adelanto')
+          .select('id,numero,tipo,monto,estado')
+          .eq('colaborador', devolucion.colaborador_nombre)
+          .in('estado', ['en_revision','aprobado'])
+        if (advDB) setAdelantosColab(advDB)
+      } catch { setBienesColab(BIENES_DEVOLUCION); setAccsColab(ACCESORIOS_DEVOLUCION) }
+      finally { setDataLoading(false) }
+    }
+    load()
+  }, [devolucion.colaborador_dni, devolucion.colaborador_nombre])
+
   const toggleSection = (id: string) => {
     setOpenSections(prev => ({ ...prev, [id]: !prev[id] }))
   }
@@ -716,7 +815,7 @@ function DetailView({ devolucion, onBack }: DetailViewProps) {
                 </tr>
               </thead>
               <tbody>
-                {BIENES_DEVOLUCION.map(b => (
+                {(bienesColab.length > 0 ? bienesColab : BIENES_DEVOLUCION).map(b => (
                   <tr key={b.id}>
                     <td>{b.id}</td>
                     <td>{b.desc}</td>
@@ -773,7 +872,7 @@ function DetailView({ devolucion, onBack }: DetailViewProps) {
                 </tr>
               </thead>
               <tbody>
-                {ACCESORIOS_DEVOLUCION.map(a => (
+                {(accsColab.length > 0 ? accsColab : ACCESORIOS_DEVOLUCION).map(a => (
                   <tr key={a.id}>
                     <td>{a.id}</td>
                     <td>{a.nombre}</td>
@@ -805,11 +904,29 @@ function DetailView({ devolucion, onBack }: DetailViewProps) {
         </div>
         {openSections.prestamos_tec && (
           <div className="section-block-body">
-            <div className="empty-state-sm">
-              <div style={{ fontSize: 24, marginBottom: 6 }}>📦</div>
-              <div className="text-sm fw-600" style={{ color: '#374151', marginBottom: 4 }}>Sin préstamos de bienes tecnológicos activos</div>
-              <div className="text-xs text-gray">No se registran préstamos de equipos pendientes de devolución para este colaborador.</div>
-            </div>
+            {dataLoading ? (
+              <div className="text-xs text-gray" style={{ padding:'12px 0', fontStyle:'italic' }}>Cargando...</div>
+            ) : prestamosColab.length > 0 ? (
+              <table>
+                <thead><tr><th>ID</th><th>Bien</th><th>Fecha dev. pactada</th><th>Estado</th></tr></thead>
+                <tbody>
+                  {prestamosColab.map(p => (
+                    <tr key={p.id}>
+                      <td className="fw-600">{p.id.slice(-6)}</td>
+                      <td>{p.bien}</td>
+                      <td>{p.fecha_devolucion}</td>
+                      <td><span className={`badge ${p.estado==='en_prestamo'?'b-blue':'b-yellow'}`}>{p.estado}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="empty-state-sm">
+                <div style={{ fontSize: 24, marginBottom: 6 }}>📦</div>
+                <div className="text-sm fw-600" style={{ color: '#374151', marginBottom: 4 }}>Sin préstamos de bienes tecnológicos activos</div>
+                <div className="text-xs text-gray">No se registran préstamos de equipos pendientes de devolución para este colaborador.</div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -827,11 +944,29 @@ function DetailView({ devolucion, onBack }: DetailViewProps) {
         </div>
         {openSections.adelantos && (
           <div className="section-block-body">
-            <div className="empty-state-sm">
-              <div style={{ fontSize: 24, marginBottom: 6 }}>💰</div>
-              <div className="text-sm fw-600" style={{ color: '#374151', marginBottom: 4 }}>Sin préstamos ni adelantos pendientes</div>
-              <div className="text-xs text-gray">No se registran préstamos o adelantos de sueldo con saldo pendiente para este colaborador.</div>
-            </div>
+            {dataLoading ? (
+              <div className="text-xs text-gray" style={{ padding:'12px 0', fontStyle:'italic' }}>Cargando...</div>
+            ) : adelantosColab.length > 0 ? (
+              <table>
+                <thead><tr><th>N°</th><th>Tipo</th><th>Monto S/.</th><th>Estado</th></tr></thead>
+                <tbody>
+                  {adelantosColab.map(a => (
+                    <tr key={a.id}>
+                      <td className="fw-600">{a.numero}</td>
+                      <td>{a.tipo==='adelanto'?'Adelanto de sueldo':'Préstamo personal'}</td>
+                      <td>S/. {Number(a.monto).toLocaleString('es-PE')}</td>
+                      <td><span className={`badge ${a.estado==='aprobado'?'b-green':'b-yellow'}`}>{a.estado}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="empty-state-sm">
+                <div style={{ fontSize: 24, marginBottom: 6 }}>💰</div>
+                <div className="text-sm fw-600" style={{ color: '#374151', marginBottom: 4 }}>Sin préstamos ni adelantos pendientes</div>
+                <div className="text-xs text-gray">No se registran préstamos o adelantos de sueldo con saldo pendiente para este colaborador.</div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -880,6 +1015,13 @@ function DetailView({ devolucion, onBack }: DetailViewProps) {
       {showActa && actaBien && (
         <ModalActaDevolucion
           bien={actaBien}
+          colaborador={{
+            nombre: devolucion.colaborador_nombre,
+            dni: devolucion.colaborador_dni,
+            area: devolucion.area,
+            cargo: COLABORADORES[devolucion.colaborador_dni]?.cargo ?? '—',
+            sede: COLABORADORES[devolucion.colaborador_dni]?.sede ?? '—',
+          }}
           onClose={() => setShowActa(false)}
           onFirmar={() => setShowActa(false)}
         />

@@ -76,6 +76,16 @@ const AREA_META: Record<string, { saldo: string; gastado: string; reposiciones: 
   'Decanato':                 { saldo: 'S/. 2,750.00', gastado: 'S/. 250.00',   reposiciones: 1 },
 }
 
+const AREA_SUBAREAS: Record<string, string[]> = {
+  'Sec. Economía y Finanzas': ['UN. DE FINANZAS', 'UN. DE ECONOMÍA'],
+  'Sec. Administración':      ['UN. DE ADMINISTRACIÓN', 'UN. DE LOGÍSTICA'],
+  'Uni. Administración':      ['UN. DE ADMINISTRACIÓN'],
+  'FOSEMED':                  ['FOSEMED'],
+  'SEMEFA':                   ['SEMEFA'],
+  'Decanato':                 ['DECANATO', 'SECRETARÍA DECANATO'],
+  'Otra área':                [],
+}
+
 function gastoBadge(estado: string) {
   if (estado === 'declarado') return <span className="badge b-green">Declarado</span>
   if (estado === 'pendiente_sustento') return <span className="badge b-red">Pendiente sustento</span>
@@ -95,6 +105,29 @@ export function CajaChica() {
   const [gestionarTab, setGestionarTab] = useState('responsables')
   const [selectedCaja, setSelectedCaja] = useState<CajaChicaType | null>(null)
   const [selectedGasto, setSelectedGasto] = useState<GastoRow | null>(null)
+
+  // Sustento de gasto modal
+  const [showSustento,       setShowSustento]       = useState(false)
+  const [sustentoGasto,      setSustentoGasto]      = useState<GastoRow | null>(null)
+  const [sustentoArea,       setSustentoArea]       = useState('')
+  const [sustentoSubarea,    setSustentoSubarea]    = useState('')
+  const [sustentoNotas,      setSustentoNotas]      = useState('')
+  const [sustentoFileName,   setSustentoFileName]   = useState('')
+
+  // Solicitar Reposición modal
+  const [repCode,      setRepCode]      = useState('')
+  const [repModalData, setRepModalData] = useState<{ area: string; responsable: string; monto: string } | null>(null)
+  const [selectedRep,  setSelectedRep]  = useState<{ area: string; responsable: string; monto: string; numero: string } | null>(null)
+
+  // Nuevo responsable modal
+  const [showNuevoResp,  setShowNuevoResp]  = useState(false)
+  const [nrcTab,         setNrcTab]         = useState<'datos'|'adjuntos'>('datos')
+  const [nrcFirma,       setNrcFirma]       = useState('')
+  const [nrcNotas,       setNrcNotas]       = useState('')
+  const [nrcVisorFile,   setNrcVisorFile]   = useState('')
+  const [formNuevoResp, setFormNuevoResp] = useState({
+    area: '', subarea: '', responsable: '', monto: '', periodo: '2026-03',
+  })
 
   const [formGasto, setFormGasto] = useState({
     fecha: new Date().toISOString().slice(0, 10),
@@ -298,7 +331,15 @@ export function CajaChica() {
 
               <div className="flex gap-8 mb-12">
                 <button className="btn btn-primary btn-sm" onClick={() => { setSelectedCaja(activeCaja); setShowRegistrarGasto(true) }}>+ Registrar Gasto</button>
-                <button className="btn btn-outline btn-sm" onClick={() => { setSelectedCaja(activeCaja); setShowReposicion(true) }}>Solicitar Reposición</button>
+                <button className="btn btn-outline btn-sm" onClick={() => {
+                  setRepModalData({
+                    area: activeCaja.area,
+                    responsable: activeCaja.responsable,
+                    monto: `S/. ${activeCaja.gastado_mes.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`,
+                  })
+                  setRepCode(`REP-${new Date().getFullYear()}-${String(Math.floor(Math.random()*900)+100)}`)
+                  setShowReposicion(true)
+                }}>Solicitar Reposición</button>
               </div>
 
               <div className="card">
@@ -329,7 +370,14 @@ export function CajaChica() {
                             {g.estado === 'pendiente_sustento' ? (
                               <div className="actions-cell">
                                 <button className="btn btn-gray btn-xs" onClick={() => { setSelectedGasto(g); setShowDetalleGasto(true) }}>Ver</button>
-                                <button className="btn btn-outline btn-xs" onClick={() => alert('Función de adjuntar disponible en producción')}>
+                                <button className="btn btn-outline btn-xs" onClick={() => {
+                                  setSustentoGasto(g)
+                                  setSustentoArea(activeCaja?.area ?? '')
+                                  setSustentoSubarea('')
+                                  setSustentoNotas('')
+                                  setSustentoFileName('')
+                                  setShowSustento(true)
+                                }}>
                                   {activeTab === 'Decanato' ? 'Adjuntar sustento' : 'Adjuntar'}
                                 </button>
                               </div>
@@ -367,7 +415,11 @@ export function CajaChica() {
 
       {/* ── Modal: Registrar Gasto ── */}
       {showRegistrarGasto && (
-        <div className="modal-overlay" onClick={() => setShowRegistrarGasto(false)}>
+        <div
+          className={`modal-overlay${showGestionar ? ' stacked' : ''}`}
+          style={showGestionar ? { background: 'rgba(0,0,0,.18)' } : undefined}
+          onClick={() => setShowRegistrarGasto(false)}
+        >
           <div className="modal-box" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}>
             <div className="modal-hdr">
               <span className="modal-title">Registrar Gasto — Caja Chica <span>{selectedCaja?.area ?? ''}</span></span>
@@ -497,25 +549,96 @@ export function CajaChica() {
       )}
 
       {/* ── Modal: Solicitar Reposición ── */}
-      {showReposicion && (
-        <div className="modal-overlay" onClick={() => setShowReposicion(false)}>
-          <div className="modal-box" style={{ maxWidth: 420 }} onClick={e => e.stopPropagation()}>
+      {showReposicion && repModalData && (
+        <div
+          className={`modal-overlay${showGestionar ? ' stacked' : ''}`}
+          style={showGestionar ? { background: 'rgba(0,0,0,.18)' } : undefined}
+          onClick={() => setShowReposicion(false)}
+        >
+          <div className="modal-box" style={{ maxWidth: 600 }} onClick={e => e.stopPropagation()}>
             <div className="modal-hdr">
-              <div className="modal-title">Solicitar Reposición</div>
+              <div>
+                <div className="modal-title">Solicitar Reposición de Caja Chica</div>
+                <div className="modal-subtitle">{repModalData.area}</div>
+              </div>
               <button className="modal-close" onClick={() => setShowReposicion(false)}>×</button>
             </div>
-            <div className="modal-body" style={{ textAlign: 'center', padding: '24px 20px' }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>📬</div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: '#1E1B4B', marginBottom: 8 }}>Reposición solicitada</div>
-              <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 16 }}>{selectedCaja?.area}</div>
-              <div style={{ background: '#F5F3FF', borderRadius: 8, padding: 14, marginBottom: 16 }}>
-                <div className="text-xs text-gray mb-8">Código de solicitud</div>
-                <div style={{ fontSize: 20, fontWeight: 700, color: '#6B21A8', letterSpacing: 2 }}>REP-2026-001</div>
+            <div className="modal-body">
+
+              {/* Resumen */}
+              <div className="summary-block" style={{ marginBottom: 14 }}>
+                <div className="summary-row"><span className="summary-lbl">Código solicitud</span><span className="summary-val fw-600" style={{ color: '#6B21A8', letterSpacing: 1 }}>{repCode}</span></div>
+                <div className="summary-row"><span className="summary-lbl">Área responsable</span><span className="summary-val">{repModalData.area}</span></div>
+                <div className="summary-row"><span className="summary-lbl">Monto a reponer</span><span className="summary-val fw-600">{repModalData.monto}</span></div>
+                <div className="summary-row"><span className="summary-lbl">Fecha solicitud</span><span className="summary-val">{new Date().toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span></div>
               </div>
-              <div className="banner banner-teal" style={{ textAlign: 'left' }}>✉ Se ha enviado una notificación al área de Contabilidad y al correo del responsable con el código de reposición.</div>
+
+              <div className="banner banner-teal" style={{ marginBottom: 14 }}>✉ Notificación enviada a Contabilidad y al correo del responsable con el código de reposición.</div>
+
+              <div className="h-divider" />
+
+              {/* Flujo del proceso */}
+              <div className="section-title-sm" style={{ marginTop: 14 }}>FLUJO DE REPOSICIÓN</div>
+              <div className="stepper" style={{ marginBottom: 16 }}>
+                <div className="step"><div className="step-circ cur">⏳</div><span className="step-lbl cur">Solicitud enviada</span></div>
+                <div className="step-conn" />
+                <div className="step"><div className="step-circ pend">2</div><span className="step-lbl pend">V°B° Jefe Área</span></div>
+                <div className="step-conn" />
+                <div className="step"><div className="step-circ pend">3</div><span className="step-lbl pend">Aprobación Contabilidad</span></div>
+                <div className="step-conn" />
+                <div className="step"><div className="step-circ pend">4</div><span className="step-lbl pend">Conformidad responsable</span></div>
+              </div>
+
+              <div className="h-divider" />
+
+              {/* Firmas del proceso */}
+              <div className="section-title-sm" style={{ marginTop: 14 }}>FIRMAS DEL PROCESO</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 4 }}>
+                <div>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: '#6B7280', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.5px' }}>Responsable de Caja</div>
+                  <div className="aprob-cell">
+                    <div className="aprob-zona">
+                      <div style={{ textAlign: 'center' }}>
+                        <span style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', color: '#1E1B4B', fontSize: 13 }}>{repModalData.responsable}</span>
+                        <div style={{ fontSize: 10, color: '#6B7280', marginTop: 2 }}>Responsable de Caja Chica</div>
+                        <div style={{ fontSize: 10, color: '#6B7280' }}>{new Date().toLocaleDateString('es-PE')}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: '#6B7280', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.5px' }}>V°B° Jefe de Área</div>
+                  <div className="aprob-cell">
+                    <div className="aprob-zona">
+                      <span style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', color: '#991B1B', fontSize: 13 }}>Pendiente</span>
+                      <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 2 }}>—</div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: '#6B7280', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.5px' }}>Aprobación Contabilidad</div>
+                  <div className="aprob-cell">
+                    <div className="aprob-zona">
+                      <span style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', color: '#6B7280', fontSize: 13 }}>En espera</span>
+                      <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 2 }}>—</div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: '#6B7280', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.5px' }}>Conformidad final</div>
+                  <div className="aprob-cell">
+                    <div className="aprob-zona">
+                      <span style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', color: '#6B7280', fontSize: 13 }}>En espera</span>
+                      <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 2 }}>—</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
-            <div className="modal-footer" style={{ justifyContent: 'center' }}>
-              <button className="btn btn-primary btn-sm" onClick={() => setShowReposicion(false)}>Entendido</button>
+            <div className="modal-footer">
+              <button className="btn btn-gray" onClick={() => setShowReposicion(false)}>Cerrar</button>
+              <button className="btn btn-primary" onClick={() => setShowReposicion(false)}>Entendido</button>
             </div>
           </div>
         </div>
@@ -565,6 +688,100 @@ export function CajaChica() {
         </div>
       )}
 
+      {/* ── Modal: Sustento de Gasto ── */}
+      {showSustento && sustentoGasto && (
+        <div className="modal-overlay" onClick={() => setShowSustento(false)}>
+          <div className="modal-box" style={{ maxWidth: 520 }} onClick={e => e.stopPropagation()}>
+            <div className="modal-hdr">
+              <div>
+                <div className="modal-title">Sustento de gasto</div>
+                <div className="modal-subtitle">{sustentoGasto.comprobante} · S/. {sustentoGasto.monto.toFixed(2)}</div>
+              </div>
+              <button className="modal-close" onClick={() => setShowSustento(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              {/* Datos del gasto (readonly) */}
+              <div style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 8, padding: '12px 14px', marginBottom: 16 }}>
+                <div className="section-title-sm" style={{ marginBottom: 8 }}>DATOS DEL GASTO</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: 12 }}>
+                  <div><div style={{ color: '#9CA3AF', fontSize: 10, marginBottom: 2 }}>Fecha</div><div style={{ fontWeight: 600 }}>{sustentoGasto.fecha}</div></div>
+                  <div><div style={{ color: '#9CA3AF', fontSize: 10, marginBottom: 2 }}>Comprobante</div><div style={{ fontWeight: 600 }}>{sustentoGasto.comprobante}</div></div>
+                  <div><div style={{ color: '#9CA3AF', fontSize: 10, marginBottom: 2 }}>Monto S/.</div><div style={{ fontWeight: 600 }}>S/. {sustentoGasto.monto.toFixed(2)}</div></div>
+                  <div><div style={{ color: '#9CA3AF', fontSize: 10, marginBottom: 2 }}>Estado</div>{gastoBadge(sustentoGasto.estado)}</div>
+                  <div style={{ gridColumn: '1/-1' }}><div style={{ color: '#9CA3AF', fontSize: 10, marginBottom: 2 }}>Descripción</div><div style={{ fontWeight: 600 }}>{sustentoGasto.descripcion}</div></div>
+                </div>
+              </div>
+
+              {/* Campos editables */}
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Área <span className="req">*</span></label>
+                  <input type="text" className="form-control" value={sustentoArea}
+                    onChange={e => setSustentoArea(e.target.value)}
+                    placeholder="Ej: Decanato" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Subárea</label>
+                  <input type="text" className="form-control" value={sustentoSubarea}
+                    onChange={e => setSustentoSubarea(e.target.value)}
+                    placeholder="Ej: Secretaría Decanato" />
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Notas / Justificación <span className="req">*</span></label>
+                <textarea className="form-control" style={{ minHeight: 72 }}
+                  placeholder="Describe el motivo o justificación del gasto para el sustento..."
+                  value={sustentoNotas} onChange={e => setSustentoNotas(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Adjuntar documentos <span className="req">*</span></label>
+                <div
+                  className="dropzone"
+                  onClick={() => document.getElementById('sustento-file-input')?.click()}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <input
+                    id="sustento-file-input"
+                    type="file"
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    style={{ display: 'none' }}
+                    onChange={e => setSustentoFileName(e.target.files?.[0]?.name ?? '')}
+                  />
+                  <div className="dropzone-icon">📎</div>
+                  {sustentoFileName
+                    ? <div style={{ fontWeight: 600, color: '#1E1B4B', fontSize: 13 }}>✔ {sustentoFileName}</div>
+                    : <><div>Arrastra el archivo o haz clic para seleccionar</div><div className="dropzone-text">PDF, Word, JPG, PNG — máx 10MB</div></>
+                  }
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-gray" onClick={() => setShowSustento(false)}>Cancelar</button>
+              <button
+                className="btn btn-primary"
+                disabled={!sustentoNotas.trim() || !sustentoFileName}
+                onClick={() => {
+                  setGastosState(prev => {
+                    const area = activeCaja?.area ?? ''
+                    return {
+                      ...prev,
+                      [area]: (prev[area] ?? []).map(g =>
+                        g === sustentoGasto ? { ...g, estado: 'declarado' } : g
+                      ),
+                    }
+                  })
+                  setShowSustento(false)
+                  setSustentoGasto(null)
+                  alert('✓ Sustento adjuntado correctamente. El gasto ha sido declarado.')
+                }}
+              >
+                Enviar sustento
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Modal: Gestionar Caja Chica ── */}
       {showGestionar && (
         <div className="modal-overlay" onClick={() => setShowGestionar(false)}>
@@ -587,7 +804,7 @@ export function CajaChica() {
               {gestionarTab === 'responsables' && (
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
-                    <button className="btn btn-primary btn-sm" onClick={() => alert('Formulario de nuevo responsable disponible en producción')}>+ Nuevo Responsable</button>
+                    <button className="btn btn-primary btn-sm" onClick={() => { setNrcTab('datos'); setNrcFirma(''); setNrcNotas(''); setNrcVisorFile(''); setFormNuevoResp({area:'',subarea:'',responsable:'',monto:'',periodo:'2026-03'}); setShowNuevoResp(true) }}>+ Nuevo Responsable</button>
                   </div>
                   <div className="table-wrap">
                     <table>
@@ -620,7 +837,7 @@ export function CajaChica() {
               {gestionarTab === 'gastos' && (
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
-                    <button className="btn btn-primary btn-sm" onClick={() => { setShowGestionar(false); setSelectedCaja(cajas.find(c => c.area === 'Decanato') ?? null); setShowRegistrarGasto(true) }}>+ Registrar Gasto</button>
+                    <button className="btn btn-primary btn-sm" onClick={() => { setSelectedCaja(cajas.find(c => c.area !== 'tablero') ?? cajas[0] ?? null); setShowRegistrarGasto(true) }}>+ Registrar Gasto</button>
                   </div>
                   <div className="table-wrap">
                     <table>
@@ -652,8 +869,21 @@ export function CajaChica() {
               {gestionarTab === 'reposiciones' && (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                    <span className="text-xs text-gray">Selecciona un registro para habilitar la acción</span>
-                    <button className="btn btn-primary btn-sm" disabled>Solicitar Reposición</button>
+                    <span className="text-xs text-gray" style={{ color: selectedRep ? '#6B21A8' : undefined, fontWeight: selectedRep ? 600 : undefined }}>
+                      {selectedRep ? `✓ Seleccionado: ${selectedRep.numero} — ${selectedRep.area}` : 'Selecciona un registro para habilitar la acción'}
+                    </span>
+                    <button
+                      className="btn btn-primary btn-sm"
+                      disabled={!selectedRep}
+                      onClick={() => {
+                        if (!selectedRep) return
+                        setRepModalData({ area: selectedRep.area, responsable: selectedRep.responsable, monto: selectedRep.monto })
+                        setRepCode(`REP-${new Date().getFullYear()}-${String(Math.floor(Math.random()*900)+100)}`)
+                        setShowReposicion(true)
+                      }}
+                    >
+                      Solicitar Reposición
+                    </button>
                   </div>
                   <div className="section-title-sm">REGISTRO DE REPOSICIONES</div>
                   <div className="table-wrap">
@@ -671,26 +901,31 @@ export function CajaChica() {
                         </tr>
                       </thead>
                       <tbody>
-                        <tr style={{ cursor: 'pointer' }}>
-                          <td><input type="radio" name="rep-sel" style={{ accentColor: '#6B21A8' }} /></td>
-                          <td className="fw-600">REP-2026-001</td><td>DECANATO</td><td>Aaron Nuñez M.</td><td>S/. 3,000</td><td>01/03/2026</td><td><span className="badge b-green">Aprobada</span></td><td>Contabilidad ✔</td>
-                        </tr>
-                        <tr style={{ cursor: 'pointer' }}>
-                          <td><input type="radio" name="rep-sel" style={{ accentColor: '#6B21A8' }} /></td>
-                          <td className="fw-600">REP-2026-002</td><td>SEC. DE ADMINISTRACION</td><td>Lizzetti Díaz E.</td><td>S/. 2,100</td><td>08/03/2026</td><td><span className="badge b-green">Aprobada</span></td><td>Contabilidad ✔</td>
-                        </tr>
-                        <tr style={{ cursor: 'pointer' }}>
-                          <td><input type="radio" name="rep-sel" style={{ accentColor: '#6B21A8' }} /></td>
-                          <td className="fw-600">REP-2026-003</td><td>SEMEFA</td><td>Jorge Lima C.</td><td>S/. 1,200</td><td>15/03/2026</td><td><span className="badge b-yellow">En revisión</span></td><td>Jefe Área ⏳</td>
-                        </tr>
-                        <tr style={{ cursor: 'pointer' }}>
-                          <td><input type="radio" name="rep-sel" style={{ accentColor: '#6B21A8' }} /></td>
-                          <td className="fw-600">REP-2026-004</td><td>FONDO DE BIEN.SOCIAL DEL MED.</td><td>Carmen Vega R.</td><td>S/. 900</td><td>20/03/2026</td><td><span className="badge b-red">Pendiente V°B°</span></td><td>Jefe Área ○</td>
-                        </tr>
-                        <tr style={{ cursor: 'pointer' }}>
-                          <td><input type="radio" name="rep-sel" style={{ accentColor: '#6B21A8' }} /></td>
-                          <td className="fw-600">REP-2026-005</td><td>SEC. DE ECONOMIA Y FINANZAS</td><td>María Torres H.</td><td>S/. 1,800</td><td>22/03/2026</td><td><span className="badge b-yellow">En revisión</span></td><td>Contabilidad ⏳</td>
-                        </tr>
+                        {([
+                          { numero: 'REP-2026-001', area: 'DECANATO',                       responsable: 'Aaron Nuñez M.',    monto: 'S/. 3,000', fecha: '01/03/2026', estadoEl: <span className="badge b-green">Aprobada</span>,        aprobacion: 'Contabilidad ✔' },
+                          { numero: 'REP-2026-002', area: 'SEC. DE ADMINISTRACION',         responsable: 'Lizzetti Díaz E.', monto: 'S/. 2,100', fecha: '08/03/2026', estadoEl: <span className="badge b-green">Aprobada</span>,        aprobacion: 'Contabilidad ✔' },
+                          { numero: 'REP-2026-003', area: 'SEMEFA',                         responsable: 'Jorge Lima C.',    monto: 'S/. 1,200', fecha: '15/03/2026', estadoEl: <span className="badge b-yellow">En revisión</span>,   aprobacion: 'Jefe Área ⏳' },
+                          { numero: 'REP-2026-004', area: 'FONDO DE BIEN.SOCIAL DEL MED.',  responsable: 'Carmen Vega R.',   monto: 'S/. 900',   fecha: '20/03/2026', estadoEl: <span className="badge b-red">Pendiente V°B°</span>,  aprobacion: 'Jefe Área ○' },
+                          { numero: 'REP-2026-005', area: 'SEC. DE ECONOMIA Y FINANZAS',    responsable: 'María Torres H.',  monto: 'S/. 1,800', fecha: '22/03/2026', estadoEl: <span className="badge b-yellow">En revisión</span>,   aprobacion: 'Contabilidad ⏳' },
+                        ] as const).map(r => {
+                          const isSelected = selectedRep?.numero === r.numero
+                          return (
+                            <tr
+                              key={r.numero}
+                              style={{ cursor: 'pointer', background: isSelected ? '#F5F3FF' : undefined }}
+                              onClick={() => setSelectedRep({ area: r.area, responsable: r.responsable, monto: r.monto, numero: r.numero })}
+                            >
+                              <td><input type="radio" name="rep-sel" style={{ accentColor: '#6B21A8' }} checked={isSelected} onChange={() => {}} /></td>
+                              <td className="fw-600">{r.numero}</td>
+                              <td>{r.area}</td>
+                              <td>{r.responsable}</td>
+                              <td>{r.monto}</td>
+                              <td>{r.fecha}</td>
+                              <td>{r.estadoEl}</td>
+                              <td>{r.aprobacion}</td>
+                            </tr>
+                          )
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -699,6 +934,168 @@ export function CajaChica() {
             </div>
             <div className="modal-footer">
               <button className="btn btn-gray" onClick={() => setShowGestionar(false)}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: Nuevo Responsable Caja Chica ── */}
+      {showNuevoResp && (
+        <div className="modal-overlay stacked" style={{ background: 'rgba(0,0,0,.18)' }} onClick={() => setShowNuevoResp(false)}>
+          <div className="modal-box" style={{ maxWidth: 520 }} onClick={e => e.stopPropagation()}>
+            <div className="modal-hdr">
+              <span className="modal-title">Nuevo Responsable de Caja Chica</span>
+              <button className="modal-close" onClick={() => setShowNuevoResp(false)}>×</button>
+            </div>
+
+            {/* Tabs */}
+            <div className="modal-tabs" style={{ margin: '0 -18px', padding: '0 18px', borderBottom: '1px solid #F3F4F6', marginBottom: 0 }}>
+              <div className={`modal-tab${nrcTab === 'datos' ? ' active' : ''}`} onClick={() => setNrcTab('datos')}>📋 Datos</div>
+              <div className={`modal-tab${nrcTab === 'adjuntos' ? ' active' : ''}`} onClick={() => setNrcTab('adjuntos')}>📎 Adjuntos</div>
+            </div>
+
+            <div className="modal-body">
+              {/* ── Pane: Datos ── */}
+              {nrcTab === 'datos' && (
+                <div style={{ paddingTop: 12 }}>
+                  <div className="form-group">
+                    <label className="form-label">Área <span className="req">*</span></label>
+                    <select className="form-control" value={formNuevoResp.area}
+                      onChange={e => setFormNuevoResp(f => ({ ...f, area: e.target.value, subarea: '' }))}>
+                      <option value="">Seleccionar área...</option>
+                      {Object.keys(AREA_SUBAREAS).map(a => <option key={a}>{a}</option>)}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">SubÁrea</label>
+                    <select className="form-control" value={formNuevoResp.subarea}
+                      disabled={!formNuevoResp.area || (AREA_SUBAREAS[formNuevoResp.area]?.length ?? 0) === 0}
+                      onChange={e => setFormNuevoResp(f => ({ ...f, subarea: e.target.value }))}>
+                      <option value="">{formNuevoResp.area ? '— Selecciona una SubÁrea —' : '— Selecciona primero un Área —'}</option>
+                      {(AREA_SUBAREAS[formNuevoResp.area] ?? []).map(s => <option key={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Responsable <span className="req">*</span></label>
+                    <input type="text" className="form-control" placeholder="Nombre completo del responsable"
+                      value={formNuevoResp.responsable}
+                      onChange={e => setFormNuevoResp(f => ({ ...f, responsable: e.target.value }))} />
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label className="form-label">Monto Asignado (S/.) <span className="req">*</span></label>
+                      <input type="number" className="form-control" placeholder="0.00"
+                        value={formNuevoResp.monto}
+                        onChange={e => setFormNuevoResp(f => ({ ...f, monto: e.target.value }))} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Periodo</label>
+                      <input type="month" className="form-control" value={formNuevoResp.periodo}
+                        onChange={e => setFormNuevoResp(f => ({ ...f, periodo: e.target.value }))} />
+                    </div>
+                  </div>
+
+                  <div className="h-divider" />
+                  <div className="section-title-sm">FIRMAS DEL PROCESO</div>
+                  <div className="banner banner-blue mb-12" style={{ fontSize: 12 }}>ℹ Requiere V°B° del Jefe/Designado de Contabilidad y firma de aceptación del nuevo responsable.</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 4 }}>
+                    {/* Paso 1 — Jefe de Contabilidad (activo) */}
+                    <div className="aprob-cell" style={{ border: '1px solid #6B21A8', background: '#F5F3FF' }}>
+                      <div className="aprob-title" style={{ fontSize: 10 }}>Paso 1 — Jefe / Designado de Contabilidad</div>
+                      <div className="aprob-zona" style={{ minHeight: 40, cursor: 'text' }}
+                        onClick={e => (e.currentTarget.querySelector('input') as HTMLInputElement | null)?.focus()}>
+                        {nrcFirma
+                          ? <span style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', color: '#1E1B4B', fontSize: 13 }}>{nrcFirma}</span>
+                          : <span style={{ fontSize: 11, color: '#9CA3AF' }}>Firmar aquí</span>}
+                        <input type="text" className="firma-input" style={{ display: nrcFirma ? 'none' : 'none', position: 'absolute' }}
+                          placeholder="Firma"
+                          onChange={e => setNrcFirma(e.target.value)} />
+                      </div>
+                      {!nrcFirma && (
+                        <input type="text" className="form-control" style={{ fontSize: 12, marginTop: 6 }}
+                          placeholder="Escribe tu firma..." value={nrcFirma}
+                          onChange={e => setNrcFirma(e.target.value)} />
+                      )}
+                      <div className="text-xs text-gray mt-4">Jefe de Contabilidad CMP</div>
+                      <div className="text-xs text-gray">—</div>
+                    </div>
+                    {/* Paso 2 — Nuevo Responsable (pendiente) */}
+                    <div className="aprob-cell" style={{ border: '1px solid #D1D5DB', background: '#FAFAFA' }}>
+                      <div className="aprob-title" style={{ fontSize: 10 }}>Paso 2 — Nuevo Responsable acepta</div>
+                      <div style={{ background: '#F3F4F6', border: '1px dashed #D1D5DB', borderRadius: 4, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontSize: 11, color: '#9CA3AF' }}>Pendiente</span>
+                      </div>
+                      <div className="text-xs text-gray mt-4">{formNuevoResp.responsable || 'Nuevo Responsable designado'}</div>
+                      <div className="text-xs text-gray">—</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Pane: Adjuntos ── */}
+              {nrcTab === 'adjuntos' && (
+                <div style={{ paddingTop: 12 }}>
+                  <div style={{ border: '2px dashed #DDD6FE', borderRadius: 8, padding: 20, textAlign: 'center', cursor: 'pointer', background: '#F9F8FF' }}
+                    onClick={() => document.getElementById('nrc-file-input')?.click()}>
+                    <div style={{ fontSize: 24, marginBottom: 6 }}>📎</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#6B21A8' }}>Haz clic o arrastra archivos aquí</div>
+                    <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>PDF, Word, Excel, imágenes — Máx. 10 MB por archivo</div>
+                    <input type="file" id="nrc-file-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg" style={{ display: 'none' }} />
+                  </div>
+                  <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {[
+                      { icon: '📄', name: 'Memorando-designacion-cc.pdf', size: '2.3 MB · Subido 08/04/2026' },
+                      { icon: '📋', name: 'Acta-asignacion-caja-chica.docx', size: '145 KB · Subido 08/04/2026' },
+                    ].map(f => (
+                      <div key={f.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'white', border: '1px solid #E5E7EB', borderRadius: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 18 }}>{f.icon}</span>
+                          <div>
+                            <div style={{ fontSize: 12, fontWeight: 600, color: '#374151' }}>{f.name}</div>
+                            <div style={{ fontSize: 10, color: '#9CA3AF' }}>{f.size}</div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <button className="btn btn-gray btn-xs" onClick={() => setNrcVisorFile(nrcVisorFile === f.name ? '' : f.name)}>👁 Ver</button>
+                          <button className="btn btn-gray btn-xs">🗑</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {nrcVisorFile && (
+                    <div style={{ marginTop: 12 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>{nrcVisorFile}</div>
+                        <button className="btn btn-gray btn-xs" onClick={() => setNrcVisorFile('')}>× Cerrar visor</button>
+                      </div>
+                      <div style={{ border: '1.5px solid #DDD6FE', borderRadius: 6, background: '#F9F8FF', padding: 24, textAlign: 'center', minHeight: 120, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ fontSize: 40, marginBottom: 8 }}>📄</div>
+                        <div style={{ fontSize: 13, color: '#6B21A8', fontWeight: 600 }}>Vista previa del documento</div>
+                        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>Los documentos reales se visualizarán desde el servidor en la implementación final</div>
+                      </div>
+                    </div>
+                  )}
+                  <div className="form-group" style={{ marginTop: 14 }}>
+                    <label className="form-label">Notas / Observaciones adicionales</label>
+                    <textarea className="form-control" maxLength={500} rows={3}
+                      placeholder="Agrega observaciones o comunicaciones relacionadas a la designación..."
+                      value={nrcNotas} onChange={e => setNrcNotas(e.target.value)}
+                      style={{ height: 80 }} />
+                    <div className="form-hint" style={{ textAlign: 'right' }}>{nrcNotas.length}/500 caracteres</div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn btn-gray" onClick={() => setShowNuevoResp(false)}>Cancelar</button>
+              <button
+                className="btn btn-primary"
+                disabled={!formNuevoResp.area || !formNuevoResp.responsable || !formNuevoResp.monto}
+                onClick={() => { setShowNuevoResp(false) }}
+              >
+                Enviar solicitud
+              </button>
             </div>
           </div>
         </div>

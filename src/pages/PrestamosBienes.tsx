@@ -34,10 +34,10 @@ const PRESTAMOS_DATA: Record<string, PrestamoBienDetalle> = {
     direccion:'Av. Los Álamos 342, Miraflores', obs:null,
     flujo:[
       {paso:'Solicitud registrada', icono:'📋', cargo:'Colaborador — UN. DE TI', status:'done', fecha:'05/03/2026', firmante:'Aaron N.'},
-      {paso:'V°B° Jefe UN. DE TI', icono:'✔', cargo:'Roberto Limas — Jefe UN. DE TI', status:'done', fecha:'05/03/2026', firmante:'R. Limas'},
-      {paso:'Entrega del bien por Administración', icono:'📦', cargo:'Lizzetti Díaz — Sec. Administración', status:'done', fecha:'06/03/2026', firmante:'L. Díaz'},
+      {paso:'V°B° Jefe UN. DE TI', icono:'✔', cargo:'Jesús Luman — Jefe UN. DE TI', status:'done', fecha:'05/03/2026', firmante:'J. Luman'},
+      {paso:'Entrega del bien por Administración', icono:'📦', cargo:'Guissela Palacios Alvarez — Jefa de Administración', status:'done', fecha:'06/03/2026', firmante:'G. Palacios'},
       {paso:'Recepción — firma del colaborador', icono:'🖊', cargo:'Aaron Samuel Nuñez Muñoz — UN. DE TI', status:'done', fecha:'06/03/2026', firmante:'Aaron N.'},
-      {paso:'Devolución del bien', icono:'📥', cargo:'Aaron Samuel Nuñez Muñoz — UN. DE TI', status:'done', fecha:'12/03/2026', firmante:'Aaron N.', firmante2:'L. Díaz — Administración confirmó'}
+      {paso:'Devolución del bien', icono:'📥', cargo:'Aaron Samuel Nuñez Muñoz — UN. DE TI', status:'done', fecha:'12/03/2026', firmante:'Aaron N.', firmante2:'G. Palacios — Jefa Administración confirmó'}
     ]
   },
   'PREST-2026-002': {
@@ -48,8 +48,8 @@ const PRESTAMOS_DATA: Record<string, PrestamoBienDetalle> = {
     direccion:'Jr. Huancavelica 472, Of. 301, Lima Centro', obs:null,
     flujo:[
       {paso:'Solicitud registrada', icono:'📋', cargo:'Colaborador — UN. DE TI', status:'done', fecha:'18/03/2026', firmante:'Aaron N.'},
-      {paso:'V°B° Jefe UN. DE TI', icono:'✔', cargo:'Roberto Limas — Jefe UN. DE TI', status:'done', fecha:'18/03/2026', firmante:'R. Limas'},
-      {paso:'Entrega del bien por Administración', icono:'📦', cargo:'Lizzetti Díaz — Sec. Administración', status:'done', fecha:'18/03/2026', firmante:'L. Díaz'},
+      {paso:'V°B° Jefe UN. DE TI', icono:'✔', cargo:'Jesús Luman — Jefe UN. DE TI', status:'done', fecha:'18/03/2026', firmante:'J. Luman'},
+      {paso:'Entrega del bien por Administración', icono:'📦', cargo:'Guissela Palacios Alvarez — Jefa de Administración', status:'done', fecha:'18/03/2026', firmante:'G. Palacios'},
       {paso:'Recepción — firma del colaborador', icono:'🖊', cargo:'Aaron Samuel Nuñez Muñoz — UN. DE TI', status:'done', fecha:'18/03/2026', firmante:'Aaron N.'},
       {paso:'Devolución del bien', icono:'📥', cargo:'Aaron Samuel Nuñez Muñoz — UN. DE TI', status:'active', fecha:'—', firmante:'', activeLabel:'Pendiente — firmar al devolver el bien'}
     ]
@@ -62,8 +62,8 @@ const PRESTAMOS_DATA: Record<string, PrestamoBienDetalle> = {
     direccion:'Av. La Marina 2000, San Miguel', obs:null,
     flujo:[
       {paso:'Solicitud registrada', icono:'📋', cargo:'Colaborador — UN. DE TI', status:'done', fecha:'22/03/2026', firmante:'Aaron N.'},
-      {paso:'V°B° Jefe UN. DE TI', icono:'✔', cargo:'Roberto Limas — Jefe UN. DE TI', status:'active', fecha:'—', firmante:'', activeLabel:'Pendiente aprobación del Jefe TI'},
-      {paso:'Entrega del bien por Administración', icono:'📦', cargo:'Lizzetti Díaz — Sec. Administración', status:'pending', fecha:'—', firmante:''},
+      {paso:'V°B° Jefe UN. DE TI', icono:'✔', cargo:'Jesús Luman — Jefe UN. DE TI', status:'active', fecha:'—', firmante:'', activeLabel:'Pendiente aprobación del Jefe TI'},
+      {paso:'Entrega del bien por Administración', icono:'📦', cargo:'Guissela Palacios Alvarez — Jefa de Administración', status:'pending', fecha:'—', firmante:''},
       {paso:'Recepción — firma del colaborador', icono:'🖊', cargo:'Aaron Samuel Nuñez Muñoz — UN. DE TI', status:'pending', fecha:'—', firmante:''},
       {paso:'Devolución del bien', icono:'📥', cargo:'Aaron Samuel Nuñez Muñoz — UN. DE TI', status:'pending', fecha:'—', firmante:''}
     ]
@@ -114,6 +114,13 @@ export function PrestamosBienes() {
 
   const [firmaStates, setFirmaStates] = useState<Record<number, string>>({ 0: '', 1: '', 2: '' })
   const [firmaModo, setFirmaModo]     = useState<Record<number, boolean>>({ 0: false, 1: false, 2: false })
+  const [prestCorreoEnviado, setPrestCorreoEnviado] = useState<Record<string,boolean>>({})
+  const [prestFirmaConfirmada, setPrestFirmaConfirmada] = useState<Record<string,{firmante:string;docAdjunto?:string}>>({})
+  const [showPrestCorreoModal, setShowPrestCorreoModal] = useState(false)
+  const [showPrestActaModal,   setShowPrestActaModal]   = useState(false)
+  const [prestModalInfo, setPrestModalInfo] = useState<{numero:string;bien:string;colaborador:string;esLocador:boolean}>({numero:'',bien:'',colaborador:'',esLocador:false})
+  const [detObsTexts, setDetObsTexts] = useState<Record<number,string>>({})
+  const [detShowObs,  setDetShowObs]  = useState<Record<number,boolean>>({})
 
   // DNI search
   const [colabDni, setColabDni]   = useState('')
@@ -136,6 +143,7 @@ export function PrestamosBienes() {
     '40812969': { nombre: 'Santiago Masaichi Hayashi Delgado',   area: 'UN. DE PATR',          puesto: 'Jefe de Patrimonio'                    },
     '10609810': { nombre: 'David Augusto Cadillo Alfaro',        area: 'UN. DE PATR',          puesto: 'Analista de Activos Muebles'           },
     '43422937': { nombre: 'David Leoncio Salazar Ttito',         area: 'UN. DE PATR',          puesto: 'Supervisor de Activos Muebles'         },
+    '46832226': { nombre: 'Percy Antonio Calderón Quispe',       area: 'UN. DE TI',            puesto: 'Locador de Servicios'                  },
   }
 
   const buscarColab = async () => {
@@ -166,9 +174,30 @@ export function PrestamosBienes() {
         if (rows && rows.length > 0) {
           setData(rows.map(r => ({ ...r, bien: r.bien_nombre, fecha_devolucion: r.fecha_devolucion ?? '—' })))
         } else {
-          setData([])
+          // Fallback al mock local cuando Supabase está vacío
+          const mockData: PrestamoBienRow[] = Object.values(PRESTAMOS_DATA).map(p => ({
+            id: p.n,
+            numero: p.n,
+            bien: p.bien,
+            fecha_solicitud: p.fechaSolicitud,
+            fecha_devolucion: p.fechaDevReal !== '—' ? p.fechaDevReal : p.fechaDevPactada,
+            estado: p.estado === 'Devuelto — conforme' ? 'devuelto_conforme'
+                  : p.estado === 'En préstamo'        ? 'en_prestamo'
+                  : 'pendiente_aprobacion',
+          }))
+          setData(mockData)
         }
-      } catch { setData([]) }
+      } catch {
+        const mockData: PrestamoBienRow[] = Object.values(PRESTAMOS_DATA).map(p => ({
+          id: p.n, numero: p.n, bien: p.bien,
+          fecha_solicitud: p.fechaSolicitud,
+          fecha_devolucion: p.fechaDevReal !== '—' ? p.fechaDevReal : p.fechaDevPactada,
+          estado: p.estado === 'Devuelto — conforme' ? 'devuelto_conforme'
+                : p.estado === 'En préstamo'        ? 'en_prestamo'
+                : 'pendiente_aprobacion',
+        }))
+        setData(mockData)
+      }
       finally { setLoading(false) }
     }
     load()
@@ -196,8 +225,7 @@ export function PrestamosBienes() {
       direccion: form.direccion,
       estado: 'pendiente_aprobacion',
     }
-    const { data: newRec, error } = await supabase.from('prestamos_bienes').insert(payload).select().single()
-    if (error) { alert(`Error: ${error.message}`); return }
+    const { data: newRec } = await supabase.from('prestamos_bienes').insert(payload).select().single()
     const nuevo: PrestamoBienRow = {
       id: newRec?.id ?? String(Date.now()),
       numero,
@@ -238,9 +266,9 @@ export function PrestamosBienes() {
   }
 
   const firmaLabels = [
-    { title: 'Firma del Solicitante',  name: 'Aaron Samuel Nuñez Muñoz' },
-    { title: 'V°B° Jefe UN. DE TI',   name: 'Roberto Limas' },
-    { title: 'V°B° Administración',   name: 'Lizzetti Díaz E.' },
+    { title: 'Firma del Solicitante',        name: 'Aaron Samuel Nuñez Muñoz — Analista de TI' },
+    { title: 'V°B° Jefe de TI',             name: 'Jesús Luman Marcos Aragon — Jefe de TI' },
+    { title: 'V°B° Jefa de Administración', name: 'Guissela Palacios Alvarez — Jefa de Administración' },
   ]
 
   return (
@@ -296,11 +324,11 @@ export function PrestamosBienes() {
                     <td>
                       {p.estado === 'en_prestamo' ? (
                         <div className="actions-cell">
-                          <button className="btn btn-gray btn-xs" onClick={() => { setSelected(p); setShowDetalle(true) }}>Ver detalle</button>
+                          <button className="btn btn-gray btn-xs" onClick={() => { setSelected(p); setDetObsTexts({}); setDetShowObs({}); setShowDetalle(true) }}>Ver detalle</button>
                           <button className="btn btn-outline btn-xs" onClick={() => { setSelectedForDev(p); setShowDevolucion(true) }}>Registrar devolución</button>
                         </div>
                       ) : (
-                        <button className="btn btn-gray btn-xs" onClick={() => { setSelected(p); setShowDetalle(true) }}>Ver detalle</button>
+                        <button className="btn btn-gray btn-xs" onClick={() => { setSelected(p); setDetObsTexts({}); setDetShowObs({}); setShowDetalle(true) }}>Ver detalle</button>
                       )}
                     </td>
                   </tr>
@@ -454,7 +482,7 @@ export function PrestamosBienes() {
                   type="text"
                   className="form-control"
                   readOnly
-                  value="Roberto Limas — Jefe TI (pre-asignado)"
+                  value="Jesús Luman — Jefe TI (pre-asignado)"
                   style={{ background: '#F9FAFB' }}
                 />
               </div>
@@ -538,6 +566,13 @@ export function PrestamosBienes() {
           ════════════════════════════════════════════ */}
       {showDetalle && selected && (() => {
         const d = PRESTAMOS_DATA[selected.numero]
+        const flujoDefault: FlujoStep[] = d ? d.flujo : [
+          {paso:'Solicitud del Colaborador',         icono:'📋', cargo:'Colaborador',                                              status:'done',    fecha:selected.fecha_solicitud, firmante:'Colaborador'},
+          {paso:'V°B° Custodio — Jefe de TI',       icono:'✔',  cargo:'Jesús Luman Marcos Aragon — Jefe de TI',                     status: selected.estado==='pendiente_aprobacion'?'active':'done', fecha:'—', firmante:''},
+          {paso:'Administración entrega al colaborador', icono:'📦', cargo:'Guissela Palacios Alvarez — Jefa de Administración',    status:'pending', fecha:'—', firmante:''},
+          {paso:'Recepción y firma del colaborador', icono:'🖊',  cargo:'Colaborador',                                              status:'pending', fecha:'—', firmante:''},
+          {paso:'Devolución del bien',               icono:'📥', cargo:'Colaborador — valida G. Palacios (Jefa Administración)',     status:'pending', fecha:selected.fecha_devolucion, firmante:'', activeLabel:`Plazo máx. 15 días`},
+        ]
         return (
           <div className="modal-overlay" onClick={() => setShowDetalle(false)}>
             <div className="modal-box" style={{ maxWidth: 600, maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
@@ -572,7 +607,7 @@ export function PrestamosBienes() {
                 </div>
                 {/* Flujo del proceso */}
                 <div className="section-title-sm" style={{ marginTop: 4 }}>FLUJO DEL PROCESO</div>
-                {d?.flujo.map((f, i) => (
+                {flujoDefault.map((f, i) => (
                   <div key={i} className="flow-step-block">
                     <div className={`flow-step-hdr ${f.status}`} style={{ cursor: 'default' }}>
                       <span>{f.status === 'done' ? '✔' : f.status === 'active' ? '⏳' : '○'} {f.icono} {f.paso}</span>
@@ -583,7 +618,7 @@ export function PrestamosBienes() {
                         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-end' }}>
                           <div>
                             <div className="firma-label" style={{ textAlign: 'left', marginBottom: 4, fontSize: 10, color: '#9CA3AF' }}>Firmado por</div>
-                            <div className="firma-box" style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', minWidth: 140 }}>{f.firmante}</div>
+                            <div className="firma-box" style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', minWidth: 140 }}>{f.firmante || '—'}</div>
                             <div className="firma-label" style={{ fontSize: 10, marginTop: 4 }}>{f.cargo}</div>
                           </div>
                           {f.firmante2 && <div>
@@ -592,23 +627,113 @@ export function PrestamosBienes() {
                           </div>}
                           <div className="inv-field"><div className="lbl">Fecha</div><div className="val">{f.fecha}</div></div>
                         </div>
+                        <div style={{ marginTop: 8 }}>
+                          <button className="btn btn-outline btn-xs" onClick={() => setDetShowObs(p => ({ ...p, [i]: !p[i] }))}>+ Observación</button>
+                        </div>
+                        {detShowObs[i] && (
+                          <div style={{ marginTop: 8, background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 6, padding: '10px 12px' }}>
+                            <div style={{ fontSize: 11, fontWeight: 600, color: '#92400E', marginBottom: 6 }}>Registrar observación</div>
+                            <textarea className="form-control" style={{ fontSize: 12, minHeight: 56 }} placeholder="Escribe la observación..."
+                              value={detObsTexts[i] || ''} onChange={e => setDetObsTexts(p => ({ ...p, [i]: e.target.value }))} />
+                            <button className="btn btn-sm" style={{ marginTop: 6, background: '#D97706', color: 'white', border: 'none', borderRadius: 5, padding: '4px 12px', fontSize: 12, cursor: 'pointer' }}
+                              onClick={() => setDetShowObs(p => ({ ...p, [i]: false }))}>
+                              Guardar observación
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
                     {f.status === 'active' && (
                       <div className="flow-step-body">
-                        <div className="banner banner-purple" style={{ fontSize: 12, marginBottom: 8 }}>{f.activeLabel}</div>
+                        {f.activeLabel && <div className="banner banner-purple" style={{ fontSize: 12, marginBottom: 8 }}>{f.activeLabel}</div>}
                         <div className="form-group" style={{ marginBottom: 8 }}>
                           <label className="form-label" style={{ fontSize: 11 }}>Firma digital — {f.cargo}</label>
                           <input type="text" className="form-control" placeholder="Escribe aquí tu firma..." style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', fontSize: 14, color: '#1E1B4B' }} />
                         </div>
-                        <button className="btn btn-primary btn-sm" onClick={() => { setShowDetalle(false); alert('✓ Firma registrada. El bien ha sido registrado como devuelto.') }}>✔ Registrar firma</button>
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                          <button className="btn btn-primary btn-sm" onClick={() => { setShowDetalle(false); alert('✓ Firma registrada.') }}>✔ Registrar firma</button>
+                          {i === 2 && (
+                            prestCorreoEnviado[selected.numero]
+                              ? <span className="badge b-green" style={{fontSize:11}}>✅ Correo enviado</span>
+                              : <button className="btn btn-sm" style={{background:'#0EA5E9',color:'white',border:'none',borderRadius:6,padding:'4px 12px',fontSize:12,cursor:'pointer'}}
+                                  onClick={() => {
+                                    const esLoc = colabDni === '46832226' || (d?.colaborador?.includes('Percy') ?? false)
+                                    setPrestCorreoEnviado(p => ({...p,[selected.numero]:true}))
+                                    setPrestModalInfo({numero:selected.numero,bien:selected.bien,colaborador:d?.colaborador??'—',esLocador:esLoc})
+                                    if (esLoc) setShowPrestActaModal(true)
+                                    else setShowPrestCorreoModal(true)
+                                  }}>
+                                  📧 Enviar correo para firma
+                                </button>
+                          )}
+                          <button className="btn btn-outline btn-xs" onClick={() => setDetShowObs(p => ({ ...p, [i]: !p[i] }))}>+ Observación</button>
+                        </div>
+                        {detShowObs[i] && (
+                          <div style={{ marginTop: 8, background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 6, padding: '10px 12px' }}>
+                            <textarea className="form-control" style={{ fontSize: 12, minHeight: 56 }} placeholder="Escribe la observación..."
+                              value={detObsTexts[i] || ''} onChange={e => setDetObsTexts(p => ({ ...p, [i]: e.target.value }))} />
+                            <button className="btn btn-sm" style={{ marginTop: 6, background: '#D97706', color: 'white', border: 'none', borderRadius: 5, padding: '4px 12px', fontSize: 12, cursor: 'pointer' }}
+                              onClick={() => setDetShowObs(p => ({ ...p, [i]: false }))}>Guardar observación</button>
+                          </div>
+                        )}
                       </div>
                     )}
-                    {f.status === 'pending' && (
-                      <div className="flow-step-body">
-                        <p className="text-xs text-gray" style={{ fontStyle: 'italic' }}>🔒 Pendiente — se habilitará al completar el paso anterior.</p>
-                      </div>
-                    )}
+                    {f.status === 'pending' && (() => {
+                      const correoEnv  = prestCorreoEnviado[selected.numero]
+                      const firmaConf  = prestFirmaConfirmada[selected.numero]
+                      const esPaso4    = i === 3
+                      if (esPaso4 && firmaConf) {
+                        return (
+                          <div className="flow-step-body">
+                            <div style={{display:'flex',gap:24,flexWrap:'wrap',alignItems:'flex-end',marginBottom:8}}>
+                              <div>
+                                <div style={{fontSize:10,color:'#9CA3AF',marginBottom:4}}>Firmado por (vía correo)</div>
+                                <div className="firma-box" style={{fontFamily:'Georgia,serif',fontStyle:'italic',minWidth:140}}>{firmaConf.firmante}</div>
+                                <div style={{fontSize:10,color:'#6B7280',marginTop:4}}>{f.cargo}</div>
+                              </div>
+                              <div className="inv-field"><div className="lbl">Fecha</div><div className="val">{new Date().toLocaleDateString('es-PE')}</div></div>
+                            </div>
+                            {firmaConf.docAdjunto && (
+                              <div style={{background:'#F0FDF4',border:'1px solid #86EFAC',borderRadius:6,padding:'8px 12px',fontSize:11,display:'flex',alignItems:'center',gap:8}}>
+                                <span style={{fontSize:16}}>📎</span>
+                                <div><div style={{fontWeight:700,color:'#15803D'}}>Documento adjunto</div><div>{firmaConf.docAdjunto}</div></div>
+                              </div>
+                            )}
+                          </div>
+                        )
+                      }
+                      if (esPaso4 && correoEnv) {
+                        return (
+                          <div className="flow-step-body">
+                            <div style={{background:'#EFF6FF',border:'1px solid #BFDBFE',borderRadius:6,padding:'10px 12px',marginBottom:8}}>
+                              <div style={{fontSize:12,fontWeight:600,color:'#1D4ED8',marginBottom:4}}>📧 Esperando confirmación del colaborador</div>
+                              <div style={{fontSize:11,color:'#374151'}}>Se envió correo con enlace de confirmación. El paso se habilitará al confirmar.</div>
+                            </div>
+                            <button className="btn btn-sm" style={{background:'#6B21A8',color:'white',border:'none',borderRadius:6,padding:'5px 14px',fontSize:12,cursor:'pointer'}}
+                              onClick={() => {
+                                const esLoc = prestModalInfo.esLocador || colabDni==='46832226'
+                                setPrestFirmaConfirmada(p => ({...p,[selected.numero]:{firmante:d?.colaborador??'Colaborador',docAdjunto:esLoc?'Proy. Acta de recepción de bien.docx':undefined}}))
+                              }}>
+                              📲 Simular: Colaborador confirma desde correo
+                            </button>
+                          </div>
+                        )
+                      }
+                      return (
+                        <div className="flow-step-body">
+                          <p className="text-xs text-gray" style={{ fontStyle: 'italic' }}>🔒 Pendiente — se habilitará al completar el paso anterior.</p>
+                          <button className="btn btn-outline btn-xs" style={{ marginTop: 6 }} onClick={() => setDetShowObs(p => ({ ...p, [i]: !p[i] }))}>+ Observación</button>
+                          {detShowObs[i] && (
+                            <div style={{ marginTop: 8, background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 6, padding: '10px 12px' }}>
+                              <textarea className="form-control" style={{ fontSize: 12, minHeight: 56 }} placeholder="Escribe la observación..."
+                                value={detObsTexts[i] || ''} onChange={e => setDetObsTexts(p => ({ ...p, [i]: e.target.value }))} />
+                              <button className="btn btn-sm" style={{ marginTop: 6, background: '#D97706', color: 'white', border: 'none', borderRadius: 5, padding: '4px 12px', fontSize: 12, cursor: 'pointer' }}
+                                onClick={() => setDetShowObs(p => ({ ...p, [i]: false }))}>Guardar observación</button>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })()}
                   </div>
                 ))}
                 {/* Firmas del proceso */}
@@ -745,6 +870,75 @@ export function PrestamosBienes() {
             <div className="modal-footer">
               <button className="btn btn-gray" onClick={closeDevolucion}>Cancelar</button>
               <button className="btn btn-primary" onClick={handleConfirmarDevolucion}>Confirmar Devolución</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ── Modal correo enviado (genérico) ── */}
+      {showPrestCorreoModal && (
+        <div className="modal-overlay" onClick={() => setShowPrestCorreoModal(false)}>
+          <div className="modal-box" style={{maxWidth:420}} onClick={e => e.stopPropagation()}>
+            <div className="modal-hdr">
+              <span>📧 Correo enviado para firma</span>
+              <button className="modal-close" onClick={() => setShowPrestCorreoModal(false)}>×</button>
+            </div>
+            <div className="modal-body" style={{textAlign:'center',padding:'28px 24px'}}>
+              <div style={{fontSize:44,marginBottom:10}}>✅</div>
+              <div style={{fontSize:14,fontWeight:700,color:'#1E1B4B',marginBottom:8}}>¡Correo enviado exitosamente!</div>
+              <div style={{fontSize:12,color:'#6B7280',lineHeight:1.6,marginBottom:14}}>
+                Se envió un mensaje al colaborador con el enlace de confirmación de recepción. Al hacer clic en <strong>"Confirmar"</strong>, se registrará automáticamente la firma en el Paso 4.
+              </div>
+              <div style={{background:'#F5F3FF',border:'1px solid #DDD6FE',borderRadius:8,padding:'10px 14px',fontSize:11,color:'#5B21B6',textAlign:'left'}}>
+                <div style={{fontWeight:700,marginBottom:4}}>Detalles del envío</div>
+                <div>Para: {prestModalInfo.colaborador}</div>
+                <div>Préstamo: {prestModalInfo.numero} · {prestModalInfo.bien}</div>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-primary" onClick={() => setShowPrestCorreoModal(false)}>Entendido</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal acta de recepción para Locador (Percy) ── */}
+      {showPrestActaModal && (
+        <div className="modal-overlay" onClick={() => setShowPrestActaModal(false)}>
+          <div className="modal-box" style={{maxWidth:480}} onClick={e => e.stopPropagation()}>
+            <div className="modal-hdr">
+              <span>📧 Correo enviado — Locador de Servicios</span>
+              <button className="modal-close" onClick={() => setShowPrestActaModal(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <div style={{textAlign:'center',marginBottom:18}}>
+                <div style={{fontSize:40,marginBottom:8}}>✅</div>
+                <div style={{fontSize:14,fontWeight:700,color:'#1E1B4B',marginBottom:6}}>¡Correo enviado exitosamente!</div>
+                <div style={{fontSize:12,color:'#6B7280',lineHeight:1.6}}>Se envió el mensaje con el <strong>Acta de Recepción de Bien</strong> adjunta. El locador debe completar y adjuntar el documento al confirmar.</div>
+              </div>
+              <div style={{background:'#F0FDF4',border:'1px solid #86EFAC',borderRadius:8,padding:'10px 14px',marginBottom:14}}>
+                <div style={{fontSize:12,fontWeight:700,color:'#15803D',marginBottom:6}}>📎 Documento adjunto al correo</div>
+                <div style={{display:'flex',alignItems:'center',gap:10,background:'white',borderRadius:6,padding:'8px 10px',border:'1px solid #D1FAE5'}}>
+                  <span style={{fontSize:22}}>📄</span>
+                  <div>
+                    <div style={{fontSize:12,fontWeight:600,color:'#1E1B4B'}}>Proy. Acta de recepción de bien.docx</div>
+                    <div style={{fontSize:10,color:'#6B7280'}}>Documento de conformidad para Locadores de Servicios</div>
+                  </div>
+                </div>
+              </div>
+              <div style={{background:'#EFF6FF',border:'1px solid #BFDBFE',borderRadius:8,padding:'10px 14px',fontSize:11,color:'#1D4ED8'}}>
+                <div style={{fontWeight:700,marginBottom:4}}>Instrucciones al locador</div>
+                <ol style={{margin:0,paddingLeft:16,lineHeight:1.8}}>
+                  <li>Descargar y completar el Acta de Recepción adjunta</li>
+                  <li>Hacer clic en <strong>"Confirmar"</strong> en el enlace del correo</li>
+                  <li>Adjuntar el acta completada al confirmar</li>
+                </ol>
+              </div>
+              <div style={{marginTop:12,fontSize:11,color:'#9CA3AF',borderTop:'1px solid #F3F4F6',paddingTop:10}}>
+                Para: {prestModalInfo.colaborador} · {prestModalInfo.numero}
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-primary" onClick={() => setShowPrestActaModal(false)}>Entendido</button>
             </div>
           </div>
         </div>

@@ -2,7 +2,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { useState } from 'react'
 
 const SUB_ITEMS = [
-  { id: 'asignacion', label: 'Asignación de Bienes', path: '/gestion/asignacion' },
+  { id: 'asignacion', label: 'Asignación de Bienes y Accesorios', path: '/gestion/asignacion' },
   { id: 'devolucion', label: 'Devolución de Bienes', path: '/gestion/devolucion' },
   { id: 'prestamos-bienes', label: 'Préstamos Bienes Tec.', path: '/gestion/prestamos-bienes' },
   { id: 'prestamos-adelantos', label: 'Préstamos y Adelantos', path: '/gestion/prestamos-adelantos' },
