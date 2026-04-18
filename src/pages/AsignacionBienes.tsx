@@ -254,7 +254,7 @@ export function AsignacionBienes() {
     // luego Supabase
     const { data } = await supabase.from('colaboradores').select('*').eq('dni', dni).maybeSingle()
     if (data) {
-      setNsColab({ nombre: data.nombres, apellido: data.apellidos, puesto: data.puesto ?? '—', subarea: data.area ?? '—', consejo: 'Consejo Nacional', initials: (data.nombres[0] + data.apellidos[0]).toUpperCase() })
+      setNsColab({ nombre: data.nombres, apellido: data.apellidos, puesto: data.puesto ?? '—', subarea: data.area ?? '—', consejo: 'Consejo Nacional', initials: (data.nombres[0] + data.apellidos[0]).toUpperCase(), relacionLaboral: 'Planilla' })
       setNsDniErr(false)
     } else {
       setNsColab(null); setNsDniErr(true)
@@ -404,7 +404,6 @@ export function AsignacionBienes() {
               const correoDelPasoAnterior = emailFirmaState[k-1]
               const esPaso4 = s.paso === 4
               const yaConfirmado = emailFirmaState[k]?.confirmado
-              const esLocador = detSol?.dni === '46832226'
               if (esPaso4 && yaConfirmado) {
                 const ef = emailFirmaState[k]!
                 const colabPuesto = COLABS[detSol?.dni ?? '']?.puesto ?? s.cargo
@@ -1331,7 +1330,7 @@ export function AsignacionBienes() {
                   <div className="h-divider" />
                   <div className="section-title-sm">FLUJO DE APROBACIÓN</div>
                   <div className="banner banner-purple" style={{marginBottom:12,fontSize:12}}>📋 Al enviar se activará el flujo de reasignación con las firmas correspondientes.</div>
-                  {[['1','Admin\nregistra'],['2','Área\nvalida'],['3','Nuevo\ncustodio'],['4','Colaborador\nconfirma']].map(([n,lbl],i,a) => (
+                  {[['1','Admin\nregistra'],['2','Área\nvalida'],['3','Nuevo\ncustodio'],['4','Colaborador\nconfirma']].map(([n],i) => (
                     <div key={n} style={{marginBottom:10}}>
                       <div className={`flow-step-hdr ${i===0?'active':'pending'}`}>
                         <div className="text-sm fw-600">{i===0?'⏳':'🔒'} Paso {n}: {['Administración registra reasignación','Área valida y aprueba el cambio','Nuevo custodio recibe el bien','Colaborador original confirma entrega'][i]}</div>
@@ -1400,7 +1399,7 @@ export function AsignacionBienes() {
                   </div>
                   <div className="h-divider" />
                   <div className="section-title-sm">FLUJO DE BAJA</div>
-                  {[['1','Admin\nregistra'],['2','Área\nrevisa'],['3','Patrimonio\nconfirma'],['4','Cierre\nregistro']].map(([n,lbl],i) => (
+                  {[['1','Admin\nregistra'],['2','Área\nrevisa'],['3','Patrimonio\nconfirma'],['4','Cierre\nregistro']].map(([n],i) => (
                     <div key={n} style={{marginBottom:10}}>
                       <div className={`flow-step-hdr ${i===0?'active':'pending'}`}>
                         <div className="text-sm fw-600">{i===0?'⏳':'🔒'} Paso {n}: {['Administración registra baja de asignación','Área jefatura revisa y aprueba','Patrimonio confirma retiro del inventario personal','Sistema cierra el registro de asignación'][i]}</div>

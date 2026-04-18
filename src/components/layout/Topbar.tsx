@@ -116,7 +116,6 @@ export function Topbar() {
       ? (ROL_LABEL[profile.rol] ?? profile.rol)
       : '—'
 
-  const rol = profile ? (ROL_LABEL[profile.rol] ?? profile.rol) : '—'
   const initials = nombreCompleto !== '—'
     ? nombreCompleto.split(' ').slice(0, 2).map(p => p[0]).join('').toUpperCase()
     : (profile?.avatar_initials ?? '—')
