@@ -51,9 +51,9 @@ const COLABORADORES: Record<string, { nombre: string; area: string; cargo: strin
 }
 
 const BIENES_DEVOLUCION = [
-  { id: '111030', desc: 'Laptop Dell', codigo: 'CMP-038401', marca: 'Dell', modelo: 'Latitude 5420', serie: 'SN20241001', custodio: 'Jesús Luman Marcos Aragon — Jefe de TI', estado: 'bueno', devolucion: 'pendiente' },
-  { id: '111031', desc: 'Mouse Logitech', codigo: 'CMP-038402', marca: 'Logitech', modelo: 'M185', serie: 'SN20231002', custodio: 'Jesús Luman Marcos Aragon — Jefe de TI', estado: 'bueno', devolucion: 'pendiente' },
-  { id: '200201', desc: 'Silla ergonómica', codigo: 'CMP-ART-041', marca: 'Ergosit', modelo: 'Modelo A', serie: '—', custodio: 'Guissela Palacios Alvarez — Jefa de Administración', estado: 'regular', devolucion: 'observado' },
+  { id: '111030', desc: 'Laptop Dell Latitude 5420',  codigo: 'CMP-038401', marca: 'Dell',      modelo: 'Latitude 5420',  serie: 'SN20241001', custodio: 'Jesús Luman Marcos Aragon — Jefe de TI',              estado: 'bueno',   devolucion: 'pendiente' },
+  { id: '111031', desc: 'Monitor LG 24" 24MK430H',   codigo: 'CMP-038402', marca: 'LG',        modelo: '24MK430H',       serie: 'SN20231002', custodio: 'Jesús Luman Marcos Aragon — Jefe de TI',              estado: 'bueno',   devolucion: 'pendiente' },
+  { id: '200201', desc: 'Silla ergonómica',           codigo: 'CMP-ART-041', marca: 'Ergosit', modelo: 'Modelo A',       serie: '—',          custodio: 'Guissela Palacios Alvarez — Jefa de Administración', estado: 'regular', devolucion: 'observado' },
 ]
 
 const ACCESORIOS_DEVOLUCION = [
@@ -72,10 +72,10 @@ function estadoBadge(estado: string) {
 }
 
 function semaforoDot(estado: string) {
-  if (estado === 'en_proceso' || estado === 'completado') return <span className="sem sem-g"></span>
+  if (estado === 'completado') return <span className="sem sem-g"></span>
+  if (estado === 'en_proceso' || estado === 'bloqueado') return <span className="sem sem-r"></span>
   if (estado === 'observado') return <span className="sem sem-y"></span>
-  if (estado === 'bloqueado') return <span className="sem sem-r"></span>
-  return <span className="sem sem-g"></span>
+  return <span className="sem sem-r"></span>
 }
 
 function getInitials(nombre: string) {
@@ -589,15 +589,15 @@ function ModalReporteDevolucion({ onClose }: ModalReporteDevolucionProps) {
                 <tr>
                   <td style={tdStyle}>111030</td><td style={tdStyle}>Laptop Dell Latitude 5420</td><td style={tdStyle}>CMP-038401</td>
                   <td style={tdStyle}>Bueno</td>
-                  <td style={{ ...tdStyle, padding: 5 }}><FirmaDone nombre="G. Palacios" cargo="Guissela Palacios Alvarez — Jefa de Administración" fecha="01/04/2026" /></td>
+                  <td style={{ ...tdStyle, padding: 5 }}><FirmaDone nombre="J. Luman" cargo="Jesús Luman Marcos Aragon — Jefe de TI" fecha="01/04/2026" /></td>
                   <td style={{ ...tdStyle, padding: 5 }}><FirmaPendiente /></td>
                   <td style={{ ...tdStyle, padding: 5 }}><FirmaEspera /></td>
                   <td style={{ ...tdStyle, color: '#D97706' }}>☐ Pendiente</td>
                 </tr>
                 <tr>
-                  <td style={tdStyle}>111031</td><td style={tdStyle}>Mouse Logitech M185</td><td style={tdStyle}>CMP-038402</td>
+                  <td style={tdStyle}>111031</td><td style={tdStyle}>Monitor LG 24" 24MK430H</td><td style={tdStyle}>CMP-038402</td>
                   <td style={tdStyle}>Bueno</td>
-                  <td style={{ ...tdStyle, padding: 5 }}><FirmaDone nombre="G. Palacios" cargo="Guissela Palacios Alvarez — Jefa de Administración" fecha="01/04/2026" /></td>
+                  <td style={{ ...tdStyle, padding: 5 }}><FirmaDone nombre="J. Luman" cargo="Jesús Luman Marcos Aragon — Jefe de TI" fecha="01/04/2026" /></td>
                   <td style={{ ...tdStyle, padding: 5 }}><FirmaPendiente /></td>
                   <td style={{ ...tdStyle, padding: 5 }}><FirmaEspera /></td>
                   <td style={{ ...tdStyle, color: '#D97706' }}>☐ Pendiente</td>
@@ -729,7 +729,10 @@ function DetailView({ devolucion, onBack }: DetailViewProps) {
         if (bienesDB && bienesDB.length > 0) {
           setBienesColab(bienesDB.map((b, i) => ({
             id: String(i+1), desc: b.bien_nombre, codigo: `CMP-${String(i+1).padStart(6,'0')}`,
-            marca: '—', modelo: '—', serie: '—', custodio: b.tipo==='computo'?'Jesús Luman Marcos Aragon — Jefe de TI':'Guissela Palacios Alvarez — Jefa de Administración',
+            marca: '—', modelo: '—', serie: '—',
+            custodio: ['computo', 'comunicaciones', 'cómputo', 'tecnologia', 'tecnología'].includes((b.tipo??'').toLowerCase())
+              ? 'Jesús Luman Marcos Aragon — Jefe de TI'
+              : 'Guissela Palacios Alvarez — Jefa de Administración',
             estado: 'bueno', devolucion: 'pendiente',
           })))
         } else {

@@ -10,6 +10,20 @@ const ROL_LABEL: Record<string, string> = {
   colaborador: 'Colaborador',
 }
 
+/** Mapeo rol+área → puesto real (fallback cuando email no está en EMAIL_TO_COLAB) */
+const ROL_AREA_PUESTO: Record<string, Record<string, string>> = {
+  custodio: {
+    'UN. DE TI':    'Jefe de TI',
+    'UN. DE ADM':   'Jefa de Administración',
+    'UN. DE PATR':  'Jefe de Patrimonio',
+    'UN. DE CONTA': 'Contador General',
+  },
+  gdth:        { 'UN. DE GDTH': 'Jefa de GDTH' },
+  contabilidad:{ 'UN. DE CONTA': 'Contador General', '': 'Contabilidad' },
+  admin:       {},
+  colaborador: {},
+}
+
 /** Mapeo email CMP → datos reales del colaborador (fallback cuando Supabase no devuelve el colaborador_id) */
 const EMAIL_TO_COLAB: Record<string, { nombre: string; puesto: string }> = {
   'aaron.nunez@cmp.org.pe':       { nombre: 'Aaron Samuel Nuñez Muñoz',       puesto: 'Analista de TI' },
@@ -113,7 +127,7 @@ export function Topbar() {
   const puesto = colabPorEmail
     ? colabPorEmail.puesto
     : profile
-      ? (ROL_LABEL[profile.rol] ?? profile.rol)
+      ? (ROL_AREA_PUESTO[profile.rol]?.[profile.area] ?? ROL_LABEL[profile.rol] ?? profile.rol)
       : '—'
 
   const initials = nombreCompleto !== '—'

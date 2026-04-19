@@ -531,7 +531,6 @@ export function AsignacionBienes() {
       bien_nombre: bienNombreCombinado,
       tipo: tipoSol,
       area_encargada: flujoAreaMap[nsTipoBien] ?? 'Administración',
-      puesto: nsColab.puesto,
       sub_area: nsColab.subarea,
       motivo: nsBienJust,
       estado: 'En revisión',

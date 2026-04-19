@@ -78,7 +78,7 @@ const AREA_META: Record<string, { saldo: string; gastado: string; reposiciones: 
 
 const AREA_SUBAREAS: Record<string, string[]> = {
   'Sec. Economía y Finanzas': ['UN. DE FINANZAS', 'UN. DE ECONOMÍA'],
-  'Sec. Administración':      ['UN. DE ADMINISTRACIÓN', 'UN. DE LOGÍSTICA'],
+  'Sec. Administración':      ['UN. DE ADMINISTRACIÓN', 'UN. DE TI'],
   'Uni. Administración':      ['UN. DE ADMINISTRACIÓN'],
   'FOSEMED':                  ['FOSEMED'],
   'SEMEFA':                   ['SEMEFA'],
@@ -95,6 +95,7 @@ function gastoBadge(estado: string) {
 
 export function CajaChica() {
   const [cajas, setCajas] = useState<CajaChicaType[]>([])
+  const [tableroRows, setTableroRows] = useState(TABLERO_ROWS)
   const [gastosState, setGastosState] = useState<Record<string, GastoRow[]>>(MOCK_GASTOS)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('tablero')
@@ -271,7 +272,7 @@ export function CajaChica() {
                       </tr>
                     </thead>
                     <tbody>
-                      {TABLERO_ROWS.map(r => (
+                      {tableroRows.map(r => (
                         <tr key={r.area}>
                           <td>{r.area}</td>
                           <td>{r.responsable}</td>
@@ -1091,8 +1092,33 @@ export function CajaChica() {
               <button className="btn btn-gray" onClick={() => setShowNuevoResp(false)}>Cancelar</button>
               <button
                 className="btn btn-primary"
-                disabled={!formNuevoResp.area || !formNuevoResp.responsable || !formNuevoResp.monto}
-                onClick={() => { setShowNuevoResp(false) }}
+                disabled={!formNuevoResp.area || !formNuevoResp.responsable || !formNuevoResp.monto || !nrcFirma.trim()}
+                title={!nrcFirma.trim() ? 'El Jefe de Contabilidad debe firmar antes de enviar' : ''}
+                onClick={() => {
+                  const monto = parseFloat(formNuevoResp.monto) || 0
+                  const montoStr = `S/. ${monto.toLocaleString('es-PE')}`
+                  setTableroRows(prev => [...prev, {
+                    area: formNuevoResp.area,
+                    responsable: formNuevoResp.responsable,
+                    asignado: montoStr,
+                    gastado: 'S/. 0',
+                    saldo: montoStr,
+                    estadoV: 'green' as const,
+                    reposicion: 'No',
+                    tab: formNuevoResp.area,
+                  }])
+                  setCajas(prev => [...prev, {
+                    id: String(Date.now()),
+                    area: formNuevoResp.area,
+                    responsable: formNuevoResp.responsable,
+                    monto_asignado: monto,
+                    gastado_mes: 0,
+                    created_at: '',
+                  }])
+                  setShowNuevoResp(false)
+                  setFormNuevoResp({ area: '', subarea: '', responsable: '', monto: '', periodo: '2026-03' })
+                  setNrcFirma('')
+                }}
               >
                 Enviar solicitud
               </button>

@@ -50,6 +50,17 @@ export function PrestamosAdelantos() {
   const [selectedNumero, setSelectedNumero] = useState('')
   const [selectedGDTHRow, setSelectedGDTHRow] = useState<typeof MATRIZ_DATA[0]|null>(null)
 
+  // GDTH bandeja — espeja misSolicitudes + solicitudes de otros colaboradores
+  const [gdthBandeja, setGdthBandeja] = useState<(MisSolicitudRow & {colaborador?:string;area?:string})[]>([])
+
+  // 8-step flow tracking per solicitud number
+  type AdvStep = { status: 'done'|'active'|'pending'; firmante: string; fecha: string }
+  const [advFlow, setAdvFlow] = useState<Record<string, AdvStep[]>>({})
+  const [advFirmaInput, setAdvFirmaInput] = useState<Record<string, string>>({})
+  const [advFichaEnabled, setAdvFichaEnabled] = useState<Record<string, boolean>>({})
+  const [advFichaSubmitted, setAdvFichaSubmitted] = useState<Record<string, boolean>>({})
+  const [advDesembolsoFile, setAdvDesembolsoFile] = useState<Record<string, string>>({})
+
   // Nueva Solicitud simplificada (Obs 6)
   const [nssDni, setNssDni] = useState('')
   const [nssColab, setNssColab] = useState<{nombre:string;area:string;puesto:string}|null>(null)
@@ -57,6 +68,8 @@ export function PrestamosAdelantos() {
   const [nssBuscando, setNssBuscando] = useState(false)
   const [nssTipo, setNssTipo] = useState<'prestamo'|'adelanto'>('prestamo')
   const [nssMonto, setNssMonto] = useState('')
+  const [nssSustentoFile, setNssSustentoFile] = useState('')
+  const [nssSustentoPreview, setNssSustentoPreview] = useState(false)
   const [nssTipoSolicitud, setNssTipoSolicitud] = useState('')
   const [nssMotivo, setNssMotivo] = useState('')
 
@@ -360,6 +373,21 @@ export function PrestamosAdelantos() {
                       </div>
                     </td>
                   </tr>
+                  {gdthBandeja.map(s => (
+                    <tr key={s.id}>
+                      <td className="fw-600">{s.numero}</td>
+                      <td>{s.colaborador ?? '—'}</td>
+                      <td>{s.area ?? '—'}</td>
+                      <td>{s.tipo}</td>
+                      <td>{s.monto}</td>
+                      <td>{s.fecha}</td>
+                      <td><span className="badge b-yellow">Nueva — Pendiente evaluación</span></td>
+                      <td className="text-sm text-gray">—</td>
+                      <td>
+                        <button className="btn btn-gray btn-xs" onClick={() => { setSelectedNumero(s.numero); setShowDetalle(true) }}>Ver detalle</button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -574,13 +602,34 @@ export function PrestamosAdelantos() {
 
               <div className="form-group">
                 <label className="form-label">Sustento (documentos)</label>
-                <div className="dropzone">
+                <div className="dropzone" style={{ cursor:'pointer' }}
+                  onClick={() => document.getElementById('nss-file-input')?.click()}>
                   <div className="dropzone-icon">📎</div>
-                  <div style={{ fontSize:13 }}>Arrastra archivos aquí o haz clic para seleccionar</div>
-                  <div className="dropzone-text">PDF, DOC, DOCX, PNG, JPG — máx 5MB por archivo</div>
-                  <input type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style={{ display:'none' }} id="nss-file-input" />
-                  <label htmlFor="nss-file-input" className="btn btn-gray btn-sm" style={{ marginTop:8, cursor:'pointer' }}>Seleccionar archivo</label>
+                  {nssSustentoFile
+                    ? <div style={{ fontWeight:600, color:'#1E1B4B', fontSize:13 }}>✔ {nssSustentoFile}</div>
+                    : <>
+                        <div style={{ fontSize:13 }}>Arrastra archivos aquí o haz clic para seleccionar</div>
+                        <div className="dropzone-text">PDF, DOC, DOCX, PNG, JPG — máx 5MB por archivo</div>
+                      </>
+                  }
+                  <input type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style={{ display:'none' }} id="nss-file-input"
+                    onChange={e => { setNssSustentoFile(e.target.files?.[0]?.name ?? ''); setNssSustentoPreview(false) }} />
                 </div>
+                {nssSustentoFile && (
+                  <div style={{ marginTop:8 }}>
+                    <button className="btn btn-gray btn-xs" onClick={() => setNssSustentoPreview(p => !p)}>
+                      {nssSustentoPreview ? '× Cerrar vista previa' : '👁 Vista previa'}
+                    </button>
+                    {nssSustentoPreview && (
+                      <div style={{ marginTop:8, border:'1.5px solid #DDD6FE', borderRadius:6, background:'#F9F8FF', padding:24, textAlign:'center', minHeight:100, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
+                        <div style={{ fontSize:40, marginBottom:6 }}>📄</div>
+                        <div style={{ fontSize:13, color:'#6B21A8', fontWeight:600 }}>{nssSustentoFile}</div>
+                        <div style={{ fontSize:11, color:'#9CA3AF', marginTop:4 }}>Vista previa del documento adjunto</div>
+                        <div style={{ fontSize:10, color:'#C4B5FD', marginTop:2 }}>El visor real estará disponible en producción</div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
             </div>
@@ -597,12 +646,27 @@ export function PrestamosAdelantos() {
                   colaborador: nssColab.nombre,
                 }).select().single()
                 if (error) { alert(`Error: ${error.message}`); return }
-                if (newRec) {
-                  setMisSolicitudes(prev => [{ id:newRec.id, numero, tipo:nssTipo==='adelanto'?'Adelanto de sueldo':'Préstamo personal',
-                    monto:`S/. ${monto.toLocaleString('es-PE')}`, fecha:new Date().toLocaleDateString('es-PE'),
-                    estado:'en_revision', proximo:'Evaluación Bienestar' }, ...prev])
-                }
+                const nuevaRow = { id: newRec?.id ?? String(Date.now()), numero,
+                  tipo: nssTipo==='adelanto'?'Adelanto de sueldo':'Préstamo personal',
+                  monto: `S/. ${monto.toLocaleString('es-PE')}`,
+                  fecha: new Date().toLocaleDateString('es-PE'),
+                  estado: 'en_revision', proximo: 'J. Carbajal — GDTH: Evaluación',
+                  colaborador: nssColab?.nombre, area: nssColab?.area }
+                setMisSolicitudes(prev => [nuevaRow, ...prev])
+                setGdthBandeja(prev => [nuevaRow, ...prev])
+                // Inicializar flujo de 8 pasos: Paso 1 done, Paso 2 active, 3-8 pending
+                setAdvFlow(prev => ({ ...prev, [numero]: [
+                  { status:'done',    firmante: nssColab?.nombre ?? 'Colaborador', fecha: new Date().toLocaleDateString('es-PE') },
+                  { status:'active',  firmante:'', fecha:'' },
+                  { status:'pending', firmante:'', fecha:'' },
+                  { status:'pending', firmante:'', fecha:'' },
+                  { status:'pending', firmante:'', fecha:'' },
+                  { status:'pending', firmante:'', fecha:'' },
+                  { status:'pending', firmante:'', fecha:'' },
+                  { status:'pending', firmante:'', fecha:'' },
+                ]}))
                 setShowNuevaSol(false); setNssDni(''); setNssColab(null); setNssMonto(''); setNssMotivo(''); setNssTipoSolicitud('')
+                setNssSustentoFile(''); setNssSustentoPreview(false)
               }}>📤 Enviar solicitud</button>
             </div>
           </div>
@@ -980,47 +1044,202 @@ export function PrestamosAdelantos() {
                 )}
               </div>
 
-              {/* Flujo */}
+              {/* Flujo de 8 pasos (para solicitudes nuevas con advFlow) o stepper legado */}
               <div className="section-title-sm">FLUJO DE APROBACIÓN</div>
-              <div className="stepper">
-                {selectedRow?.estado === 'aprobado' ? (
-                  <>
-                    <div className="step"><div className="step-circ done">✔</div><span className="step-lbl done">Solicitud</span></div>
-                    <div className="step-conn done"></div>
-                    <div className="step"><div className="step-circ done">✔</div><span className="step-lbl done">Bienestar</span></div>
-                    <div className="step-conn done"></div>
-                    <div className="step"><div className="step-circ done">✔</div><span className="step-lbl done">J. Carbajal — GDTH</span></div>
-                    <div className="step-conn done"></div>
-                    <div className="step"><div className="step-circ cur">⏳</div><span className="step-lbl cur">G. Palacios — Adm.</span></div>
-                    <div className="step-conn"></div>
-                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">E. Chozo — Conta.</span></div>
-                  </>
-                ) : selectedRow?.estado === 'rechazado' ? (
-                  <>
-                    <div className="step"><div className="step-circ done">✔</div><span className="step-lbl done">Solicitud</span></div>
-                    <div className="step-conn done"></div>
-                    <div className="step"><div className="step-circ done">✔</div><span className="step-lbl done">Bienestar</span></div>
-                    <div className="step-conn"></div>
-                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">J. Carbajal — GDTH</span></div>
-                    <div className="step-conn"></div>
-                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">G. Palacios — Adm.</span></div>
-                    <div className="step-conn"></div>
-                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">E. Chozo — Conta.</span></div>
-                  </>
-                ) : (
-                  <>
-                    <div className="step"><div className="step-circ done">✔</div><span className="step-lbl done">Solicitud</span></div>
-                    <div className="step-conn done"></div>
-                    <div className="step"><div className="step-circ cur">⏳</div><span className="step-lbl cur">Bienestar</span></div>
-                    <div className="step-conn"></div>
-                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">J. Carbajal — GDTH</span></div>
-                    <div className="step-conn"></div>
-                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">G. Palacios — Adm.</span></div>
-                    <div className="step-conn"></div>
-                    <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">E. Chozo — Conta.</span></div>
-                  </>
-                )}
-              </div>
+              {advFlow[selectedNumero] ? (() => {
+                const FLOW_DEFS = [
+                  { label: 'Colaborador — Genera solicitud',           actor: 'Colaborador' },
+                  { label: 'J. Carbajal — GDTH: Evaluación',           actor: 'Julieth Z. Carbajal Garro — Jefa de GDTH' },
+                  { label: 'Bienestar — Remitir formato al colaborador',actor: 'Bienestar Social' },
+                  { label: 'Colaborador — Completa Nueva Ficha',        actor: 'Colaborador' },
+                  { label: 'Bienestar — Valida adecuado llenado',       actor: 'Bienestar Social' },
+                  { label: 'GDTH — Solicitar Validación de Sec. Adm.',  actor: 'J. Carbajal — Jefa de GDTH' },
+                  { label: 'Sec. Administración — Aprobación y firma',  actor: 'Guissela Palacios Alvarez — Jefa de Administración' },
+                  { label: 'Contabilidad — Desembolso y comprobante',   actor: 'Edwin J. Chozo Santisteban — Contador General' },
+                ]
+                const steps = advFlow[selectedNumero]
+                const firmaInput = advFirmaInput[selectedNumero] ?? ''
+                return (
+                  <div style={{ marginTop: 8 }}>
+                    {FLOW_DEFS.map((def, i) => {
+                      const s = steps[i]
+                      if (!s) return null
+                      return (
+                        <div key={i} className="flow-step-block" style={{ marginBottom: 8 }}>
+                          <div className={`flow-step-hdr ${s.status}`}>
+                            <span>{s.status==='done'?'✔':s.status==='active'?'⏳':'○'} Paso {i+1}: {def.label}</span>
+                            <span style={{ fontSize:11, color:'#9CA3AF' }}>{def.actor}</span>
+                          </div>
+                          {s.status === 'done' && (
+                            <div className="flow-step-body">
+                              <div style={{ display:'flex', gap:24, flexWrap:'wrap', alignItems:'flex-end' }}>
+                                <div>
+                                  <div style={{ fontSize:10, color:'#9CA3AF', marginBottom:4 }}>Firmado por</div>
+                                  <div className="firma-box" style={{ fontFamily:'Georgia,serif', fontStyle:'italic', minWidth:140 }}>{s.firmante || def.actor}</div>
+                                  <div style={{ fontSize:10, color:'#6B7280', marginTop:4 }}>{def.actor}</div>
+                                </div>
+                                <div className="inv-field"><div className="lbl">Fecha</div><div className="val">{s.fecha}</div></div>
+                              </div>
+                            </div>
+                          )}
+                          {s.status === 'active' && (
+                            <div className="flow-step-body">
+                              {/* Paso 3: Bienestar remite formato */}
+                              {i === 2 && (
+                                <div className="banner banner-purple" style={{ fontSize:12, marginBottom:8 }}>
+                                  📋 Bienestar valida el resultado de la evaluación GDTH. Al "Remitir formato" se habilita el botón "+Nueva Ficha" para el colaborador.
+                                </div>
+                              )}
+                              {/* Paso 6: GDTH Solicitar Validación */}
+                              {i === 5 && (
+                                <div className="banner banner-purple" style={{ fontSize:12, marginBottom:8 }}>
+                                  📤 Al enviar, se solicitará la validación de Sec. de Administración para continuar.
+                                </div>
+                              )}
+                              {/* Paso 8: Contabilidad adjunta comprobante */}
+                              {i === 7 && (
+                                <div style={{ marginBottom:8 }}>
+                                  <label className="form-label" style={{ fontSize:11 }}>Adjuntar comprobante de desembolso</label>
+                                  <div className="dropzone" style={{ cursor:'pointer', padding:'12px 16px' }}
+                                    onClick={() => document.getElementById(`adv-desebolso-file-${selectedNumero}`)?.click()}>
+                                    <div style={{ fontSize:13 }}>{advDesembolsoFile[selectedNumero] ? `✔ ${advDesembolsoFile[selectedNumero]}` : '📎 Seleccionar comprobante'}</div>
+                                    <input type="file" id={`adv-desebolso-file-${selectedNumero}`} accept=".pdf,.jpg,.png" style={{ display:'none' }}
+                                      onChange={e => setAdvDesembolsoFile(prev => ({ ...prev, [selectedNumero]: e.target.files?.[0]?.name ?? '' }))} />
+                                  </div>
+                                </div>
+                              )}
+                              <div className="form-group" style={{ marginBottom:8 }}>
+                                <label className="form-label" style={{ fontSize:11 }}>Firma digital — {def.actor}</label>
+                                <input type="text" className="form-control"
+                                  placeholder="Escribe aquí tu firma..."
+                                  style={{ fontFamily:'Georgia,serif', fontStyle:'italic', fontSize:14, color:'#1E1B4B' }}
+                                  value={firmaInput}
+                                  onChange={e => setAdvFirmaInput(prev => ({ ...prev, [selectedNumero]: e.target.value }))}
+                                />
+                              </div>
+                              <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+                                <button className="btn btn-primary btn-sm" onClick={() => {
+                                  if (!firmaInput.trim()) { alert('Escribe tu firma para continuar'); return }
+                                  if (i === 7 && !advDesembolsoFile[selectedNumero]) { alert('Adjunta el comprobante de desembolso'); return }
+                                  const newSteps = steps.map((st, si) => {
+                                    if (si === i) return { ...st, status:'done' as const, firmante: firmaInput, fecha: new Date().toLocaleDateString('es-PE') }
+                                    if (si === i+1 && steps[si].status === 'pending') return { ...st, status:'active' as const }
+                                    return st
+                                  })
+                                  setAdvFlow(prev => ({ ...prev, [selectedNumero]: newSteps }))
+                                  setAdvFirmaInput(prev => ({ ...prev, [selectedNumero]: '' }))
+                                  // Paso 3 done → habilitar Nueva Ficha
+                                  if (i === 2) setAdvFichaEnabled(prev => ({ ...prev, [selectedNumero]: true }))
+                                  // Paso 8 done → finalizado
+                                  if (i === 7) setMisSolicitudes(prev => prev.map(r => r.numero===selectedNumero ? {...r, estado:'aprobado', proximo:'Desembolso realizado'} : r))
+                                }}>
+                                  {i === 2 ? '📤 Remitir formato' : i === 5 ? '📨 Solicitar Validación' : i === 7 ? '✔ Registrar desembolso' : '✔ Registrar firma'}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                          {s.status === 'pending' && (
+                            <div className="flow-step-body">
+                              {/* Paso 4 - colaborador completa ficha (si fue habilitado) */}
+                              {i === 3 && advFichaEnabled[selectedNumero] && !advFichaSubmitted[selectedNumero] && (
+                                <div>
+                                  <div className="banner banner-purple" style={{ fontSize:12, marginBottom:8 }}>✅ Formato habilitado — el colaborador puede completar su ficha.</div>
+                                  <button className="btn btn-primary btn-sm" onClick={() => {
+                                    setAdvFichaSubmitted(prev => ({ ...prev, [selectedNumero]: true }))
+                                    const newSteps = steps.map((st, si) => {
+                                      if (si === 3) return { ...st, status:'done' as const, firmante:'Colaborador', fecha: new Date().toLocaleDateString('es-PE') }
+                                      if (si === 4) return { ...st, status:'active' as const }
+                                      return st
+                                    })
+                                    setAdvFlow(prev => ({ ...prev, [selectedNumero]: newSteps }))
+                                  }}>📄 Completar Nueva Ficha (simulado)</button>
+                                </div>
+                              )}
+                              {!(i === 3 && advFichaEnabled[selectedNumero] && !advFichaSubmitted[selectedNumero]) && (
+                                <p className="text-xs text-gray" style={{ fontStyle:'italic' }}>🔒 Pendiente — se habilitará al completar el paso anterior.</p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                    {/* Firmas del proceso */}
+                    <div style={{ marginTop:16 }}>
+                      <div className="section-title-sm">FIRMAS DEL PROCESO</div>
+                      <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, marginTop:8 }}>
+                        {FLOW_DEFS.map((def, i) => {
+                          const s = steps[i]
+                          const borderColor = s?.status==='done'?'#22C55E':s?.status==='active'?'#6B21A8':'#D1D5DB'
+                          const bgColor = s?.status==='done'?'#F0FDF4':s?.status==='active'?'#F5F3FF':'#FAFAFA'
+                          return (
+                            <div key={i} className="aprob-cell" style={{ border:`1px solid ${borderColor}`, background:bgColor }}>
+                              <div className="aprob-title" style={{ fontSize:9 }}>Paso {i+1}</div>
+                              <div className="aprob-zona">
+                                {s?.status==='done'
+                                  ? <><span style={{ fontFamily:'Georgia,serif', fontStyle:'italic', color:'#1E1B4B', fontSize:12 }}>{s.firmante || '—'}</span><div style={{ fontSize:9, color:'#6B7280', marginTop:2 }}>{s.fecha}</div></>
+                                  : s?.status==='active'
+                                    ? <span style={{ fontFamily:'Georgia,serif', fontStyle:'italic', color:'#991B1B', fontSize:11 }}>En proceso</span>
+                                    : <span style={{ fontFamily:'Georgia,serif', fontStyle:'italic', color:'#6B7280', fontSize:11 }}>En espera</span>
+                                }
+                              </div>
+                              <div style={{ fontSize:9, color:'#9CA3AF', marginTop:4 }}>{def.actor.split('—')[0].trim()}</div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                    {/* Si el paso 8 está done → mostrar comprobante */}
+                    {steps[7]?.status === 'done' && advDesembolsoFile[selectedNumero] && (
+                      <div style={{ marginTop:12, background:'#F0FDF4', border:'1px solid #86EFAC', borderRadius:6, padding:'10px 12px', display:'flex', alignItems:'center', gap:8 }}>
+                        <span style={{ fontSize:18 }}>📎</span>
+                        <div>
+                          <div style={{ fontWeight:700, color:'#15803D', fontSize:12 }}>Comprobante de desembolso</div>
+                          <div style={{ fontSize:11 }}>{advDesembolsoFile[selectedNumero]}</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })() : (
+                /* Stepper legado para solicitudes sin advFlow */
+                <div className="stepper" style={{ marginBottom:12 }}>
+                  {selectedRow?.estado === 'aprobado' ? (
+                    <>
+                      <div className="step"><div className="step-circ done">✔</div><span className="step-lbl done">Solicitud</span></div>
+                      <div className="step-conn done"></div>
+                      <div className="step"><div className="step-circ done">✔</div><span className="step-lbl done">Bienestar</span></div>
+                      <div className="step-conn done"></div>
+                      <div className="step"><div className="step-circ done">✔</div><span className="step-lbl done">J. Carbajal — GDTH</span></div>
+                      <div className="step-conn done"></div>
+                      <div className="step"><div className="step-circ cur">⏳</div><span className="step-lbl cur">G. Palacios — Adm.</span></div>
+                      <div className="step-conn"></div>
+                      <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">E. Chozo — Conta.</span></div>
+                    </>
+                  ) : selectedRow?.estado === 'rechazado' ? (
+                    <>
+                      <div className="step"><div className="step-circ done">✔</div><span className="step-lbl done">Solicitud</span></div>
+                      <div className="step-conn"></div>
+                      <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">J. Carbajal — GDTH</span></div>
+                      <div className="step-conn"></div>
+                      <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">G. Palacios — Adm.</span></div>
+                      <div className="step-conn"></div>
+                      <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">E. Chozo — Conta.</span></div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="step"><div className="step-circ done">✔</div><span className="step-lbl done">Solicitud</span></div>
+                      <div className="step-conn done"></div>
+                      <div className="step"><div className="step-circ cur">⏳</div><span className="step-lbl cur">Bienestar</span></div>
+                      <div className="step-conn"></div>
+                      <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">J. Carbajal — GDTH</span></div>
+                      <div className="step-conn"></div>
+                      <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">G. Palacios — Adm.</span></div>
+                      <div className="step-conn"></div>
+                      <div className="step"><div className="step-circ pend">○</div><span className="step-lbl pend">E. Chozo — Conta.</span></div>
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* Observación si rechazado */}
               {selectedRow?.estado === 'rechazado' && (

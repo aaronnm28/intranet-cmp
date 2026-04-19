@@ -121,6 +121,9 @@ export function PrestamosBienes() {
   const [prestModalInfo, setPrestModalInfo] = useState<{numero:string;bien:string;colaborador:string;esLocador:boolean}>({numero:'',bien:'',colaborador:'',esLocador:false})
   const [detObsTexts, setDetObsTexts] = useState<Record<number,string>>({})
   const [detShowObs,  setDetShowObs]  = useState<Record<number,boolean>>({})
+  // Firma interactiva por paso en el modal de detalle (clave: numero_prestamo, valor: {paso: {firmante, fecha}})
+  const [detFirmaSteps, setDetFirmaSteps] = useState<Record<string,Record<number,{firmante:string;fecha:string}>>>({})
+  const [detFirmaInput, setDetFirmaInput] = useState<Record<string,Record<number,string>>>({})
 
   // DNI search
   const [colabDni, setColabDni]   = useState('')
@@ -607,25 +610,28 @@ export function PrestamosBienes() {
                 </div>
                 {/* Flujo del proceso */}
                 <div className="section-title-sm" style={{ marginTop: 4 }}>FLUJO DEL PROCESO</div>
-                {flujoDefault.map((f, i) => (
+                {flujoDefault.map((f, i) => {
+                  const firmaGuardada = detFirmaSteps[selected.numero]?.[i]
+                  const stepStatus = firmaGuardada ? 'done' : f.status
+                  return (
                   <div key={i} className="flow-step-block">
-                    <div className={`flow-step-hdr ${f.status}`} style={{ cursor: 'default' }}>
-                      <span>{f.status === 'done' ? '✔' : f.status === 'active' ? '⏳' : '○'} {f.icono} {f.paso}</span>
+                    <div className={`flow-step-hdr ${stepStatus}`} style={{ cursor: 'default' }}>
+                      <span>{stepStatus === 'done' ? '✔' : stepStatus === 'active' ? '⏳' : '○'} {f.icono} {f.paso}</span>
                       <span style={{ fontSize: 11, color: '#9CA3AF' }}>{f.cargo}</span>
                     </div>
-                    {f.status === 'done' && (
+                    {stepStatus === 'done' && (
                       <div className="flow-step-body">
                         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-end' }}>
                           <div>
                             <div className="firma-label" style={{ textAlign: 'left', marginBottom: 4, fontSize: 10, color: '#9CA3AF' }}>Firmado por</div>
-                            <div className="firma-box" style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', minWidth: 140 }}>{f.firmante || '—'}</div>
+                            <div className="firma-box" style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', minWidth: 140 }}>{firmaGuardada?.firmante || f.firmante || '—'}</div>
                             <div className="firma-label" style={{ fontSize: 10, marginTop: 4 }}>{f.cargo}</div>
                           </div>
                           {f.firmante2 && <div>
                             <div className="firma-label" style={{ textAlign: 'left', marginBottom: 4, fontSize: 10, color: '#9CA3AF' }}>Confirmado por</div>
                             <div className="firma-box" style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', minWidth: 140 }}>{f.firmante2}</div>
                           </div>}
-                          <div className="inv-field"><div className="lbl">Fecha</div><div className="val">{f.fecha}</div></div>
+                          <div className="inv-field"><div className="lbl">Fecha</div><div className="val">{firmaGuardada?.fecha || f.fecha}</div></div>
                         </div>
                         <div style={{ marginTop: 8 }}>
                           <button className="btn btn-outline btn-xs" onClick={() => setDetShowObs(p => ({ ...p, [i]: !p[i] }))}>+ Observación</button>
@@ -643,15 +649,24 @@ export function PrestamosBienes() {
                         )}
                       </div>
                     )}
-                    {f.status === 'active' && (
+                    {stepStatus === 'active' && (
                       <div className="flow-step-body">
                         {f.activeLabel && <div className="banner banner-purple" style={{ fontSize: 12, marginBottom: 8 }}>{f.activeLabel}</div>}
                         <div className="form-group" style={{ marginBottom: 8 }}>
                           <label className="form-label" style={{ fontSize: 11 }}>Firma digital — {f.cargo}</label>
-                          <input type="text" className="form-control" placeholder="Escribe aquí tu firma..." style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', fontSize: 14, color: '#1E1B4B' }} />
+                          <input type="text" className="form-control"
+                            placeholder="Escribe aquí tu firma..."
+                            style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', fontSize: 14, color: '#1E1B4B' }}
+                            value={detFirmaInput[selected.numero]?.[i] ?? ''}
+                            onChange={e => setDetFirmaInput(prev => ({ ...prev, [selected.numero]: { ...(prev[selected.numero] ?? {}), [i]: e.target.value } }))}
+                          />
                         </div>
                         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                          <button className="btn btn-primary btn-sm" onClick={() => { setShowDetalle(false); alert('✓ Firma registrada.') }}>✔ Registrar firma</button>
+                          <button className="btn btn-primary btn-sm" onClick={() => {
+                            const firma = detFirmaInput[selected.numero]?.[i]
+                            if (!firma?.trim()) { alert('Escribe tu firma para continuar'); return }
+                            setDetFirmaSteps(prev => ({ ...prev, [selected.numero]: { ...(prev[selected.numero] ?? {}), [i]: { firmante: firma, fecha: new Date().toLocaleDateString('es-PE') } } }))
+                          }}>✔ Registrar firma</button>
                           {i === 2 && (
                             prestCorreoEnviado[selected.numero]
                               ? <span className="badge b-green" style={{fontSize:11}}>✅ Correo enviado</span>
@@ -735,7 +750,7 @@ export function PrestamosBienes() {
                       )
                     })()}
                   </div>
-                ))}
+                )})}
                 {/* Firmas del proceso */}
                 {d && (
                   <div style={{ marginTop: 16 }}>
