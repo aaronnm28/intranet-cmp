@@ -9,6 +9,10 @@ interface MisSolicitudRow {
   fecha: string
   estado: string
   proximo: string
+  cuotas?: string
+  motivo?: string
+  colaborador?: string
+  area?: string
 }
 
 
@@ -145,6 +149,8 @@ export function PrestamosAdelantos() {
             proximo: r.estado === 'aprobado' ? 'Desembolso realizado' : 'J. Carbajal — GDTH: Evaluación',
             colaborador: r.colaborador ?? '—',
             area: areaCache[r.numero] ?? '—',
+            cuotas: r.cuotas ? String(r.cuotas) : undefined,
+            motivo: r.motivo ?? undefined,
           }))
           setMisSolicitudes(mapped)
           setGdthBandeja(mapped)
@@ -194,6 +200,10 @@ export function PrestamosAdelantos() {
         id: newRec.id, numero, tipo: tipoSolicitud === 'adelanto' ? 'Adelanto de sueldo' : 'Préstamo personal',
         monto: `S/. ${monto.toLocaleString('es-PE')}`, fecha: new Date().toLocaleDateString('es-PE'),
         estado: 'en_revision', proximo: 'Evaluación Bienestar',
+        motivo: motivoSolicitud || undefined,
+        cuotas: tipoSolicitud === 'prestamo' && numCuotas ? numCuotas : undefined,
+        colaborador: nssColab?.nombre ?? 'Colaborador',
+        area: nssColab?.area ?? '—',
       }, ...prev])
     }
     setShowNueva(false)
@@ -1268,24 +1278,38 @@ export function PrestamosAdelantos() {
 
               {/* DATOS DE LA SOLICITUD — alineado con referencia Torres Huamán (ADV-2026-004) */}
               <div className="section-title-sm">DATOS DE LA SOLICITUD</div>
-              <div className="inv-grid" style={{ marginBottom: 14 }}>
-                <div className="inv-field"><div className="lbl">N° Documento</div><div className="val fw-600">{selectedNumero}</div></div>
-                <div className="inv-field"><div className="lbl">Colaborador</div><div className="val">{selectedMatriz?.nombre ?? (selectedRow as {colaborador?:string}|null)?.colaborador ?? '—'}</div></div>
-                <div className="inv-field"><div className="lbl">DNI</div><div className="val">{selectedMatriz?.dni ?? '—'}</div></div>
-                <div className="inv-field"><div className="lbl">Área</div><div className="val">{selectedMatriz?.area ?? (selectedRow as {area?:string}|null)?.area ?? '—'}</div></div>
-                <div className="inv-field"><div className="lbl">Puesto</div><div className="val">{selectedMatriz?.puesto ?? '—'}</div></div>
-                <div className="inv-field"><div className="lbl">Tipo</div><div className="val">
-                  {selectedMatriz
-                    ? <span className={`badge ${selectedMatriz.tipo==='adelanto'?'b-purple':'b-blue'}`}>{selectedMatriz.tipo==='adelanto'?'ADELANTO DE SUELDO':'PRÉSTAMO PERSONAL'}</span>
-                    : (selectedRow?.tipo ?? '—')}
-                </div></div>
-                <div className="inv-field"><div className="lbl">Motivo</div><div className="val">{selectedMatriz?.motivo ?? '—'}</div></div>
-                <div className="inv-field"><div className="lbl">Monto solicitado</div><div className="val fw-600">{selectedMatriz?.monto ?? selectedRow?.monto ?? '—'}</div></div>
-                <div className="inv-field"><div className="lbl">Fecha solicitud</div><div className="val">{selectedMatriz?.fecha ?? selectedRow?.fecha ?? '—'}</div></div>
-                <div className="inv-field"><div className="lbl">Cuotas</div><div className="val">{selectedMatriz?.cuotas ?? '—'}</div></div>
-                <div className="inv-field"><div className="lbl">Mes de descuento</div><div className="val" style={{ whiteSpace:'pre-line' }}>{selectedMatriz?.mes_descuento ?? '—'}</div></div>
-                <div className="inv-field"><div className="lbl">Aprueba</div><div className="val">{selectedMatriz?.aprueba ?? '—'}</div></div>
-              </div>
+              {(() => {
+                const dbRow = selectedRow as MisSolicitudRow | null
+                const evalCuotasVal = gdthEvalData[selectedNumero]?.cuotas
+                const displayCuotas = evalCuotasVal
+                  ? `${evalCuotasVal} cuota(s)`
+                  : (dbRow?.cuotas ?? (selectedMatriz?.cuotas ? String(selectedMatriz.cuotas) : '—'))
+                const displayTipo = dbRow?.tipo ?? (selectedMatriz
+                  ? (selectedMatriz.tipo === 'adelanto' ? 'Adelanto de sueldo' : 'Préstamo personal')
+                  : '—')
+                const isBadge = !!selectedMatriz || !!dbRow
+                const isAdelanto = displayTipo.toLowerCase().includes('adelanto')
+                return (
+                  <div className="inv-grid" style={{ marginBottom: 14 }}>
+                    <div className="inv-field"><div className="lbl">N° Documento</div><div className="val fw-600">{selectedNumero}</div></div>
+                    <div className="inv-field"><div className="lbl">Colaborador</div><div className="val">{dbRow?.colaborador ?? selectedMatriz?.nombre ?? '—'}</div></div>
+                    <div className="inv-field"><div className="lbl">DNI</div><div className="val">{selectedMatriz?.dni ?? '—'}</div></div>
+                    <div className="inv-field"><div className="lbl">Área</div><div className="val">{dbRow?.area ?? selectedMatriz?.area ?? '—'}</div></div>
+                    <div className="inv-field"><div className="lbl">Puesto</div><div className="val">{selectedMatriz?.puesto ?? '—'}</div></div>
+                    <div className="inv-field"><div className="lbl">Tipo</div><div className="val">
+                      {isBadge
+                        ? <span className={`badge ${isAdelanto ? 'b-purple' : 'b-blue'}`}>{isAdelanto ? 'ADELANTO DE SUELDO' : 'PRÉSTAMO PERSONAL'}</span>
+                        : '—'}
+                    </div></div>
+                    <div className="inv-field"><div className="lbl">Motivo</div><div className="val">{dbRow?.motivo ?? selectedMatriz?.motivo ?? '—'}</div></div>
+                    <div className="inv-field"><div className="lbl">Monto solicitado</div><div className="val fw-600">{dbRow?.monto ?? selectedMatriz?.monto ?? '—'}</div></div>
+                    <div className="inv-field"><div className="lbl">Fecha solicitud</div><div className="val">{dbRow?.fecha ?? selectedMatriz?.fecha ?? '—'}</div></div>
+                    <div className="inv-field"><div className="lbl">Cuotas</div><div className="val">{displayCuotas}</div></div>
+                    <div className="inv-field"><div className="lbl">Mes de descuento</div><div className="val" style={{ whiteSpace:'pre-line' }}>{selectedMatriz?.mes_descuento ?? '—'}</div></div>
+                    <div className="inv-field"><div className="lbl">Aprueba</div><div className="val">{selectedMatriz?.aprueba ?? '—'}</div></div>
+                  </div>
+                )
+              })()}
 
               {/* Flujo de 8 pasos (para solicitudes nuevas con advFlow) o stepper legado */}
               <div className="section-title-sm">FLUJO DE APROBACIÓN</div>

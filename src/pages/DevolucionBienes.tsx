@@ -289,6 +289,7 @@ interface ActaBien {
   marca: string
   modelo: string
   serie: string
+  custodio?: string
 }
 
 interface ColaboradorActa {
@@ -464,47 +465,59 @@ function ModalActaDevolucion({ bien, colaborador, onClose, onFirmar }: ModalActa
 
           {/* Grid firmas del acta */}
           <div className="section-title-sm">FIRMAS DEL ACTA</div>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:14 }}>
-            {/* Responsable que entrega — firma interactiva */}
-            <div className="aprob-cell">
-              <div className="aprob-title">Responsable que entrega</div>
-              {firmaEntregaDone ? (
-                <FirmaDone nombre={firmaEntregaVal} cargo="Administración CMP" fecha={fechaHoy} />
-              ) : (
-                <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Escribe aquí tu firma..."
-                    style={{ fontFamily:'Georgia,serif', fontStyle:'italic', fontSize:13, color:'#1E1B4B' }}
-                    value={firmaEntregaVal}
-                    onChange={e => setFirmaEntregaVal(e.target.value)}
-                  />
-                  <button
-                    className="btn btn-primary btn-sm"
-                    style={{ alignSelf:'flex-start' }}
-                    disabled={!firmaEntregaVal.trim()}
-                    onClick={() => { if (firmaEntregaVal.trim()) setFirmaEntregaDone(true) }}
-                  >✔ Registrar firma</button>
+          {(() => {
+            const custodioStr = bien.custodio ?? ''
+            const custodioLower = custodioStr.toLowerCase()
+            let custodioArea = 'Administración'
+            if (custodioLower.includes('ti') || custodioLower.includes('tecnolog') || custodioLower.includes('cómputo') || custodioLower.includes('computo') || custodioLower.includes('sistemas')) {
+              custodioArea = 'TI'
+            } else if (custodioLower.includes('comunicaciones') || custodioLower.includes('imagen')) {
+              custodioArea = 'Comunicaciones e Imagen Institucional'
+            }
+            return (
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:14 }}>
+                {/* Responsable que recibe — firma interactiva */}
+                <div className="aprob-cell">
+                  <div className="aprob-title">Responsable que recibe</div>
+                  {firmaEntregaDone ? (
+                    <FirmaDone nombre={firmaEntregaVal} cargo={custodioArea} fecha={fechaHoy} />
+                  ) : (
+                    <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Escribe aquí tu firma..."
+                        style={{ fontFamily:'Georgia,serif', fontStyle:'italic', fontSize:13, color:'#1E1B4B' }}
+                        value={firmaEntregaVal}
+                        onChange={e => setFirmaEntregaVal(e.target.value)}
+                      />
+                      <button
+                        className="btn btn-primary btn-sm"
+                        style={{ alignSelf:'flex-start' }}
+                        disabled={!firmaEntregaVal.trim()}
+                        onClick={() => { if (firmaEntregaVal.trim()) setFirmaEntregaDone(true) }}
+                      >✔ Registrar firma</button>
+                    </div>
+                  )}
+                  <div className="text-xs text-gray mt-4">{custodioArea}</div>
                 </div>
-              )}
-              <div className="text-xs text-gray mt-4">Administración CMP</div>
-            </div>
-            {/* Colaborador — firma automática al enviar notificación */}
-            <div className="aprob-cell">
-              <div className="aprob-title">Colaborador — firma por correo</div>
-              {colaboradorFirmado ? (
-                <FirmaDone nombre={colaborador.nombre} cargo={colaborador.cargo} fecha={fechaHoy} />
-              ) : notifEnviada ? (
-                <div className="aprob-zona" style={{ background:'#F5F3FF', border:'1px dashed #6B21A8' }}>
-                  <span style={{ fontSize:11, color:'#6B21A8', fontStyle:'italic' }}>⏳ Pendiente de aceptación por correo</span>
+                {/* Colaborador — firma automática al enviar notificación */}
+                <div className="aprob-cell">
+                  <div className="aprob-title">Colaborador — firma por correo</div>
+                  {colaboradorFirmado ? (
+                    <FirmaDone nombre={colaborador.nombre} cargo={colaborador.cargo} fecha={fechaHoy} />
+                  ) : notifEnviada ? (
+                    <div className="aprob-zona" style={{ background:'#F5F3FF', border:'1px dashed #6B21A8' }}>
+                      <span style={{ fontSize:11, color:'#6B21A8', fontStyle:'italic' }}>⏳ Pendiente de aceptación por correo</span>
+                    </div>
+                  ) : (
+                    <FirmaPendiente />
+                  )}
+                  <div className="text-xs text-gray mt-4">{colaborador.nombre}</div>
                 </div>
-              ) : (
-                <FirmaPendiente />
-              )}
-              <div className="text-xs text-gray mt-4">{colaborador.nombre}</div>
-            </div>
-          </div>
+              </div>
+            )
+          })()}
         </div>
         <div className="modal-footer">
           <span className="modal-note">Ambas firmas son requeridas para registrar la devolución.</span>
@@ -789,8 +802,8 @@ function DetailView({ devolucion, onBack }: DetailViewProps) {
     setOpenSections(prev => ({ ...prev, [id]: !prev[id] }))
   }
 
-  const openActaDevolucion = (id: string, nombre: string, codigo: string, marca: string, modelo: string, serie: string) => {
-    setActaBien({ id, nombre, codigo, marca, modelo, serie })
+  const openActaDevolucion = (id: string, nombre: string, codigo: string, marca: string, modelo: string, serie: string, custodio?: string) => {
+    setActaBien({ id, nombre, codigo, marca, modelo, serie, custodio })
     setShowActa(true)
   }
 
@@ -870,10 +883,10 @@ function DetailView({ devolucion, onBack }: DetailViewProps) {
                       {b.devolucion === 'observado' ? (
                         <div className="actions-cell">
                           <button className="btn btn-gray btn-xs" onClick={() => openVerObsDev(b.id)}>Ver obs.</button>
-                          <button className="btn btn-outline btn-xs" onClick={() => openActaDevolucion(b.id, b.desc, b.codigo, b.marca, b.modelo, b.serie)}>Registrar devolución</button>
+                          <button className="btn btn-outline btn-xs" onClick={() => openActaDevolucion(b.id, b.desc, b.codigo, b.marca, b.modelo, b.serie, b.custodio)}>Registrar devolución</button>
                         </div>
                       ) : (
-                        <button className="btn btn-primary btn-xs" onClick={() => openActaDevolucion(b.id, b.desc, b.codigo, b.marca, b.modelo, b.serie)}>Registrar devolución</button>
+                        <button className="btn btn-primary btn-xs" onClick={() => openActaDevolucion(b.id, b.desc, b.codigo, b.marca, b.modelo, b.serie, b.custodio)}>Registrar devolución</button>
                       )}
                     </td>
                   </tr>
@@ -913,7 +926,7 @@ function DetailView({ devolucion, onBack }: DetailViewProps) {
                     <td><span className="sem sem-y"></span></td>
                     <td style={{ color: '#991B1B', fontWeight: 600 }}>☐ Pendiente</td>
                     <td>
-                      <button className="btn btn-primary btn-xs" onClick={() => openActaDevolucion(a.id, a.nombre, a.codigo, a.marca, a.modelo, a.serie)}>Registrar devolución</button>
+                      <button className="btn btn-primary btn-xs" onClick={() => openActaDevolucion(a.id, a.nombre, a.codigo, a.marca, a.modelo, a.serie, 'Guissela Palacios Alvarez — Jefa de Administración')}>Registrar devolución</button>
                     </td>
                   </tr>
                 ))}
