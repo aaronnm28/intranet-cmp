@@ -47,6 +47,7 @@ export function PrestamosAdelantos() {
   const [showNuevaSol, setShowNuevaSol] = useState(false)   // Modal "Nueva Solicitud" simplificado (Obs 6)
   const [showDetalle, setShowDetalle] = useState(false)
   const [showEvalGDTH, setShowEvalGDTH] = useState(false)   // Modal Evaluación GDTH (Obs 7)
+  const [detTab, setDetTab] = useState<'detalle'|'evaluacion'>('detalle')
   const [selectedNumero, setSelectedNumero] = useState('')
   const [selectedGDTHRow, setSelectedGDTHRow] = useState<typeof MATRIZ_DATA[0]|null>(null)
 
@@ -201,6 +202,10 @@ export function PrestamosAdelantos() {
 
   const openDetalle = (numero: string) => {
     setSelectedNumero(numero)
+    setDetTab('detalle')
+    // Pre-llenar monto de evaluación desde MATRIZ_DATA si existe
+    const mRow = MATRIZ_DATA.find(r => r.documento === numero)
+    if (mRow) { setSelectedGDTHRow(mRow); setEvalMontoAprobado(mRow.monto); setEvalResultado(''); setEvalDni(''); setEvalColab(null) }
     setShowDetalle(true)
   }
 
@@ -253,7 +258,11 @@ export function PrestamosAdelantos() {
     ? calcularCuotas(evalMontoNum, parseInt(evalCuotas))
     : []
 
-  const selectedRow = misSolicitudes.find(r => r.numero === selectedNumero) ?? null
+  const selectedRow = misSolicitudes.find(r => r.numero === selectedNumero)
+    ?? gdthBandeja.find(r => r.numero === selectedNumero)
+    ?? null
+  // Busca en MATRIZ_DATA para datos enriquecidos (referencia Torres Huamán)
+  const selectedMatriz = MATRIZ_DATA.find(r => r.documento === selectedNumero) ?? null
 
   // Matriz table (shared between GDTH and Bienestar tabs)
   const MatrizTable = () => (
@@ -408,7 +417,7 @@ export function PrestamosAdelantos() {
                     <td className="text-sm text-gray">Bienestar — 18/02/2026</td>
                     <td>
                       <div className="actions-cell">
-                        <button className="btn btn-gray btn-xs" onClick={() => { const row = MATRIZ_DATA.find(r=>r.documento==='ADV-2026-004')??null; setSelectedGDTHRow(row); setEvalDni(''); setEvalColab(null); setEvalResultado(''); setEvalMontoAprobado(row?.monto??''); setEvalCuotas(''); setShowEvalGDTH(true) }}>Ver detalle</button>
+                        <button className="btn btn-gray btn-xs" onClick={() => openDetalle('ADV-2026-004')}>Ver detalle</button>
                       </div>
                     </td>
                   </tr>
@@ -423,7 +432,7 @@ export function PrestamosAdelantos() {
                       <td><span className="badge b-yellow">Nueva — Pendiente evaluación</span></td>
                       <td className="text-sm text-gray">—</td>
                       <td>
-                        <button className="btn btn-gray btn-xs" onClick={() => { setSelectedNumero(s.numero); setShowDetalle(true) }}>Ver detalle</button>
+                        <button className="btn btn-gray btn-xs" onClick={() => openDetalle(s.numero)}>Ver detalle</button>
                       </td>
                     </tr>
                   ))}
@@ -1051,10 +1060,10 @@ export function PrestamosAdelantos() {
         </div>
       )}
 
-      {/* Modal Detalle */}
+      {/* Modal Detalle — Pestañas: DETALLE SOLICITUD | EVALUACIÓN */}
       {showDetalle && (
         <div className="modal-overlay" onClick={() => setShowDetalle(false)}>
-          <div className="modal" style={{ maxWidth: 560 }} onClick={e => e.stopPropagation()}>
+          <div className="modal" style={{ maxWidth: 640, maxHeight: '92vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
             <div className="modal-hdr">
               <div>
                 <div className="modal-title">Detalle de Solicitud</div>
@@ -1062,31 +1071,46 @@ export function PrestamosAdelantos() {
               </div>
               <button className="modal-close" onClick={() => setShowDetalle(false)}>×</button>
             </div>
+            {/* Tabs */}
+            <div className="modal-tabs" style={{ margin: '0 -18px', padding: '0 18px', borderBottom: '1px solid #F3F4F6', marginBottom: 0 }}>
+              <div className={`modal-tab${detTab === 'detalle' ? ' active' : ''}`} onClick={() => setDetTab('detalle')}>📋 Detalle Solicitud</div>
+              <div className={`modal-tab${detTab === 'evaluacion' ? ' active' : ''}`} onClick={() => setDetTab('evaluacion')}>📝 Evaluación</div>
+            </div>
             <div className="modal-body">
+
+              {/* ══ PESTAÑA 1: DETALLE SOLICITUD ══ */}
+              {detTab === 'detalle' && (<>
               {/* Estado */}
               <div style={{ marginBottom: 14 }}>
                 {selectedRow?.estado === 'aprobado' && <span className="badge b-green">Aprobado</span>}
-                {selectedRow?.estado === 'en_revision' && <span className="badge b-yellow">En revisión — Bienestar</span>}
+                {selectedRow?.estado === 'en_revision' && <span className="badge b-yellow">En revisión</span>}
                 {selectedRow?.estado === 'rechazado' && <span className="badge b-red">Rechazado</span>}
-                {!selectedRow && <span className="badge b-gray">{selectedNumero}</span>}
+                {!selectedRow && selectedMatriz?.abono_fecha === 'rechazado' && <span className="badge b-red">Rechazado</span>}
+                {!selectedRow && selectedMatriz?.abono_fecha === 'pendiente' && <span className="badge b-yellow">Pendiente</span>}
+                {!selectedRow && selectedMatriz?.abono_fecha === 'en_proceso' && <span className="badge b-yellow">En proceso</span>}
+                {!selectedRow && selectedMatriz && !['rechazado','pendiente','en_proceso'].includes(selectedMatriz.abono_fecha) && <span className="badge b-green">Aprobado</span>}
+                {!selectedRow && !selectedMatriz && <span className="badge b-gray">{selectedNumero}</span>}
               </div>
 
-              {/* Datos */}
+              {/* DATOS DE LA SOLICITUD — alineado con referencia Torres Huamán (ADV-2026-004) */}
               <div className="section-title-sm">DATOS DE LA SOLICITUD</div>
               <div className="inv-grid" style={{ marginBottom: 14 }}>
-                {selectedRow ? (
-                  <>
-                    <div className="lbl-cell">N°</div><div className="val-cell fw-600">{selectedRow.numero}</div>
-                    <div className="lbl-cell">Tipo</div><div className="val-cell">{selectedRow.tipo}</div>
-                    <div className="lbl-cell">Monto S/.</div><div className="val-cell fw-600">{selectedRow.monto}</div>
-                    <div className="lbl-cell">Fecha solicitud</div><div className="val-cell">{selectedRow.fecha}</div>
-                    <div className="lbl-cell">Próximo paso</div><div className="val-cell text-gray">{selectedRow.proximo}</div>
-                  </>
-                ) : (
-                  <>
-                    <div className="lbl-cell">N°</div><div className="val-cell fw-600">{selectedNumero}</div>
-                  </>
-                )}
+                <div className="inv-field"><div className="lbl">N° Documento</div><div className="val fw-600">{selectedNumero}</div></div>
+                <div className="inv-field"><div className="lbl">Colaborador</div><div className="val">{selectedMatriz?.nombre ?? (selectedRow as {colaborador?:string}|null)?.colaborador ?? '—'}</div></div>
+                <div className="inv-field"><div className="lbl">DNI</div><div className="val">{selectedMatriz?.dni ?? '—'}</div></div>
+                <div className="inv-field"><div className="lbl">Área</div><div className="val">{selectedMatriz?.area ?? (selectedRow as {area?:string}|null)?.area ?? '—'}</div></div>
+                <div className="inv-field"><div className="lbl">Puesto</div><div className="val">{selectedMatriz?.puesto ?? '—'}</div></div>
+                <div className="inv-field"><div className="lbl">Tipo</div><div className="val">
+                  {selectedMatriz
+                    ? <span className={`badge ${selectedMatriz.tipo==='adelanto'?'b-purple':'b-blue'}`}>{selectedMatriz.tipo==='adelanto'?'ADELANTO DE SUELDO':'PRÉSTAMO PERSONAL'}</span>
+                    : (selectedRow?.tipo ?? '—')}
+                </div></div>
+                <div className="inv-field"><div className="lbl">Motivo</div><div className="val">{selectedMatriz?.motivo ?? '—'}</div></div>
+                <div className="inv-field"><div className="lbl">Monto solicitado</div><div className="val fw-600">{selectedMatriz?.monto ?? selectedRow?.monto ?? '—'}</div></div>
+                <div className="inv-field"><div className="lbl">Fecha solicitud</div><div className="val">{selectedMatriz?.fecha ?? selectedRow?.fecha ?? '—'}</div></div>
+                <div className="inv-field"><div className="lbl">Cuotas</div><div className="val">{selectedMatriz?.cuotas ?? '—'}</div></div>
+                <div className="inv-field"><div className="lbl">Mes de descuento</div><div className="val" style={{ whiteSpace:'pre-line' }}>{selectedMatriz?.mes_descuento ?? '—'}</div></div>
+                <div className="inv-field"><div className="lbl">Aprueba</div><div className="val">{selectedMatriz?.aprueba ?? '—'}</div></div>
               </div>
 
               {/* Flujo de 8 pasos (para solicitudes nuevas con advFlow) o stepper legado */}
@@ -1292,23 +1316,123 @@ export function PrestamosAdelantos() {
                   Motivo: No cumple con los requisitos mínimos de tiempo de servicio.
                 </div>
               )}
-            </div>
-            <div className="modal-footer">
-              <button className="btn btn-gray" onClick={() => setShowDetalle(false)}>Cerrar</button>
-              {(() => {
-                const fichaEnabled = selectedRow?.estado === 'aprobado' || !!advFichaEnabled[selectedNumero]
-                return (
-                  <button
-                    className="btn btn-primary btn-sm"
-                    style={!fichaEnabled ? {opacity:0.45,cursor:'not-allowed'} : {}}
-                    disabled={!fichaEnabled}
-                    title={!fichaEnabled ? 'Disponible cuando Bienestar remita el formato (Paso 3)' : undefined}
-                    onClick={() => { if (fichaEnabled) { setShowDetalle(false); setShowNueva(true) } }}
-                  >
-                    📄 +Nueva Ficha Préstamo/Adelanto
+              </>)}
+
+              {/* ══ PESTAÑA 2: EVALUACIÓN ══ */}
+              {detTab === 'evaluacion' && (<>
+                <div className="section-title-sm">EVALUACIÓN</div>
+                <div className="banner banner-purple" style={{ marginBottom:12, fontSize:12 }}>
+                  🔍 Busca al colaborador por DNI para ver su información contractual antes de evaluar
+                </div>
+                <div style={{ display:'flex', gap:8, alignItems:'flex-end', marginBottom:8 }}>
+                  <div style={{ flex:1 }}>
+                    <label className="form-label">DNI del colaborador <span className="req">*</span></label>
+                    <input type="text" className="form-control" placeholder="Ingresa el DNI" maxLength={8}
+                      value={evalDni} onChange={e => { setEvalDni(e.target.value); setEvalColab(null); setEvalDniErr(false) }}
+                      onKeyDown={e => e.key==='Enter' && buscarColabEval()} />
+                  </div>
+                  <button className="btn btn-primary btn-sm" onClick={buscarColabEval} disabled={evalDni.length<8||evalBuscando}>
+                    🔍 {evalBuscando?'Buscando...':'Buscar'}
                   </button>
-                )
-              })()}
+                </div>
+                {evalDniErr && <div className="banner banner-amber mb-8">⚠ No se encontró colaborador con ese DNI.</div>}
+                {evalColab && (
+                  <div className="inv-grid" style={{ background:'#F5F3FF', border:'1px solid #DDD6FE', borderRadius:8, padding:'12px 14px', marginBottom:14 }}>
+                    <div className="inv-field"><div className="lbl">Colaborador</div><div className="val fw-600">{evalColab.nombre}</div></div>
+                    <div className="inv-field"><div className="lbl">Área</div><div className="val">{evalColab.area}</div></div>
+                    <div className="inv-field"><div className="lbl">Puesto</div><div className="val">{evalColab.puesto}</div></div>
+                    {evalColab.subarea && <div className="inv-field"><div className="lbl">Sub-Área</div><div className="val">{evalColab.subarea}</div></div>}
+                    {evalColab.salario && <div className="inv-field"><div className="lbl">Salario</div><div className="val fw-600">{evalColab.salario}</div></div>}
+                    {evalColab.inicio && <div className="inv-field"><div className="lbl">Inicio contrato</div><div className="val">{new Date(evalColab.inicio).toLocaleDateString('es-PE')}</div></div>}
+                    {evalColab.fin && <div className="inv-field"><div className="lbl">Fin contrato</div><div className="val">{new Date(evalColab.fin).toLocaleDateString('es-PE')}</div></div>}
+                    {evalColab.vigencia && <div className="inv-field"><div className="lbl">Vigencia restante</div><div className="val fw-600" style={{ color:'#1E1B4B' }}>{evalColab.vigencia}</div></div>}
+                  </div>
+                )}
+                <div className="h-divider" />
+                <div className="section-title-sm">RESULTADO</div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Resultado <span className="req">*</span></label>
+                    <select className="form-control" value={evalResultado} onChange={e => setEvalResultado(e.target.value)}>
+                      <option value="">Seleccionar...</option>
+                      <option value="Aprobado">Aprobado</option>
+                      <option value="Rechazado">Rechazado</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Monto Aprobado (S/.) <span className="req">*</span></label>
+                    <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+                      <input type="text" className="form-control" value={evalMontoAprobado}
+                        readOnly={!evalMontoEditable}
+                        style={{ background: evalMontoEditable ? undefined : '#F9FAFB' }}
+                        onChange={e => setEvalMontoAprobado(e.target.value)} />
+                      <button className="btn btn-outline btn-xs" onClick={() => setEvalMontoEditable(p=>!p)}
+                        title={evalMontoEditable ? 'Bloquear monto' : 'Editar monto'}>
+                        {evalMontoEditable ? '🔒' : '✏️'}
+                      </button>
+                    </div>
+                    <div className="form-hint">Monto jalado de la solicitud — editable si se aprueba un monto menor</div>
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">N° de Cuotas</label>
+                    <select className="form-control" value={evalCuotas} onChange={e => setEvalCuotas(e.target.value)}>
+                      <option value="">Seleccionar...</option>
+                      {Array.from({length:12},(_,i)=><option key={i+1} value={String(i+1)}>{i+1} cuota{i>0?'s':''}</option>)}
+                    </select>
+                  </div>
+                </div>
+                {evalCuotasData.length > 0 && (
+                  <div style={{ marginBottom:16 }}>
+                    <div className="section-title-sm">CRONOGRAMA DE PAGOS</div>
+                    <table className="cuotas-table">
+                      <thead><tr><th>CUOTA N°</th><th>MES</th><th>MONTO (S/.)</th></tr></thead>
+                      <tbody>
+                        {evalCuotasData.map(c => (
+                          <tr key={c.cuota}><td>{c.cuota}</td><td>{c.mes}</td><td>{c.montoStr}</td></tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </>)}
+
+            </div>
+            {/* Footer dinámico según pestaña activa */}
+            <div className="modal-footer">
+              {detTab === 'detalle' && (<>
+                <button className="btn btn-gray" onClick={() => setShowDetalle(false)}>Cerrar</button>
+                {(() => {
+                  const fichaEnabled = selectedRow?.estado === 'aprobado' || !!advFichaEnabled[selectedNumero]
+                  return (
+                    <button
+                      className="btn btn-primary btn-sm"
+                      style={!fichaEnabled ? {opacity:0.45,cursor:'not-allowed'} : {}}
+                      disabled={!fichaEnabled}
+                      title={!fichaEnabled ? 'Disponible cuando Bienestar remita el formato (Paso 3)' : undefined}
+                      onClick={() => { if (fichaEnabled) { setShowDetalle(false); setShowNueva(true) } }}
+                    >
+                      📄 +Nueva Ficha Préstamo/Adelanto
+                    </button>
+                  )
+                })()}
+              </>)}
+              {detTab === 'evaluacion' && (<>
+                <button className="btn btn-gray" onClick={() => setShowDetalle(false)}>Cancelar</button>
+                <button
+                  className="btn btn-primary"
+                  disabled={!evalResultado}
+                  style={!evalResultado?{opacity:0.5,cursor:'not-allowed'}:{}}
+                  onClick={() => {
+                    if (!evalResultado) { alert('Selecciona un resultado'); return }
+                    alert(`✓ ${evalResultado==='Aprobado'?'Préstamo/Adelanto generado':'Solicitud rechazada'} correctamente`)
+                    setShowDetalle(false)
+                  }}
+                >
+                  ✔ Generar Préstamo/Adelanto
+                </button>
+              </>)}
             </div>
           </div>
         </div>
