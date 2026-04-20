@@ -304,12 +304,16 @@ interface ModalActaDevolucionProps {
 
 function ModalActaDevolucion({ bien, colaborador, onClose, onFirmar }: ModalActaDevolucionProps) {
   const [notifEnviada, setNotifEnviada] = useState(false)
+  const [colaboradorFirmado, setColaboradorFirmado] = useState(false)
   const [aceptado, setAceptado] = useState(false)
+  const [firmaEntregaVal, setFirmaEntregaVal] = useState('')
+  const [firmaEntregaDone, setFirmaEntregaDone] = useState(false)
   const hoy = new Date()
   const dd = String(hoy.getDate()).padStart(2,'0')
   const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
   const mes = meses[hoy.getMonth()]
   const anio = hoy.getFullYear()
+  const fechaHoy = `${dd}/${String(hoy.getMonth()+1).padStart(2,'0')}/${anio}`
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -451,7 +455,7 @@ function ModalActaDevolucion({ bien, colaborador, onClose, onFirmar }: ModalActa
                 className="btn btn-primary btn-sm"
                 disabled={!aceptado}
                 style={!aceptado ? { opacity:0.5, cursor:'not-allowed' } : {}}
-                onClick={() => setNotifEnviada(true)}
+                onClick={() => { setNotifEnviada(true); setColaboradorFirmado(true) }}
               >
                 📧 Enviar notificación de firma al colaborador
               </button>
@@ -461,27 +465,52 @@ function ModalActaDevolucion({ bien, colaborador, onClose, onFirmar }: ModalActa
           {/* Grid firmas del acta */}
           <div className="section-title-sm">FIRMAS DEL ACTA</div>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:14 }}>
+            {/* Responsable que entrega — firma interactiva */}
             <div className="aprob-cell">
               <div className="aprob-title">Responsable que entrega</div>
-              <div className="aprob-zona"><span className="firma-placeholder">Firmar aquí</span></div>
+              {firmaEntregaDone ? (
+                <FirmaDone nombre={firmaEntregaVal} cargo="Administración CMP" fecha={fechaHoy} />
+              ) : (
+                <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Escribe aquí tu firma..."
+                    style={{ fontFamily:'Georgia,serif', fontStyle:'italic', fontSize:13, color:'#1E1B4B' }}
+                    value={firmaEntregaVal}
+                    onChange={e => setFirmaEntregaVal(e.target.value)}
+                  />
+                  <button
+                    className="btn btn-primary btn-sm"
+                    style={{ alignSelf:'flex-start' }}
+                    disabled={!firmaEntregaVal.trim()}
+                    onClick={() => { if (firmaEntregaVal.trim()) setFirmaEntregaDone(true) }}
+                  >✔ Registrar firma</button>
+                </div>
+              )}
               <div className="text-xs text-gray mt-4">Administración CMP</div>
             </div>
+            {/* Colaborador — firma automática al enviar notificación */}
             <div className="aprob-cell">
               <div className="aprob-title">Colaborador — firma por correo</div>
-              <div className="aprob-zona" style={{ background:'#F5F3FF', border:'1px dashed #6B21A8' }}>
-                {notifEnviada
-                  ? <span style={{ fontSize:11, color:'#6B21A8', fontStyle:'italic' }}>⏳ Pendiente de aceptación por correo</span>
-                  : <span style={{ fontSize:11, color:'#9CA3AF' }}>Notificación no enviada aún</span>}
-              </div>
+              {colaboradorFirmado ? (
+                <FirmaDone nombre={colaborador.nombre} cargo={colaborador.cargo} fecha={fechaHoy} />
+              ) : notifEnviada ? (
+                <div className="aprob-zona" style={{ background:'#F5F3FF', border:'1px dashed #6B21A8' }}>
+                  <span style={{ fontSize:11, color:'#6B21A8', fontStyle:'italic' }}>⏳ Pendiente de aceptación por correo</span>
+                </div>
+              ) : (
+                <FirmaPendiente />
+              )}
               <div className="text-xs text-gray mt-4">{colaborador.nombre}</div>
             </div>
           </div>
         </div>
         <div className="modal-footer">
-          <span className="modal-note">La firma del colaborador se registra vía aceptación del correo de notificación.</span>
+          <span className="modal-note">Ambas firmas son requeridas para registrar la devolución.</span>
           <button className="btn btn-gray" onClick={onClose}>Cancelar</button>
           <button className="btn btn-outline">💾 Guardar borrador</button>
-          <button className="btn btn-primary" onClick={onFirmar} disabled={!notifEnviada} style={!notifEnviada?{opacity:0.5,cursor:'not-allowed'}:{}}>
+          <button className="btn btn-primary" onClick={onFirmar} disabled={!firmaEntregaDone || !colaboradorFirmado} style={(!firmaEntregaDone || !colaboradorFirmado)?{opacity:0.5,cursor:'not-allowed'}:{}}>
             ✔ Registrar devolución
           </button>
         </div>

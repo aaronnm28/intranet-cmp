@@ -218,6 +218,8 @@ export function AsignacionBienes() {
   const [quitarNotas,      setQuitarNotas]      = useState('')
   const [quitarObs,        setQuitarObs]        = useState<Record<number,string>>({})
   const [quitarShowObs,    setQuitarShowObs]    = useState<Record<number,boolean>>({})
+  const [quitarFirmas,     setQuitarFirmas]     = useState<Record<number,string>>({})
+  const [quitarFirmaDone,  setQuitarFirmaDone]  = useState<Record<number,boolean>>({})
 
   function openReasignacion() {
     setReasigTab('reasignar')
@@ -226,6 +228,7 @@ export function AsignacionBienes() {
     setReasigObs({}); setReasigShowObs({})
     setQuitarMotivo(''); setQuitarEstFinal('disponible'); setQuitarNotas('')
     setQuitarObs({}); setQuitarShowObs({})
+    setQuitarFirmas({}); setQuitarFirmaDone({})
     setShowReasignacion(true)
   }
 
@@ -291,8 +294,8 @@ export function AsignacionBienes() {
     }
   }
 
-  function registrarFirma(paso:number) {
-    const val = detFirmas[paso]
+  function registrarFirma(key:number, paso:number) {
+    const val = detFirmas[key]
     if (!val?.trim()) { toast.show('Escribe tu firma antes de registrar'); return }
     toast.show(`Firma registrada en Paso ${paso}`)
   }
@@ -353,7 +356,7 @@ export function AsignacionBienes() {
                     value={detFirmas[k]||''} onChange={e => setDetFirmas(p=>({...p,[k]:e.target.value}))} />
                 </div>
                 <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
-                  <button className="btn btn-primary btn-sm" onClick={() => registrarFirma(k)}>✔ Registrar firma</button>
+                  <button className="btn btn-primary btn-sm" onClick={() => registrarFirma(k, s.paso)}>✔ Registrar firma</button>
                   {s.paso === 3 && (
                     emailFirmaState[k]?.correoEnviado
                       ? <span className="badge b-green" style={{fontSize:11}}>✅ {emailFirmaState[k]!.confNum} — enviado</span>
@@ -1398,26 +1401,65 @@ export function AsignacionBienes() {
                   </div>
                   <div className="h-divider" />
                   <div className="section-title-sm">FLUJO DE BAJA</div>
-                  {[['1','Admin\nregistra'],['2','Área\nrevisa'],['3','Patrimonio\nconfirma'],['4','Cierre\nregistro']].map(([n],i) => (
-                    <div key={n} style={{marginBottom:10}}>
-                      <div className={`flow-step-hdr ${i===0?'active':'pending'}`}>
-                        <div className="text-sm fw-600">{i===0?'⏳':'🔒'} Paso {n}: {['Administración registra baja de asignación','Área jefatura revisa y aprueba','Patrimonio confirma retiro del inventario personal','Sistema cierra el registro de asignación'][i]}</div>
-                        <span className="text-xs text-gray">—</span>
+                  {(['Administración registra baja de asignación','Área jefatura revisa y aprueba','Patrimonio confirma retiro del inventario personal','Sistema cierra el registro de asignación'] as const).map((label, i) => {
+                    const isDone = !!quitarFirmaDone[i]
+                    const prevDone = i === 0 || !!quitarFirmaDone[i-1]
+                    const isActive = !isDone && prevDone
+                    const stepStatus = isDone ? 'done' : isActive ? 'active' : 'pending'
+                    const actors = ['Anali J. Chafloque Cordova — Asistente Administrativo','Responsable del Área','Santiago Hayashi Delgado — Jefe de Patrimonio','Sistema — cierre automático']
+                    return (
+                      <div key={i} style={{marginBottom:10}}>
+                        <div className={`flow-step-hdr ${stepStatus}`}>
+                          <div className="text-sm fw-600">{isDone?'✅':isActive?'⏳':'🔒'} Paso {i+1}: {label}</div>
+                          <span className="text-xs text-gray">{isDone ? new Date().toLocaleDateString('es-PE') : '—'}</span>
+                        </div>
+                        <div className="flow-step-body">
+                          {isDone ? (
+                            <div style={{display:'flex',gap:24,flexWrap:'wrap',alignItems:'flex-end'}}>
+                              <div>
+                                <div className="firma-label" style={{textAlign:'left',marginBottom:4}}>Firmado por</div>
+                                <div className="firma-box">{quitarFirmas[i]}</div>
+                                <div className="firma-label">{actors[i]}</div>
+                              </div>
+                            </div>
+                          ) : isActive ? (
+                            <div>
+                              <div className="form-group" style={{marginBottom:8}}>
+                                <label className="form-label" style={{fontSize:11}}>Firma digital — {actors[i]}</label>
+                                <input type="text" className="form-control" placeholder="Escribe aquí tu firma..."
+                                  style={{fontFamily:'Georgia,serif',fontStyle:'italic',fontSize:14,color:'#1E1B4B'}}
+                                  value={quitarFirmas[i]||''} onChange={e=>setQuitarFirmas(p=>({...p,[i]:e.target.value}))} />
+                              </div>
+                              <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+                                <button className="btn btn-primary btn-sm"
+                                  onClick={() => {
+                                    if (!quitarFirmas[i]?.trim()) { toast.show('Escribe tu firma antes de registrar'); return }
+                                    setQuitarFirmaDone(p=>({...p,[i]:true}))
+                                    toast.show(`Firma registrada en Paso ${i+1}`)
+                                  }}>✔ Registrar firma</button>
+                                <button className="btn btn-outline btn-xs" onClick={() => setQuitarShowObs(p=>({...p,[i]:!p[i]}))}>+ Observación</button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-xs text-gray" style={{fontStyle:'italic',margin:'4px 0 6px'}}>🔒 Pendiente — se habilitará al completar el paso anterior.</p>
+                          )}
+                          {(isDone || isActive) && (
+                            <div style={{marginTop:6}}>
+                              <button className="btn btn-outline btn-xs" onClick={() => setQuitarShowObs(p=>({...p,[i]:!p[i]}))}>+ Observación</button>
+                            </div>
+                          )}
+                          {quitarShowObs[i] && (
+                            <div style={{marginTop:8,background:'#FFFBEB',border:'1px solid #FDE68A',borderRadius:6,padding:'10px 12px'}}>
+                              <textarea className="form-control" style={{fontSize:12,minHeight:56}} placeholder="Observación..."
+                                value={quitarObs[i]||''} onChange={e=>setQuitarObs(p=>({...p,[i]:e.target.value}))} />
+                              <button className="btn btn-sm" style={{marginTop:6,background:'#D97706',color:'white',border:'none',borderRadius:5,padding:'4px 12px',fontSize:12,cursor:'pointer'}}
+                                onClick={() => { toast.show('Observación registrada'); setQuitarShowObs(p=>({...p,[i]:false})) }}>Guardar</button>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div className="flow-step-body">
-                        {i>0 && <p className="text-xs text-gray" style={{fontStyle:'italic',margin:'4px 0 6px'}}>🔒 Pendiente — se habilitará al completar el paso anterior.</p>}
-                        <button className="btn btn-outline btn-xs" onClick={() => setQuitarShowObs(p=>({...p,[i]:!p[i]}))}>+ Observación</button>
-                        {quitarShowObs[i] && (
-                          <div style={{marginTop:8,background:'#FFFBEB',border:'1px solid #FDE68A',borderRadius:6,padding:'10px 12px'}}>
-                            <textarea className="form-control" style={{fontSize:12,minHeight:56}} placeholder="Observación..."
-                              value={quitarObs[i]||''} onChange={e=>setQuitarObs(p=>({...p,[i]:e.target.value}))} />
-                            <button className="btn btn-sm" style={{marginTop:6,background:'#D97706',color:'white',border:'none',borderRadius:5,padding:'4px 12px',fontSize:12,cursor:'pointer'}}
-                              onClick={() => { toast.show('Observación registrada'); setQuitarShowObs(p=>({...p,[i]:false})) }}>Guardar</button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </div>

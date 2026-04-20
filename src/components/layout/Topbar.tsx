@@ -1,6 +1,7 @@
 import { useAuth } from '../../lib/auth'
 import { useNavigate } from 'react-router-dom'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { supabase } from '../../lib/supabase'
 
 const ROL_LABEL: Record<string, string> = {
   admin: 'Administrador',
@@ -63,7 +64,8 @@ interface Notif {
   leida: boolean
 }
 
-const MOCK_NOTIFS: Notif[] = [
+/** Notificaciones base que siempre se muestran (contextuales al prototipo) */
+const BASE_NOTIFS: Notif[] = [
   {
     id: 1, tipo: 'warning', leida: false,
     titulo: 'Bienes pendientes de devolución',
@@ -71,36 +73,17 @@ const MOCK_NOTIFS: Notif[] = [
     fecha: '17/04/2026',
   },
   {
-    id: 2, tipo: 'info', leida: false,
-    titulo: 'Firma pendiente — SOL-2026-001',
-    texto: 'Jefe UN. DE TI: Se requiere V°B° para validar la entrega del bien solicitado.',
-    fecha: '10/04/2026',
-  },
-  {
-    id: 3, tipo: 'warning', leida: false,
-    titulo: 'Correo enviado para firma',
-    texto: 'Se envió solicitud de conformidad a percy.calderon@cmp.pe para firma del Acta de Recepción.',
-    fecha: '16/04/2026',
-  },
-  {
-    id: 4, tipo: 'success', leida: true,
-    titulo: 'PREST-2026-002 — En préstamo',
-    texto: 'Proyector Epson EB-X41 en préstamo activo. Devolución pactada: 25/03/2026.',
-    fecha: '18/03/2026',
-  },
-  {
-    id: 5, tipo: 'info', leida: true,
-    titulo: 'SOL-2026-003 Observada',
-    texto: 'Teléfono IP — Área de Comunicaciones solicita especificación técnica. Adjuntar ficha técnica.',
-    fecha: '07/03/2026',
-  },
-  {
-    id: 6, tipo: 'error', leida: false,
+    id: 2, tipo: 'error', leida: false,
     titulo: 'Devolución vencida — PREST-2026-002',
     texto: 'La devolución del Proyector Epson EB-X41 venció el 25/03/2026. Regularizar a la brevedad.',
     fecha: '26/03/2026',
   },
 ]
+
+function fmtFecha(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  try { return new Date(iso).toLocaleDateString('es-PE') } catch { return iso }
+}
 
 const TIPO_COLOR: Record<string, string> = {
   warning: '#D97706',
@@ -125,8 +108,120 @@ export function Topbar() {
   const { profile, user, signOut } = useAuth()
   const navigate = useNavigate()
   const [notifOpen, setNotifOpen] = useState(false)
-  const [notifs, setNotifs] = useState<Notif[]>(MOCK_NOTIFS)
+  const [notifs, setNotifs] = useState<Notif[]>(BASE_NOTIFS)
   const panelRef = useRef<HTMLDivElement>(null)
+
+  const loadNotifs = useCallback(async () => {
+    const dynamic: Notif[] = []
+    let nextId = 50
+
+    try {
+      // ── Solicitudes de adelanto/préstamo pendientes de evaluación ──
+      const { data: adelantos } = await supabase
+        .from('solicitudes_adelanto')
+        .select('numero,colaborador,tipo,monto,estado,created_at')
+        .in('estado', ['en_revision', 'pendiente'])
+        .order('created_at', { ascending: false })
+        .limit(8)
+
+      if (adelantos) {
+        adelantos.forEach(a => {
+          dynamic.push({
+            id: nextId++, tipo: 'info', leida: false,
+            titulo: `${a.numero} — Pendiente evaluación GDTH`,
+            texto: `Solicitud de ${a.tipo === 'adelanto' ? 'adelanto de sueldo' : 'préstamo'} de ${a.colaborador ?? '—'} por S/. ${Number(a.monto).toLocaleString('es-PE')} requiere evaluación.`,
+            fecha: fmtFecha(a.created_at),
+          })
+        })
+        const aprobados = await supabase
+          .from('solicitudes_adelanto')
+          .select('numero,colaborador,tipo,monto,created_at')
+          .eq('estado', 'aprobado')
+          .order('created_at', { ascending: false })
+          .limit(3)
+        if (aprobados.data) {
+          aprobados.data.forEach(a => {
+            dynamic.push({
+              id: nextId++, tipo: 'success', leida: true,
+              titulo: `${a.numero} — Aprobado`,
+              texto: `${a.tipo === 'adelanto' ? 'Adelanto' : 'Préstamo'} de ${a.colaborador ?? '—'} por S/. ${Number(a.monto).toLocaleString('es-PE')} fue aprobado y procesado.`,
+              fecha: fmtFecha(a.created_at),
+            })
+          })
+        }
+      }
+
+      // ── Solicitudes de asignación de bienes pendientes ──
+      const { data: asignaciones } = await supabase
+        .from('solicitudes_asignacion')
+        .select('numero,colaborador,bien_nombre,estado,created_at')
+        .in('estado', ['Pendiente', 'Nueva', 'En revisión'])
+        .order('created_at', { ascending: false })
+        .limit(5)
+
+      if (asignaciones) {
+        asignaciones.forEach(s => {
+          dynamic.push({
+            id: nextId++, tipo: 'info', leida: false,
+            titulo: `${s.numero} — Solicitud de bien pendiente`,
+            texto: `${s.colaborador ?? 'Colaborador'} solicitó: ${s.bien_nombre ?? '—'}. Requiere V°B° del área encargada.`,
+            fecha: fmtFecha(s.created_at),
+          })
+        })
+      }
+
+      // ── Préstamos de bienes activos ──
+      const { data: prestamos } = await supabase
+        .from('prestamos_bienes')
+        .select('numero,colaborador,bien_nombre,fecha_devolucion,estado,created_at')
+        .in('estado', ['activo', 'en_prestamo', 'vencido'])
+        .order('created_at', { ascending: false })
+        .limit(5)
+
+      if (prestamos) {
+        const hoy = new Date()
+        prestamos.forEach(p => {
+          const vencido = p.fecha_devolucion && new Date(p.fecha_devolucion) < hoy
+          dynamic.push({
+            id: nextId++,
+            tipo: vencido ? 'error' : 'success',
+            leida: !vencido,
+            titulo: vencido
+              ? `Devolución vencida — ${p.numero}`
+              : `${p.numero} — Préstamo activo`,
+            texto: vencido
+              ? `La devolución de ${p.bien_nombre ?? 'bien'} (${p.colaborador ?? '—'}) venció el ${fmtFecha(p.fecha_devolucion)}. Regularizar a la brevedad.`
+              : `${p.bien_nombre ?? 'Bien'} en préstamo activo. Devolver antes del ${fmtFecha(p.fecha_devolucion)}.`,
+            fecha: fmtFecha(p.created_at),
+          })
+        })
+      }
+
+      // ── Cajas chicas con rendición pendiente ──
+      const { data: cajas } = await supabase
+        .from('caja_chica_cajas')
+        .select('nombre,area,subarea,fondo,estado,created_at')
+        .in('estado', ['activa', 'pendiente'])
+        .order('created_at', { ascending: false })
+        .limit(3)
+
+      if (cajas) {
+        cajas.forEach(c => {
+          dynamic.push({
+            id: nextId++, tipo: 'warning', leida: false,
+            titulo: `Caja chica pendiente — ${c.nombre ?? c.area ?? '—'}`,
+            texto: `Caja chica de ${c.subarea ?? c.area ?? '—'} con fondo S/. ${Number(c.fondo ?? 0).toLocaleString('es-PE')} tiene rendición pendiente.`,
+            fecha: fmtFecha(c.created_at),
+          })
+        })
+      }
+    } catch { /* mantiene BASE_NOTIFS */ }
+
+    // Merge: dinámicas primero, luego las base (sin duplicar IDs)
+    setNotifs([...dynamic, ...BASE_NOTIFS])
+  }, [])
+
+  useEffect(() => { loadNotifs() }, [loadNotifs])
 
   // Buscar datos reales del colaborador por email
   const colabPorEmail = user?.email ? EMAIL_TO_COLAB[user.email] : undefined
@@ -232,11 +327,14 @@ export function Topbar() {
                 Notificaciones
                 {unread > 0 && <span style={{ marginLeft: 6, background: '#6B21A8', color: 'white', fontSize: 10, padding: '1px 6px', borderRadius: 10 }}>{unread} nuevas</span>}
               </div>
-              {unread > 0 && (
-                <button onClick={marcarTodasLeidas} style={{ fontSize: 11, color: '#6B21A8', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
-                  Marcar todas como leídas
-                </button>
-              )}
+              <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+                <button onClick={loadNotifs} title="Actualizar" style={{ fontSize: 13, color: '#9CA3AF', background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1 }}>↻</button>
+                {unread > 0 && (
+                  <button onClick={marcarTodasLeidas} style={{ fontSize: 11, color: '#6B21A8', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+                    Marcar leídas
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Lista de notificaciones */}

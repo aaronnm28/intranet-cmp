@@ -69,6 +69,14 @@ export function PrestamosAdelantos() {
   const [advDesembolsoFile, setAdvDesembolsoFile] = useState<Record<string, string>>(() => {
     try { const s = localStorage.getItem('cmp_adv_desembolso'); return s ? JSON.parse(s) as Record<string, string> : {} } catch { return {} }
   })
+  // Evaluation results saved by GDTH — persisted to unlock Step 2 firma
+  const [gdthEvalData, setGdthEvalData] = useState<Record<string, {resultado:string;monto:string;cuotas:string}>>(() => {
+    try { const s = localStorage.getItem('cmp_adv_eval'); return s ? JSON.parse(s) as Record<string, {resultado:string;monto:string;cuotas:string}> : {} } catch { return {} }
+  })
+  const [adminSubTab, setAdminSubTab] = useState('sol')
+  const [contSubTab,  setContSubTab]  = useState('sol')
+  // Flag: ficha opened from detalle modal context (pre-fills from gdthEvalData)
+  const [fichaFromDetalle, setFichaFromDetalle] = useState(false)
 
   // Nueva Solicitud simplificada (Obs 6)
   const [nssDni, setNssDni] = useState('')
@@ -116,6 +124,7 @@ export function PrestamosAdelantos() {
   useEffect(() => { localStorage.setItem('cmp_adv_ficha_enabled', JSON.stringify(advFichaEnabled)) }, [advFichaEnabled])
   useEffect(() => { localStorage.setItem('cmp_adv_ficha_submitted', JSON.stringify(advFichaSubmitted)) }, [advFichaSubmitted])
   useEffect(() => { localStorage.setItem('cmp_adv_desembolso', JSON.stringify(advDesembolsoFile)) }, [advDesembolsoFile])
+  useEffect(() => { localStorage.setItem('cmp_adv_eval', JSON.stringify(gdthEvalData)) }, [gdthEvalData])
 
   useEffect(() => {
     const load = async () => {
@@ -146,7 +155,7 @@ export function PrestamosAdelantos() {
               if (!updated[r.numero]) {
                 updated[r.numero] = [
                   { status: 'done', firmante: r.colaborador ?? 'Colaborador', fecha: r.fecha_solicitud ?? new Date().toLocaleDateString('es-PE') },
-                  { status: 'active', firmante: '', fecha: '' },
+                  { status: 'pending', firmante: '', fecha: '' },
                   { status: 'pending', firmante: '', fecha: '' },
                   { status: 'pending', firmante: '', fecha: '' },
                   { status: 'pending', firmante: '', fecha: '' },
@@ -345,6 +354,8 @@ export function PrestamosAdelantos() {
         <div className={`tab${activeTab === 'mis' ? ' active' : ''}`} onClick={() => setActiveTab('mis')}>Mis Solicitudes</div>
         <div className={`tab${activeTab === 'gdth' ? ' active' : ''}`} onClick={() => setActiveTab('gdth')}>Bandeja GDTH</div>
         <div className={`tab${activeTab === 'bienestar' ? ' active' : ''}`} onClick={() => setActiveTab('bienestar')}>Bandeja Bienestar</div>
+        <div className={`tab${activeTab === 'admin' ? ' active' : ''}`} onClick={() => setActiveTab('admin')}>Bandeja Administración</div>
+        <div className={`tab${activeTab === 'cont' ? ' active' : ''}`} onClick={() => setActiveTab('cont')}>Bandeja Contabilidad</div>
         <div className={`tab${activeTab === 'hist' ? ' active' : ''}`} onClick={() => setActiveTab('hist')}>Historial</div>
       </div>
 
@@ -460,6 +471,7 @@ export function PrestamosAdelantos() {
       </div>
 
       {/* PANE: Bandeja Bienestar */}
+      {/* Dynamic Bienestar rows: solicitudes where step 3 (i=2) or step 5 (i=4) is active */}
       <div id="pane-adv-bienestar" className={`tab-pane${activeTab === 'bienestar' ? ' active' : ''}`}>
         <div className="subtabs" id="subtabs-bienestar">
           <div className={`subtab${bienestarSubTab === 'sol' ? ' active' : ''}`} onClick={() => setBienestarSubTab('sol')}>📋 Solicitudes</div>
@@ -500,6 +512,31 @@ export function PrestamosAdelantos() {
                       </div>
                     </td>
                   </tr>
+                  {/* Dynamic rows: solicitudes where GDTH firma (step 2) is done → step 3 active */}
+                  {gdthBandeja.filter(s => {
+                    const steps = advFlow[s.numero]
+                    return steps && (steps[2]?.status === 'active' || steps[4]?.status === 'active')
+                  }).map(s => {
+                    const steps = advFlow[s.numero]
+                    const isRemitir = steps?.[2]?.status === 'active'
+                    return (
+                      <tr key={s.id}>
+                        <td className="fw-600">{s.numero}</td>
+                        <td>{(s as {colaborador?:string}).colaborador ?? '—'}</td>
+                        <td>{(s as {area?:string}).area ?? '—'}</td>
+                        <td>{s.tipo}</td>
+                        <td>{s.monto}</td>
+                        <td>{s.fecha}</td>
+                        <td><span className="badge b-yellow">{isRemitir ? 'Pendiente remisión de formato' : 'Validando llenado ficha'}</span></td>
+                        <td>{gdthEvalData[s.numero]?.cuotas ? `${gdthEvalData[s.numero].cuotas} cuota(s)` : '—'}</td>
+                        <td>
+                          <div className="actions-cell">
+                            <button className="btn btn-gray btn-xs" onClick={() => openDetalle(s.numero)}>Ver detalle</button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
@@ -520,6 +557,114 @@ export function PrestamosAdelantos() {
           </div>
           <MatrizTable />
           <div className="text-xs text-gray" style={{ fontStyle: 'italic' }}>Total registros 2026: 9 · Monto total aprobado: S/. 11,600 · Pendientes: 2</div>
+        </div>
+      </div>
+
+      {/* PANE: Bandeja Administración */}
+      <div id="pane-adv-admin" className={`tab-pane${activeTab === 'admin' ? ' active' : ''}`}>
+        <div className="subtabs">
+          <div className={`subtab${adminSubTab === 'sol' ? ' active' : ''}`} onClick={() => setAdminSubTab('sol')}>📋 Solicitudes</div>
+          <div className={`subtab${adminSubTab === 'matriz' ? ' active' : ''}`} onClick={() => setAdminSubTab('matriz')}>📊 Matriz</div>
+        </div>
+        <div className={`tab-pane${adminSubTab === 'sol' ? ' active' : ''}`}>
+          <div className="page-header" style={{ marginBottom:12 }}>
+            <div>
+              <div style={{ fontSize:14, fontWeight:600, color:'#1E1B4B' }}>Solicitudes pendientes de aprobación — Administración</div>
+              <div className="text-xs text-gray mt-4">Solicitudes que requieren aprobación y firma de la Jefa de Administración (G. Palacios)</div>
+            </div>
+          </div>
+          <div className="card">
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>N°</th><th>Colaborador</th><th>Área</th><th>Tipo</th><th>Monto S/.</th><th>F. Solicitud</th><th>Estado</th><th>Acciones</th></tr>
+                </thead>
+                <tbody>
+                  {gdthBandeja.filter(s => advFlow[s.numero]?.[6]?.status === 'active').length === 0 && (
+                    <tr><td colSpan={8} style={{ textAlign:'center', padding:'40px 0', color:'#9CA3AF' }}>No hay solicitudes pendientes en este paso</td></tr>
+                  )}
+                  {gdthBandeja.filter(s => advFlow[s.numero]?.[6]?.status === 'active').map(s => (
+                    <tr key={s.id}>
+                      <td className="fw-600">{s.numero}</td>
+                      <td>{(s as {colaborador?:string}).colaborador ?? '—'}</td>
+                      <td>{(s as {area?:string}).area ?? '—'}</td>
+                      <td>{s.tipo}</td>
+                      <td>{s.monto}</td>
+                      <td>{s.fecha}</td>
+                      <td><span className="badge b-yellow">Pendiente firma Administración</span></td>
+                      <td><button className="btn btn-gray btn-xs" onClick={() => openDetalle(s.numero)}>Ver detalle</button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div className={`tab-pane${adminSubTab === 'matriz' ? ' active' : ''}`}>
+          <div className="page-header" style={{ marginBottom:12 }}>
+            <div>
+              <div style={{ fontSize:14, fontWeight:600, color:'#1E1B4B' }}>Matriz Préstamos / Adelantos 2026</div>
+              <div className="text-xs text-gray mt-4">Registro consolidado — vista Administración</div>
+            </div>
+            <div className="header-actions">
+              <button className="btn btn-outline btn-sm">📥 Exportar Excel</button>
+            </div>
+          </div>
+          <MatrizTable />
+        </div>
+      </div>
+
+      {/* PANE: Bandeja Contabilidad */}
+      <div id="pane-adv-cont" className={`tab-pane${activeTab === 'cont' ? ' active' : ''}`}>
+        <div className="subtabs">
+          <div className={`subtab${contSubTab === 'sol' ? ' active' : ''}`} onClick={() => setContSubTab('sol')}>📋 Solicitudes</div>
+          <div className={`subtab${contSubTab === 'matriz' ? ' active' : ''}`} onClick={() => setContSubTab('matriz')}>📊 Matriz</div>
+        </div>
+        <div className={`tab-pane${contSubTab === 'sol' ? ' active' : ''}`}>
+          <div className="page-header" style={{ marginBottom:12 }}>
+            <div>
+              <div style={{ fontSize:14, fontWeight:600, color:'#1E1B4B' }}>Solicitudes pendientes de desembolso — Contabilidad</div>
+              <div className="text-xs text-gray mt-4">Solicitudes que requieren adjuntar comprobante de desembolso (E. Chozo — Contador General)</div>
+            </div>
+          </div>
+          <div className="card">
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>N°</th><th>Colaborador</th><th>Área</th><th>Tipo</th><th>Monto S/.</th><th>F. Solicitud</th><th>Estado</th><th>Acciones</th></tr>
+                </thead>
+                <tbody>
+                  {gdthBandeja.filter(s => advFlow[s.numero]?.[7]?.status === 'active').length === 0 && (
+                    <tr><td colSpan={8} style={{ textAlign:'center', padding:'40px 0', color:'#9CA3AF' }}>No hay solicitudes pendientes en este paso</td></tr>
+                  )}
+                  {gdthBandeja.filter(s => advFlow[s.numero]?.[7]?.status === 'active').map(s => (
+                    <tr key={s.id}>
+                      <td className="fw-600">{s.numero}</td>
+                      <td>{(s as {colaborador?:string}).colaborador ?? '—'}</td>
+                      <td>{(s as {area?:string}).area ?? '—'}</td>
+                      <td>{s.tipo}</td>
+                      <td>{s.monto}</td>
+                      <td>{s.fecha}</td>
+                      <td><span className="badge b-purple">Pendiente desembolso Contabilidad</span></td>
+                      <td><button className="btn btn-gray btn-xs" onClick={() => openDetalle(s.numero)}>Ver detalle</button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div className={`tab-pane${contSubTab === 'matriz' ? ' active' : ''}`}>
+          <div className="page-header" style={{ marginBottom:12 }}>
+            <div>
+              <div style={{ fontSize:14, fontWeight:600, color:'#1E1B4B' }}>Matriz Préstamos / Adelantos 2026</div>
+              <div className="text-xs text-gray mt-4">Registro consolidado — vista Contabilidad</div>
+            </div>
+            <div className="header-actions">
+              <button className="btn btn-outline btn-sm">📥 Exportar Excel</button>
+            </div>
+          </div>
+          <MatrizTable />
         </div>
       </div>
 
@@ -711,7 +856,7 @@ export function PrestamosAdelantos() {
                 // Inicializar flujo de 8 pasos: Paso 1 done, Paso 2 active, 3-8 pending
                 setAdvFlow(prev => ({ ...prev, [numero]: [
                   { status:'done',    firmante: nssColab?.nombre ?? 'Colaborador', fecha: new Date().toLocaleDateString('es-PE') },
-                  { status:'active',  firmante:'', fecha:'' },
+                  { status:'pending', firmante:'', fecha:'' },
                   { status:'pending', firmante:'', fecha:'' },
                   { status:'pending', firmante:'', fecha:'' },
                   { status:'pending', firmante:'', fecha:'' },
@@ -731,7 +876,7 @@ export function PrestamosAdelantos() {
            MODAL — Nueva Ficha Préstamo/Adelanto (ficha completa, Obs 6)
          ══════════════════════════════════════════════════════════════ */}
       {showNueva && (
-        <div className="modal-overlay" onClick={() => setShowNueva(false)}>
+        <div className="modal-overlay" onClick={() => { setShowNueva(false); setFichaFromDetalle(false) }}>
           <div className="modal" style={{ maxWidth: 640 }} onClick={e => e.stopPropagation()}>
             <div className="modal-hdr">
               <div>
@@ -744,10 +889,16 @@ export function PrestamosAdelantos() {
                   <span className="text-xs text-gray fw-600">FECHA:</span>
                   <input type="date" className="form-control" defaultValue="2026-03-26" style={{ width: 140, padding: '4px 8px', fontSize: 12 }} />
                 </div>
-                <button className="modal-close" onClick={() => setShowNueva(false)}>×</button>
+                <button className="modal-close" onClick={() => { setShowNueva(false); setFichaFromDetalle(false) }}>×</button>
               </div>
             </div>
             <div className="modal-body">
+
+              {fichaFromDetalle && (
+                <div className="banner banner-purple" style={{ marginBottom:12, fontSize:12 }}>
+                  📋 Ficha pre-llenada con la evaluación de GDTH. Solo el campo <strong>Domicilio Actual</strong> es editable.
+                </div>
+              )}
 
               {/* Datos personales */}
               <div className="section-title-sm">DATOS PERSONALES DEL TRABAJADOR</div>
@@ -789,14 +940,16 @@ export function PrestamosAdelantos() {
               <div className="radio-cards" id="tipo-solicitud-cards">
                 <div
                   className={`radio-card${tipoSolicitud === 'prestamo' ? ' selected' : ''}`}
-                  onClick={() => setTipoSolicitud('prestamo')}
+                  onClick={() => { if (!fichaFromDetalle) setTipoSolicitud('prestamo') }}
+                  style={fichaFromDetalle ? { pointerEvents:'none', opacity:tipoSolicitud==='prestamo'?1:0.35 } : {}}
                 >
                   <div className="radio-card-icon">💼</div>
                   <div className="radio-card-label">PRÉSTAMO PERSONAL</div>
                 </div>
                 <div
                   className={`radio-card${tipoSolicitud === 'adelanto' ? ' selected' : ''}`}
-                  onClick={() => setTipoSolicitud('adelanto')}
+                  onClick={() => { if (!fichaFromDetalle) setTipoSolicitud('adelanto') }}
+                  style={fichaFromDetalle ? { pointerEvents:'none', opacity:tipoSolicitud==='adelanto'?1:0.35 } : {}}
                 >
                   <div className="radio-card-icon">⚡</div>
                   <div className="radio-card-label">ADELANTO DE SUELDO</div>
@@ -810,7 +963,9 @@ export function PrestamosAdelantos() {
                   <div className="form-row">
                     <div className="form-group">
                       <label className="form-label">Motivo de préstamo <span className="req">*</span></label>
-                      <select className="form-control" value={motivoSolicitud} onChange={e => setMotivoSolicitud(e.target.value)}>
+                      <select className="form-control" value={motivoSolicitud} disabled={fichaFromDetalle}
+                        style={fichaFromDetalle ? { background:'#F9FAFB' } : {}}
+                        onChange={e => setMotivoSolicitud(e.target.value)}>
                         <option value="">Seleccionar...</option>
                         <option>Salud</option>
                         <option>Educación</option>
@@ -827,6 +982,8 @@ export function PrestamosAdelantos() {
                         className="form-control"
                         placeholder="0.00"
                         value={montoSolicitud}
+                        readOnly={fichaFromDetalle}
+                        style={fichaFromDetalle ? { background:'#F9FAFB' } : {}}
                         onChange={e => setMontoSolicitud(e.target.value)}
                       />
                     </div>
@@ -862,6 +1019,8 @@ export function PrestamosAdelantos() {
                         max={12}
                         placeholder="1-12"
                         value={numCuotas}
+                        readOnly={fichaFromDetalle}
+                        style={fichaFromDetalle ? { background:'#F9FAFB' } : {}}
                         onChange={e => setNumCuotas(e.target.value)}
                       />
                     </div>
@@ -892,7 +1051,9 @@ export function PrestamosAdelantos() {
                   <div className="form-row">
                     <div className="form-group">
                       <label className="form-label">Motivo de adelanto <span className="req">*</span></label>
-                      <select className="form-control" value={motivoSolicitud} onChange={e => setMotivoSolicitud(e.target.value)}>
+                      <select className="form-control" value={motivoSolicitud} disabled={fichaFromDetalle}
+                        style={fichaFromDetalle ? { background:'#F9FAFB' } : {}}
+                        onChange={e => setMotivoSolicitud(e.target.value)}>
                         <option value="">Seleccionar...</option>
                         <option>Salud</option>
                         <option>Educación</option>
@@ -909,6 +1070,8 @@ export function PrestamosAdelantos() {
                         className="form-control"
                         placeholder="0.00"
                         value={montoSolicitud}
+                        readOnly={fichaFromDetalle}
+                        style={fichaFromDetalle ? { background:'#F9FAFB' } : {}}
                         onChange={e => setMontoSolicitud(e.target.value)}
                       />
                     </div>
@@ -1052,7 +1215,7 @@ export function PrestamosAdelantos() {
             </div>
             <div className="modal-footer">
               <span className="modal-note">Al enviar, la solicitud pasa a evaluación de Bienestar Social.</span>
-              <button className="btn btn-gray" onClick={() => setShowNueva(false)}>Cancelar</button>
+              <button className="btn btn-gray" onClick={() => { setShowNueva(false); setFichaFromDetalle(false) }}>Cancelar</button>
               <button className="btn btn-outline">💾 Guardar borrador</button>
               <button className="btn btn-primary" onClick={handleEnviarSolicitud}>📤 Enviar solicitud</button>
             </div>
@@ -1411,7 +1574,21 @@ export function PrestamosAdelantos() {
                       style={!fichaEnabled ? {opacity:0.45,cursor:'not-allowed'} : {}}
                       disabled={!fichaEnabled}
                       title={!fichaEnabled ? 'Disponible cuando Bienestar remita el formato (Paso 3)' : undefined}
-                      onClick={() => { if (fichaEnabled) { setShowDetalle(false); setShowNueva(true) } }}
+                      onClick={() => {
+                        if (fichaEnabled) {
+                          // Pre-fill ficha from gdthEvalData if available
+                          const evalD = gdthEvalData[selectedNumero]
+                          if (evalD) {
+                            const montoNum = parseFloat(evalD.monto.replace(/[^0-9.]/g,''))
+                            if (!isNaN(montoNum)) setMontoSolicitud(String(montoNum))
+                            if (evalD.cuotas) setNumCuotas(evalD.cuotas)
+                          }
+                          if (selectedMatriz?.motivo) setMotivoSolicitud(selectedMatriz.motivo)
+                          if (selectedMatriz?.tipo) setTipoSolicitud(selectedMatriz.tipo as 'prestamo'|'adelanto')
+                          setFichaFromDetalle(true)
+                          setShowNueva(true)  // parent modal (showDetalle) stays open
+                        }
+                      }}
                     >
                       📄 +Nueva Ficha Préstamo/Adelanto
                     </button>
@@ -1419,15 +1596,27 @@ export function PrestamosAdelantos() {
                 })()}
               </>)}
               {detTab === 'evaluacion' && (<>
-                <button className="btn btn-gray" onClick={() => setShowDetalle(false)}>Cancelar</button>
+                <button className="btn btn-gray" onClick={() => setDetTab('detalle')}>Cancelar</button>
                 <button
                   className="btn btn-primary"
                   disabled={!evalResultado}
                   style={!evalResultado?{opacity:0.5,cursor:'not-allowed'}:{}}
                   onClick={() => {
                     if (!evalResultado) { alert('Selecciona un resultado'); return }
-                    alert(`✓ ${evalResultado==='Aprobado'?'Préstamo/Adelanto generado':'Solicitud rechazada'} correctamente`)
-                    setShowDetalle(false)
+                    // Save eval data + enable Step 2 firma in Tab 1
+                    setGdthEvalData(prev => ({...prev, [selectedNumero]: {resultado:evalResultado, monto:evalMontoAprobado, cuotas:evalCuotas}}))
+                    if (evalResultado === 'Aprobado') {
+                      setAdvFlow(prev => {
+                        const steps = prev[selectedNumero]
+                        if (!steps) return prev
+                        const newSteps = steps.map((s, i) =>
+                          i === 1 && s.status === 'pending' ? {...s, status:'active' as const} : s
+                        )
+                        return {...prev, [selectedNumero]: newSteps}
+                      })
+                    }
+                    // Switch to detalle tab to show the now-active Step 2
+                    setDetTab('detalle')
                   }}
                 >
                   ✔ Generar Préstamo/Adelanto
