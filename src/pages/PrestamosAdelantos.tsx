@@ -212,9 +212,20 @@ export function PrestamosAdelantos() {
   const openDetalle = (numero: string) => {
     setSelectedNumero(numero)
     setDetTab('detalle')
-    // Pre-llenar monto de evaluación desde MATRIZ_DATA si existe
+    setEvalResultado(''); setEvalDni(''); setEvalColab(null)
+    // Pre-llenar monto de evaluación: primero MATRIZ_DATA, si no existe buscar en bandeja/DB
     const mRow = MATRIZ_DATA.find(r => r.documento === numero)
-    if (mRow) { setSelectedGDTHRow(mRow); setEvalMontoAprobado(mRow.monto); setEvalResultado(''); setEvalDni(''); setEvalColab(null) }
+    if (mRow) {
+      setSelectedGDTHRow(mRow)
+      setEvalMontoAprobado(mRow.monto)
+    } else {
+      // Para solicitudes nuevas registradas por el NSS form
+      const dbRow = gdthBandeja.find(r => r.numero === numero)
+                 ?? misSolicitudes.find(r => r.numero === numero)
+      // monto viene como "S/. 1,200" — extraer solo el número para que evalMontoAprobado sea editable
+      const rawMonto = dbRow?.monto ?? ''
+      setEvalMontoAprobado(rawMonto)
+    }
     setShowDetalle(true)
   }
 

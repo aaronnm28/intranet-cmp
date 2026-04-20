@@ -238,6 +238,13 @@ export function AsignacionBienes() {
   // solicitudes desde supabase
   const [solicitudesDB, setSolicitudesDB] = useState<Array<{id:string;numero:string;bien_nombre:string;tipo:string;fecha_solicitud:string;estado:string;colaborador:string;area_encargada:string}>>([])
 
+  // Firmas registradas persistidas por solicitud — sobrescriben el status del flujo
+  // solFlujoOverride[numero][k] = { firmante, fecha } donde k = offset + stepIndex
+  const [solFlujoOverride, setSolFlujoOverride] = useState<Record<string, Record<number,{firmante:string;fecha:string}>>>(() => {
+    try { const s = localStorage.getItem('cmp_sol_firmas'); return s ? JSON.parse(s) : {} } catch { return {} }
+  })
+  useEffect(() => { localStorage.setItem('cmp_sol_firmas', JSON.stringify(solFlujoOverride)) }, [solFlujoOverride])
+
   useEffect(() => {
     supabase
       .from('solicitudes_asignacion')
@@ -297,6 +304,13 @@ export function AsignacionBienes() {
   function registrarFirma(key:number, paso:number) {
     const val = detFirmas[key]
     if (!val?.trim()) { toast.show('Escribe tu firma antes de registrar'); return }
+    if (!detSol) return
+    const fecha = new Date().toLocaleDateString('es-PE')
+    setSolFlujoOverride(prev => ({
+      ...prev,
+      [detSol.n]: { ...(prev[detSol.n] ?? {}), [key]: { firmante: val.trim(), fecha } }
+    }))
+    setDetFirmas(prev => ({ ...prev, [key]: '' }))
     toast.show(`Firma registrada en Paso ${paso}`)
   }
 
@@ -312,42 +326,82 @@ export function AsignacionBienes() {
   ] : []
 
   function renderFlujoBlocks(flujo: FlujoStep[], offset: number) {
+    const override = solFlujoOverride[detSol?.n ?? ''] ?? {}
+
+    // Compute effective status, firmante, fecha for each step
+    const eff = flujo.map((s, i) => {
+      const k = offset + i
+      const ov = override[k]
+      let effStatus: FlujoStatus
+      let effFirmante = s.firmante
+      let effFecha = s.fecha
+      if (ov) {
+        effStatus = 'done'; effFirmante = ov.firmante; effFecha = ov.fecha
+      } else if (s.status === 'done') {
+        effStatus = 'done'
+      } else if (s.status === 'rejected') {
+        effStatus = 'rejected'
+      } else if (i === 0) {
+        effStatus = s.status  // keep original for first step (active or pending)
+      } else {
+        const prevK = k - 1
+        const prevDone = override[prevK] !== undefined || flujo[i - 1].status === 'done'
+        effStatus = prevDone ? 'active' : 'pending'
+      }
+      return { k, effStatus, effFirmante, effFecha }
+    })
+
+    const obsBlock = (k: number) => (<>
+      <button className="btn btn-outline btn-xs" style={{marginTop:6}} onClick={() => setDetShowObs(p=>({...p,[k]:!p[k]}))}>+ Observación</button>
+      {detShowObs[k] && (<div style={{marginTop:8,background:'#FFFBEB',border:'1px solid #FDE68A',borderRadius:6,padding:'10px 12px'}}>
+        <textarea className="form-control" style={{fontSize:12,minHeight:60}} placeholder="Escribe la observación..."
+          value={detObsTexts[k]||''} onChange={e=>setDetObsTexts(p=>({...p,[k]:e.target.value}))} />
+        <button className="btn btn-sm" style={{marginTop:6,background:'#D97706',color:'white',border:'none',borderRadius:5,padding:'4px 12px',fontSize:12,cursor:'pointer'}}
+          onClick={() => { toast.show('Observación registrada'); setDetShowObs(p=>({...p,[k]:false})) }}>Guardar observación</button>
+      </div>)}
+    </>)
+
     return (<>
       <div className="stepper" style={{marginBottom:16}}>
-        {flujo.map((s,i) => (
-          <>{i>0&&<div key={`c${offset+i}`} className={`step-conn${flujo[i-1].status==='done'?' done':''}`}/>}
-          <div key={`s${offset+i}`} className="step">
-            <div className={`step-circ ${stepCls(s.status)}`} style={s.status==='rejected'?{background:'#FEE2E2',borderColor:'#EF4444',color:'#EF4444'}:{}}>{stepIcon(s.status)}</div>
-            <span className={`step-lbl ${stepCls(s.status)}`} style={{fontSize:10,textAlign:'center',maxWidth:58}}>{'Registro\nValidación\nEntrega\nConformidad'.split('\n')[i]}</span>
-          </div></>
-        ))}
+        {flujo.map((s,i) => {
+          const { effStatus } = eff[i]
+          const prevDone = i > 0 && eff[i-1].effStatus === 'done'
+          return (<>
+            {i>0&&<div key={`c${offset+i}`} className={`step-conn${prevDone?' done':''}`}/>}
+            <div key={`s${offset+i}`} className="step">
+              <div className={`step-circ ${stepCls(effStatus)}`} style={effStatus==='rejected'?{background:'#FEE2E2',borderColor:'#EF4444',color:'#EF4444'}:{}}>{stepIcon(effStatus)}</div>
+              <span className={`step-lbl ${stepCls(effStatus)}`} style={{fontSize:10,textAlign:'center',maxWidth:58}}>{'Registro\nValidación\nEntrega\nConformidad'.split('\n')[i]}</span>
+            </div>
+          </>)
+        })}
       </div>
       <div className="section-title-sm">FLUJO DE APROBACIÓN</div>
       {flujo.map((s,i) => {
-        const k = offset + i
+        const { k, effStatus, effFirmante, effFecha } = eff[i]
         return (
           <div key={k} className="flow-step-block">
-            <div className={`flow-step-hdr ${s.status==='done'?'done':s.status==='active'?'active':s.status==='rejected'?'rejected':'pending'}`}>
-              <div className="text-sm fw-600">{s.status==='done'?'✅':s.status==='active'?'⏳':s.status==='rejected'?'❌':'🔒'} Paso {s.paso}: {s.label}</div>
-              <span className="text-xs text-gray">{s.fecha}</span>
+            <div className={`flow-step-hdr ${effStatus==='done'?'done':effStatus==='active'?'active':effStatus==='rejected'?'rejected':'pending'}`}>
+              <div className="text-sm fw-600">{effStatus==='done'?'✅':effStatus==='active'?'⏳':effStatus==='rejected'?'❌':'🔒'} Paso {s.paso}: {s.label}</div>
+              <span className="text-xs text-gray">{effFecha}</span>
             </div>
-            {s.status==='done' && (
+
+            {/* DONE */}
+            {effStatus==='done' && (
               <div className="flow-step-body">
                 <div style={{display:'flex',gap:24,flexWrap:'wrap',alignItems:'flex-end'}}>
-                  <div><div className="firma-label" style={{textAlign:'left',marginBottom:4}}>Firmado por</div><div className="firma-box">{s.firmante}</div><div className="firma-label">{s.cargo}</div></div>
-                  <div className="inv-field"><div className="lbl">Fecha</div><div className="val">{s.fecha}</div></div>
+                  <div>
+                    <div className="firma-label" style={{textAlign:'left',marginBottom:4}}>Firmado por</div>
+                    <div className="firma-box">{effFirmante}</div>
+                    <div className="firma-label">{s.cargo}</div>
+                  </div>
+                  <div className="inv-field"><div className="lbl">Fecha</div><div className="val">{effFecha}</div></div>
                 </div>
-                <div style={{marginTop:8}}><button className="btn btn-outline btn-xs" onClick={() => setDetShowObs(p=>({...p,[k]:!p[k]}))}>+ Observación</button></div>
-                {detShowObs[k] && (<div style={{marginTop:8,background:'#FFFBEB',border:'1px solid #FDE68A',borderRadius:6,padding:'10px 12px'}}>
-                  <div style={{fontSize:11,fontWeight:600,color:'#92400E',marginBottom:6}}>Registrar observación en este paso</div>
-                  <textarea className="form-control" style={{fontSize:12,minHeight:60}} placeholder="Escribe la observación..."
-                    value={detObsTexts[k]||''} onChange={e=>setDetObsTexts(p=>({...p,[k]:e.target.value}))} />
-                  <button className="btn btn-sm" style={{marginTop:6,background:'#D97706',color:'white',border:'none',borderRadius:5,padding:'4px 12px',fontSize:12,cursor:'pointer'}}
-                    onClick={() => { toast.show('Observación registrada'); setDetShowObs(p=>({...p,[k]:false})) }}>Guardar observación</button>
-                </div>)}
+                <div style={{marginTop:8}}>{obsBlock(k)}</div>
               </div>
             )}
-            {s.status==='active' && (
+
+            {/* ACTIVE */}
+            {effStatus==='active' && (
               <div className="flow-step-body">
                 <div className="form-group" style={{marginBottom:8}}>
                   <label className="form-label" style={{fontSize:11}}>Firma digital — {s.cargo}</label>
@@ -368,8 +422,7 @@ export function AsignacionBienes() {
                             const colab = COLABS[dni]
                             const nombreColab = colab ? `${colab.nombre} ${colab.apellido}` : (detSol?.colaborador ?? '—')
                             const puestoColab = colab?.puesto ?? '—'
-                            // Derivar email: primerNombre.primerApellido@cmp.org.pe (sin tildes)
-                            const norm = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()
+                            const norm = (str: string) => str.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()
                             const palabras = nombreColab.split(' ')
                             const correoColab = `${norm(palabras[0])}.${norm(palabras[palabras.length >= 4 ? 2 : palabras.length >= 2 ? 1 : 0])}@cmp.org.pe`
                             setEmailFirmaState(p => ({...p,[k]:{correoEnviado:true,confirmado:false,firmante:'',confNum:num}}))
@@ -379,31 +432,23 @@ export function AsignacionBienes() {
                           📧 Enviar correo para firma
                         </button>
                   )}
-                  <button className="btn btn-outline btn-xs" onClick={() => setDetShowObs(p=>({...p,[k]:!p[k]}))}>+ Observación</button>
+                  {obsBlock(k)}
                 </div>
-                {detShowObs[k] && (<div style={{marginTop:8,background:'#FFFBEB',border:'1px solid #FDE68A',borderRadius:6,padding:'10px 12px'}}>
-                  <textarea className="form-control" style={{fontSize:12,minHeight:60}} placeholder="Escribe la observación..."
-                    value={detObsTexts[k]||''} onChange={e=>setDetObsTexts(p=>({...p,[k]:e.target.value}))} />
-                  <button className="btn btn-sm" style={{marginTop:6,background:'#D97706',color:'white',border:'none',borderRadius:5,padding:'4px 12px',fontSize:12,cursor:'pointer'}}
-                    onClick={() => { toast.show('Observación registrada'); setDetShowObs(p=>({...p,[k]:false})) }}>Guardar observación</button>
-                </div>)}
               </div>
             )}
-            {s.status==='rejected' && (
+
+            {/* REJECTED */}
+            {effStatus==='rejected' && (
               <div className="flow-step-body">
                 <div className="banner" style={{background:'#FEF2F2',color:'#991B1B',border:'1px solid #FCA5A5',fontSize:12}}>
                   ❌ Observado por {s.actor} el {s.fecha}.<br/>{detSol?.observacion||'Requiere subsanación antes de continuar.'}
                 </div>
-                <div style={{marginTop:8}}><button className="btn btn-outline btn-xs" onClick={() => setDetShowObs(p=>({...p,[k]:!p[k]}))}>+ Observación</button></div>
-                {detShowObs[k] && (<div style={{marginTop:8,background:'#FFFBEB',border:'1px solid #FDE68A',borderRadius:6,padding:'10px 12px'}}>
-                  <textarea className="form-control" style={{fontSize:12,minHeight:60}} placeholder="Escribe la observación..."
-                    value={detObsTexts[k]||''} onChange={e=>setDetObsTexts(p=>({...p,[k]:e.target.value}))} />
-                  <button className="btn btn-sm" style={{marginTop:6,background:'#D97706',color:'white',border:'none',borderRadius:5,padding:'4px 12px',fontSize:12,cursor:'pointer'}}
-                    onClick={() => { toast.show('Observación registrada'); setDetShowObs(p=>({...p,[k]:false})) }}>Guardar observación</button>
-                </div>)}
+                <div style={{marginTop:8}}>{obsBlock(k)}</div>
               </div>
             )}
-            {s.status==='pending' && (() => {
+
+            {/* PENDING */}
+            {effStatus==='pending' && (() => {
               const correoDelPasoAnterior = emailFirmaState[k-1]
               const esPaso4 = s.paso === 4
               const yaConfirmado = emailFirmaState[k]?.confirmado
@@ -418,25 +463,13 @@ export function AsignacionBienes() {
                         <div className="firma-box" style={{fontFamily:'Georgia,serif',fontStyle:'italic',color:'#1E1B4B'}}>{ef.firmante}</div>
                         <div className="firma-label">{colabPuesto}</div>
                       </div>
-                      <div className="inv-field">
-                        <div className="lbl">Fecha de confirmación</div>
-                        <div className="val">{new Date().toLocaleDateString('es-PE')}</div>
-                      </div>
-                      {ef.confNum && (
-                        <div className="inv-field">
-                          <div className="lbl">N° Conformidad</div>
-                          <div className="val fw-600" style={{color:'#6B21A8'}}>{ef.confNum}</div>
-                        </div>
-                      )}
+                      <div className="inv-field"><div className="lbl">Fecha</div><div className="val">{new Date().toLocaleDateString('es-PE')}</div></div>
+                      {ef.confNum && <div className="inv-field"><div className="lbl">N° Conformidad</div><div className="val fw-600" style={{color:'#6B21A8'}}>{ef.confNum}</div></div>}
                     </div>
                     {ef.docAdjunto && (
                       <div style={{background:'#F0FDF4',border:'1px solid #86EFAC',borderRadius:6,padding:'10px 14px',fontSize:11,display:'flex',alignItems:'center',gap:10}}>
                         <span style={{fontSize:20}}>📄</span>
-                        <div>
-                          <div style={{fontWeight:700,color:'#15803D',marginBottom:2}}>Documento firmado</div>
-                          <div style={{color:'#1E1B4B',fontWeight:600}}>{ef.docAdjunto}</div>
-                          <div style={{color:'#6B7280',marginTop:2}}>Firmado en bloque: FIRMAS DEL ACTA › COLABORADOR - FIRMA POR CORREO</div>
-                        </div>
+                        <div><div style={{fontWeight:700,color:'#15803D',marginBottom:2}}>Documento firmado</div><div style={{color:'#1E1B4B',fontWeight:600}}>{ef.docAdjunto}</div></div>
                       </div>
                     )}
                   </div>
@@ -447,69 +480,54 @@ export function AsignacionBienes() {
                   <div className="flow-step-body">
                     <div style={{background:'#EFF6FF',border:'1px solid #BFDBFE',borderRadius:6,padding:'10px 12px',marginBottom:8}}>
                       <div style={{fontSize:12,fontWeight:600,color:'#1D4ED8',marginBottom:4}}>📧 Esperando confirmación del colaborador</div>
-                      <div style={{fontSize:11,color:'#374151'}}>Se envió un correo con enlace de confirmación. El paso se habilitará automáticamente al confirmar.</div>
+                      <div style={{fontSize:11,color:'#374151'}}>Se envió un correo con enlace de confirmación. El paso se habilitará al confirmar.</div>
                     </div>
                     <button className="btn btn-sm" style={{background:'#6B21A8',color:'white',border:'none',borderRadius:6,padding:'5px 14px',fontSize:12,cursor:'pointer'}}
                       onClick={() => {
                         const dni = detSol?.dni ?? ''
                         const colab = COLABS[dni]
                         const nombreColab = colab ? `${colab.nombre} ${colab.apellido}` : (detSol?.colaborador ?? 'Colaborador')
-                        setEmailFirmaState(p => ({
-                          ...p,
-                          [k]: {
-                            ...p[k],
-                            correoEnviado: true,
-                            confirmado: true,
-                            firmante: nombreColab,
-                            docAdjunto: 'ACTA DE ENTREGA Y DEVOLUCIÓN DE BIENES — ENTREGA',
-                          }
-                        }))
+                        setEmailFirmaState(p => ({...p,[k]:{...p[k],correoEnviado:true,confirmado:true,firmante:nombreColab,docAdjunto:'ACTA DE ENTREGA Y DEVOLUCIÓN DE BIENES — ENTREGA'}})
+                        )
                         toast.show('✅ Colaborador confirmó vía correo — firma registrada')
                       }}>
                       📲 Simular: Colaborador confirma desde correo
                     </button>
-                    <button className="btn btn-outline btn-xs" style={{marginTop:6,marginLeft:8}} onClick={() => setDetShowObs(p=>({...p,[k]:!p[k]}))}>+ Observación</button>
-                    {detShowObs[k] && (<div style={{marginTop:8,background:'#FFFBEB',border:'1px solid #FDE68A',borderRadius:6,padding:'10px 12px'}}>
-                      <textarea className="form-control" style={{fontSize:12,minHeight:60}} placeholder="Escribe la observación..."
-                        value={detObsTexts[k]||''} onChange={e=>setDetObsTexts(p=>({...p,[k]:e.target.value}))} />
-                      <button className="btn btn-sm" style={{marginTop:6,background:'#D97706',color:'white',border:'none',borderRadius:5,padding:'4px 12px',fontSize:12,cursor:'pointer'}}
-                        onClick={() => { toast.show('Observación registrada'); setDetShowObs(p=>({...p,[k]:false})) }}>Guardar observación</button>
-                    </div>)}
+                    <div style={{marginTop:6}}>{obsBlock(k)}</div>
                   </div>
                 )
               }
               return (
                 <div className="flow-step-body">
                   <p className="text-xs text-gray" style={{fontStyle:'italic'}}>🔒 Pendiente — se habilitará al completar el paso anterior.</p>
-                  <button className="btn btn-outline btn-xs" style={{marginTop:6}} onClick={() => setDetShowObs(p=>({...p,[k]:!p[k]}))}>+ Observación</button>
-                  {detShowObs[k] && (<div style={{marginTop:8,background:'#FFFBEB',border:'1px solid #FDE68A',borderRadius:6,padding:'10px 12px'}}>
-                    <textarea className="form-control" style={{fontSize:12,minHeight:60}} placeholder="Escribe la observación..."
-                      value={detObsTexts[k]||''} onChange={e=>setDetObsTexts(p=>({...p,[k]:e.target.value}))} />
-                    <button className="btn btn-sm" style={{marginTop:6,background:'#D97706',color:'white',border:'none',borderRadius:5,padding:'4px 12px',fontSize:12,cursor:'pointer'}}
-                      onClick={() => { toast.show('Observación registrada'); setDetShowObs(p=>({...p,[k]:false})) }}>Guardar observación</button>
-                  </div>)}
+                  {obsBlock(k)}
                 </div>
               )
             })()}
           </div>
         )
       })}
+
+      {/* Firmas del proceso — grilla */}
       <div style={{marginTop:16}}>
         <div className="section-title-sm">FIRMAS DEL PROCESO</div>
         <div style={{display:'grid',gridTemplateColumns:`repeat(${Math.min(flujo.length,4)},1fr)`,gap:10,marginTop:8}}>
-          {flujo.map((s,i) => (
-            <div key={`f${offset+i}`}>
-              <div style={{fontSize:10,color:'#6B7280',marginBottom:4,fontWeight:600}}>{s.label.split('—')[0].trim()}</div>
-              <div className="aprob-cell"><div className="aprob-zona">
-                {s.status==='done'
-                  ? <><span style={{fontFamily:'Georgia,serif',fontStyle:'italic',color:'#1E1B4B',fontSize:13}}>{s.firmante}</span><div style={{fontSize:10,color:'#6B7280',marginTop:2}}>{s.cargo}</div><div style={{fontSize:10,color:'#6B7280'}}>{s.fecha}</div></>
-                  : s.status==='active'
-                    ? <><span style={{fontFamily:'Georgia,serif',fontStyle:'italic',color:'#991B1B',fontSize:13}}>Pendiente</span><div style={{fontSize:10,color:'#9CA3AF',marginTop:2}}>—</div></>
-                    : <><span style={{fontFamily:'Georgia,serif',fontStyle:'italic',color:'#6B7280',fontSize:13}}>En espera</span><div style={{fontSize:10,color:'#9CA3AF',marginTop:2}}>—</div></>
-                }
-              </div></div>
-            </div>
-          ))}
+          {flujo.map((s,i) => {
+            const { effStatus, effFirmante, effFecha } = eff[i]
+            return (
+              <div key={`f${offset+i}`}>
+                <div style={{fontSize:10,color:'#6B7280',marginBottom:4,fontWeight:600}}>{s.label.split('—')[0].trim()}</div>
+                <div className="aprob-cell"><div className="aprob-zona">
+                  {effStatus==='done'
+                    ? <><span style={{fontFamily:'Georgia,serif',fontStyle:'italic',color:'#1E1B4B',fontSize:13}}>{effFirmante}</span><div style={{fontSize:10,color:'#6B7280',marginTop:2}}>{s.cargo}</div><div style={{fontSize:10,color:'#6B7280'}}>{effFecha}</div></>
+                    : effStatus==='active'
+                      ? <><span style={{fontFamily:'Georgia,serif',fontStyle:'italic',color:'#991B1B',fontSize:13}}>Pendiente</span><div style={{fontSize:10,color:'#9CA3AF',marginTop:2}}>—</div></>
+                      : <><span style={{fontFamily:'Georgia,serif',fontStyle:'italic',color:'#6B7280',fontSize:13}}>En espera</span><div style={{fontSize:10,color:'#9CA3AF',marginTop:2}}>—</div></>
+                  }
+                </div></div>
+              </div>
+            )
+          })}
         </div>
       </div>
     </>)
