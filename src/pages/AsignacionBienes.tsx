@@ -363,7 +363,7 @@ export function AsignacionBienes() {
 
     return (<>
       <div className="stepper" style={{marginBottom:16}}>
-        {flujo.map((s,i) => {
+        {flujo.map((_s,i) => {
           const { effStatus } = eff[i]
           const prevDone = i > 0 && eff[i-1].effStatus === 'done'
           return (<>
