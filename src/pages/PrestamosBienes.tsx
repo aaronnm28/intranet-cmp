@@ -612,7 +612,13 @@ export function PrestamosBienes() {
                 <div className="section-title-sm" style={{ marginTop: 4 }}>FLUJO DEL PROCESO</div>
                 {flujoDefault.map((f, i) => {
                   const firmaGuardada = detFirmaSteps[selected.numero]?.[i]
-                  const stepStatus = firmaGuardada ? 'done' : f.status
+                  // Si el paso anterior tiene firma registrada y este paso era 'pending', avanzarlo a 'active'
+                  const prevFirmaGuardada = i > 0 ? detFirmaSteps[selected.numero]?.[i - 1] : null
+                  const stepStatus = firmaGuardada
+                    ? 'done'
+                    : (prevFirmaGuardada && f.status === 'pending')
+                      ? 'active'
+                      : f.status
                   return (
                   <div key={i} className="flow-step-block">
                     <div className={`flow-step-hdr ${stepStatus}`} style={{ cursor: 'default' }}>
@@ -654,8 +660,9 @@ export function PrestamosBienes() {
                         {f.activeLabel && <div className="banner banner-purple" style={{ fontSize: 12, marginBottom: 8 }}>{f.activeLabel}</div>}
                         <div className="form-group" style={{ marginBottom: 8 }}>
                           <label className="form-label" style={{ fontSize: 11 }}>Firma digital — {f.cargo}</label>
+                          <div style={{ fontSize:10, color:'#6B21A8', marginBottom:4 }}>✏ Escribe tu nombre completo para firmar y luego haz clic en "Registrar firma"</div>
                           <input type="text" className="form-control"
-                            placeholder="Escribe aquí tu firma..."
+                            placeholder="Escribe tu nombre completo aquí..."
                             style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', fontSize: 14, color: '#1E1B4B' }}
                             value={detFirmaInput[selected.numero]?.[i] ?? ''}
                             onChange={e => setDetFirmaInput(prev => ({ ...prev, [selected.numero]: { ...(prev[selected.numero] ?? {}), [i]: e.target.value } }))}

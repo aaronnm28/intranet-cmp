@@ -13,15 +13,34 @@ const ROL_LABEL: Record<string, string> = {
 /** Mapeo rol+área → puesto real (fallback cuando email no está en EMAIL_TO_COLAB) */
 const ROL_AREA_PUESTO: Record<string, Record<string, string>> = {
   custodio: {
-    'UN. DE TI':    'Jefe de TI',
-    'UN. DE ADM':   'Jefa de Administración',
-    'UN. DE PATR':  'Jefe de Patrimonio',
-    'UN. DE CONTA': 'Contador General',
+    'UN. DE TI':        'Jefe de TI',
+    'TI':               'Jefe de TI',
+    'UN. DE ADM':       'Jefa de Administración',
+    'UN. DE ADMINISTRACIÓN': 'Jefa de Administración',
+    'ADM':              'Jefa de Administración',
+    'UN. DE PATR':      'Jefe de Patrimonio',
+    'PATRIMONIO':       'Jefe de Patrimonio',
+    'UN. DE CONTA':     'Contador General',
+    'CONTABILIDAD':     'Contador General',
+    'UN. DE GDTH':      'Jefa de GDTH',
+    'GDTH':             'Jefa de GDTH',
   },
-  gdth:        { 'UN. DE GDTH': 'Jefa de GDTH' },
-  contabilidad:{ 'UN. DE CONTA': 'Contador General', '': 'Contabilidad' },
+  gdth:        { 'UN. DE GDTH': 'Jefa de GDTH', 'GDTH': 'Jefa de GDTH' },
+  contabilidad:{ 'UN. DE CONTA': 'Contador General', 'CONTABILIDAD': 'Contador General', '': 'Contabilidad' },
   admin:       {},
   colaborador: {},
+}
+
+/** Normaliza lookup: busca exacto primero, luego subcadena */
+function lookupPuesto(rol: string, area: string): string | undefined {
+  const map = ROL_AREA_PUESTO[rol] ?? {}
+  if (map[area]) return map[area]
+  const aLow = (area ?? '').toLowerCase()
+  for (const [key, val] of Object.entries(map)) {
+    const kLow = key.toLowerCase()
+    if (aLow.includes(kLow) || kLow.includes(aLow)) return val
+  }
+  return undefined
 }
 
 /** Mapeo email CMP → datos reales del colaborador (fallback cuando Supabase no devuelve el colaborador_id) */
@@ -127,7 +146,7 @@ export function Topbar() {
   const puesto = colabPorEmail
     ? colabPorEmail.puesto
     : profile
-      ? (ROL_AREA_PUESTO[profile.rol]?.[profile.area] ?? ROL_LABEL[profile.rol] ?? profile.rol)
+      ? (lookupPuesto(profile.rol, profile.area ?? '') ?? ROL_LABEL[profile.rol] ?? profile.rol)
       : '—'
 
   const initials = nombreCompleto !== '—'

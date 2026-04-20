@@ -53,13 +53,21 @@ export function PrestamosAdelantos() {
   // GDTH bandeja — espeja misSolicitudes + solicitudes de otros colaboradores
   const [gdthBandeja, setGdthBandeja] = useState<(MisSolicitudRow & {colaborador?:string;area?:string})[]>([])
 
-  // 8-step flow tracking per solicitud number
+  // 8-step flow tracking per solicitud number — persistido en localStorage
   type AdvStep = { status: 'done'|'active'|'pending'; firmante: string; fecha: string }
-  const [advFlow, setAdvFlow] = useState<Record<string, AdvStep[]>>({})
+  const [advFlow, setAdvFlow] = useState<Record<string, AdvStep[]>>(() => {
+    try { const s = localStorage.getItem('cmp_adv_flow'); return s ? JSON.parse(s) as Record<string, AdvStep[]> : {} } catch { return {} }
+  })
   const [advFirmaInput, setAdvFirmaInput] = useState<Record<string, string>>({})
-  const [advFichaEnabled, setAdvFichaEnabled] = useState<Record<string, boolean>>({})
-  const [advFichaSubmitted, setAdvFichaSubmitted] = useState<Record<string, boolean>>({})
-  const [advDesembolsoFile, setAdvDesembolsoFile] = useState<Record<string, string>>({})
+  const [advFichaEnabled, setAdvFichaEnabled] = useState<Record<string, boolean>>(() => {
+    try { const s = localStorage.getItem('cmp_adv_ficha_enabled'); return s ? JSON.parse(s) as Record<string, boolean> : {} } catch { return {} }
+  })
+  const [advFichaSubmitted, setAdvFichaSubmitted] = useState<Record<string, boolean>>(() => {
+    try { const s = localStorage.getItem('cmp_adv_ficha_submitted'); return s ? JSON.parse(s) as Record<string, boolean> : {} } catch { return {} }
+  })
+  const [advDesembolsoFile, setAdvDesembolsoFile] = useState<Record<string, string>>(() => {
+    try { const s = localStorage.getItem('cmp_adv_desembolso'); return s ? JSON.parse(s) as Record<string, string> : {} } catch { return {} }
+  })
 
   // Nueva Solicitud simplificada (Obs 6)
   const [nssDni, setNssDni] = useState('')
@@ -102,22 +110,53 @@ export function PrestamosAdelantos() {
     ? calcularCuotas(parseFloat(montoSolicitud), parseInt(numCuotas))
     : []
 
+  // Guardar estado del flujo en localStorage cuando cambie
+  useEffect(() => { localStorage.setItem('cmp_adv_flow', JSON.stringify(advFlow)) }, [advFlow])
+  useEffect(() => { localStorage.setItem('cmp_adv_ficha_enabled', JSON.stringify(advFichaEnabled)) }, [advFichaEnabled])
+  useEffect(() => { localStorage.setItem('cmp_adv_ficha_submitted', JSON.stringify(advFichaSubmitted)) }, [advFichaSubmitted])
+  useEffect(() => { localStorage.setItem('cmp_adv_desembolso', JSON.stringify(advDesembolsoFile)) }, [advDesembolsoFile])
+
   useEffect(() => {
     const load = async () => {
       try {
         const { data: rows } = await supabase.from('solicitudes_adelanto')
-          .select('id,numero,tipo,monto,motivo,cuotas,estado,fecha_solicitud')
+          .select('id,numero,tipo,monto,motivo,cuotas,estado,fecha_solicitud,colaborador')
           .order('created_at', { ascending: false })
         if (rows && rows.length > 0) {
-          setMisSolicitudes(rows.map(r => ({
+          let areaCache: Record<string, string> = {}
+          try { const ac = localStorage.getItem('cmp_adv_area'); if (ac) areaCache = JSON.parse(ac) } catch {}
+          const mapped = rows.map(r => ({
             id: r.id,
             numero: r.numero,
             tipo: r.tipo === 'adelanto' ? 'Adelanto de sueldo' : 'Préstamo personal',
             monto: `S/. ${Number(r.monto).toLocaleString('es-PE')}`,
             fecha: r.fecha_solicitud ?? '—',
             estado: r.estado,
-            proximo: r.estado === 'aprobado' ? 'Desembolso por Contabilidad' : r.estado === 'en_revision' ? 'Evaluación Bienestar' : '—',
-          })))
+            proximo: r.estado === 'aprobado' ? 'Desembolso realizado' : 'J. Carbajal — GDTH: Evaluación',
+            colaborador: r.colaborador ?? '—',
+            area: areaCache[r.numero] ?? '—',
+          }))
+          setMisSolicitudes(mapped)
+          setGdthBandeja(mapped)
+          // Inicializar flujo de 8 pasos para solicitudes que aún no tienen flujo en localStorage
+          setAdvFlow(prev => {
+            const updated = { ...prev }
+            rows.forEach(r => {
+              if (!updated[r.numero]) {
+                updated[r.numero] = [
+                  { status: 'done', firmante: r.colaborador ?? 'Colaborador', fecha: r.fecha_solicitud ?? new Date().toLocaleDateString('es-PE') },
+                  { status: 'active', firmante: '', fecha: '' },
+                  { status: 'pending', firmante: '', fecha: '' },
+                  { status: 'pending', firmante: '', fecha: '' },
+                  { status: 'pending', firmante: '', fecha: '' },
+                  { status: 'pending', firmante: '', fecha: '' },
+                  { status: 'pending', firmante: '', fecha: '' },
+                  { status: 'pending', firmante: '', fecha: '' },
+                ]
+              }
+            })
+            return updated
+          })
         }
       } catch { /* mantiene mock */ }
     }
@@ -345,7 +384,7 @@ export function PrestamosAdelantos() {
           <div className="page-header" style={{ marginBottom: 12 }}>
             <div>
               <div style={{ fontSize: 14, fontWeight: 600, color: '#1E1B4B' }}>Solicitudes pendientes de aprobación GDTH</div>
-              <div className="text-xs text-gray mt-4">Solicitudes que han pasado evaluación de Bienestar y requieren V°B° de J. Carbajal — GDTH</div>
+              <div className="text-xs text-gray mt-4">Todas las solicitudes recibidas — J. Carbajal (Jefa de GDTH) realiza la evaluación inicial de cada solicitud</div>
             </div>
           </div>
           <div className="card">
@@ -646,6 +685,12 @@ export function PrestamosAdelantos() {
                   colaborador: nssColab.nombre,
                 }).select().single()
                 if (error) { alert(`Error: ${error.message}`); return }
+                // Guardar área en localStorage para persistirla al recargar
+                try {
+                  const areaCache: Record<string,string> = JSON.parse(localStorage.getItem('cmp_adv_area') ?? '{}')
+                  areaCache[numero] = nssColab?.area ?? '—'
+                  localStorage.setItem('cmp_adv_area', JSON.stringify(areaCache))
+                } catch {}
                 const nuevaRow = { id: newRec?.id ?? String(Date.now()), numero,
                   tipo: nssTipo==='adelanto'?'Adelanto de sueldo':'Préstamo personal',
                   monto: `S/. ${monto.toLocaleString('es-PE')}`,
@@ -1250,15 +1295,20 @@ export function PrestamosAdelantos() {
             </div>
             <div className="modal-footer">
               <button className="btn btn-gray" onClick={() => setShowDetalle(false)}>Cerrar</button>
-              <button
-                className="btn btn-primary btn-sm"
-                style={selectedRow?.estado !== 'aprobado' ? {opacity:0.45,cursor:'not-allowed'} : {}}
-                disabled={selectedRow?.estado !== 'aprobado'}
-                title={selectedRow?.estado !== 'aprobado' ? 'Disponible solo cuando GDTH apruebe la solicitud' : undefined}
-                onClick={() => { if (selectedRow?.estado === 'aprobado') { setShowDetalle(false); setShowNueva(true) } }}
-              >
-                📄 +Nueva Ficha Préstamo/Adelanto
-              </button>
+              {(() => {
+                const fichaEnabled = selectedRow?.estado === 'aprobado' || !!advFichaEnabled[selectedNumero]
+                return (
+                  <button
+                    className="btn btn-primary btn-sm"
+                    style={!fichaEnabled ? {opacity:0.45,cursor:'not-allowed'} : {}}
+                    disabled={!fichaEnabled}
+                    title={!fichaEnabled ? 'Disponible cuando Bienestar remita el formato (Paso 3)' : undefined}
+                    onClick={() => { if (fichaEnabled) { setShowDetalle(false); setShowNueva(true) } }}
+                  >
+                    📄 +Nueva Ficha Préstamo/Adelanto
+                  </button>
+                )
+              })()}
             </div>
           </div>
         </div>

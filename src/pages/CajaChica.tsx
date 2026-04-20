@@ -121,11 +121,12 @@ export function CajaChica() {
   const [selectedRep,  setSelectedRep]  = useState<{ area: string; responsable: string; monto: string; numero: string } | null>(null)
 
   // Nuevo responsable modal
-  const [showNuevoResp,  setShowNuevoResp]  = useState(false)
-  const [nrcTab,         setNrcTab]         = useState<'datos'|'adjuntos'>('datos')
-  const [nrcFirma,       setNrcFirma]       = useState('')
-  const [nrcNotas,       setNrcNotas]       = useState('')
-  const [nrcVisorFile,   setNrcVisorFile]   = useState('')
+  const [showNuevoResp,      setShowNuevoResp]      = useState(false)
+  const [nrcTab,             setNrcTab]             = useState<'datos'|'adjuntos'>('datos')
+  const [nrcFirma,           setNrcFirma]           = useState('')
+  const [nrcNotas,           setNrcNotas]           = useState('')
+  const [nrcVisorFile,       setNrcVisorFile]       = useState('')
+  const [nrcAdjuntosVisited, setNrcAdjuntosVisited] = useState(false)
   const [formNuevoResp, setFormNuevoResp] = useState({
     area: '', subarea: '', responsable: '', monto: '', periodo: '2026-03',
   })
@@ -942,7 +943,7 @@ export function CajaChica() {
 
       {/* ── Modal: Nuevo Responsable Caja Chica ── */}
       {showNuevoResp && (
-        <div className="modal-overlay stacked" style={{ background: 'rgba(0,0,0,.18)' }} onClick={() => setShowNuevoResp(false)}>
+        <div className="modal-overlay stacked" style={{ background: 'rgba(0,0,0,.18)' }} onClick={() => { setShowNuevoResp(false); setNrcAdjuntosVisited(false) }}>
           <div className="modal-box" style={{ maxWidth: 520 }} onClick={e => e.stopPropagation()}>
             <div className="modal-hdr">
               <span className="modal-title">Nuevo Responsable de Caja Chica</span>
@@ -952,7 +953,7 @@ export function CajaChica() {
             {/* Tabs */}
             <div className="modal-tabs" style={{ margin: '0 -18px', padding: '0 18px', borderBottom: '1px solid #F3F4F6', marginBottom: 0 }}>
               <div className={`modal-tab${nrcTab === 'datos' ? ' active' : ''}`} onClick={() => setNrcTab('datos')}>📋 Datos</div>
-              <div className={`modal-tab${nrcTab === 'adjuntos' ? ' active' : ''}`} onClick={() => setNrcTab('adjuntos')}>📎 Adjuntos</div>
+              <div className={`modal-tab${nrcTab === 'adjuntos' ? ' active' : ''}`} onClick={() => { setNrcTab('adjuntos'); setNrcAdjuntosVisited(true) }}>📎 Adjuntos</div>
             </div>
 
             <div className="modal-body">
@@ -998,21 +999,23 @@ export function CajaChica() {
 
                   <div className="h-divider" />
                   <div className="section-title-sm">FIRMAS DEL PROCESO</div>
+                  {!nrcAdjuntosVisited && (
+                    <div className="banner banner-amber mb-12" style={{ fontSize: 12 }}>
+                      ⚠ Antes de firmar, revisa y adjunta los documentos requeridos en la pestaña <strong>📎 Adjuntos</strong>.
+                    </div>
+                  )}
                   <div className="banner banner-blue mb-12" style={{ fontSize: 12 }}>ℹ Requiere V°B° del Jefe/Designado de Contabilidad y firma de aceptación del nuevo responsable.</div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 4 }}>
                     {/* Paso 1 — Jefe de Contabilidad (activo) */}
-                    <div className="aprob-cell" style={{ border: '1px solid #6B21A8', background: '#F5F3FF' }}>
+                    <div className="aprob-cell" style={{ border: `1px solid ${nrcAdjuntosVisited ? '#6B21A8' : '#D1D5DB'}`, background: nrcAdjuntosVisited ? '#F5F3FF' : '#FAFAFA' }}>
                       <div className="aprob-title" style={{ fontSize: 10 }}>Paso 1 — Jefe / Designado de Contabilidad</div>
-                      <div className="aprob-zona" style={{ minHeight: 40, cursor: 'text' }}
-                        onClick={e => (e.currentTarget.querySelector('input') as HTMLInputElement | null)?.focus()}>
+                      <div className="aprob-zona" style={{ minHeight: 40, cursor: nrcAdjuntosVisited ? 'text' : 'default' }}
+                        onClick={e => nrcAdjuntosVisited && (e.currentTarget.querySelector('input') as HTMLInputElement | null)?.focus()}>
                         {nrcFirma
                           ? <span style={{ fontFamily: 'Georgia,serif', fontStyle: 'italic', color: '#1E1B4B', fontSize: 13 }}>{nrcFirma}</span>
-                          : <span style={{ fontSize: 11, color: '#9CA3AF' }}>Firmar aquí</span>}
-                        <input type="text" className="firma-input" style={{ display: nrcFirma ? 'none' : 'none', position: 'absolute' }}
-                          placeholder="Firma"
-                          onChange={e => setNrcFirma(e.target.value)} />
+                          : <span style={{ fontSize: 11, color: nrcAdjuntosVisited ? '#9CA3AF' : '#D1D5DB' }}>{nrcAdjuntosVisited ? 'Firmar aquí' : '🔒 Primero adjunta documentos'}</span>}
                       </div>
-                      {!nrcFirma && (
+                      {!nrcFirma && nrcAdjuntosVisited && (
                         <input type="text" className="form-control" style={{ fontSize: 12, marginTop: 6 }}
                           placeholder="Escribe tu firma..." value={nrcFirma}
                           onChange={e => setNrcFirma(e.target.value)} />
@@ -1118,6 +1121,7 @@ export function CajaChica() {
                   setShowNuevoResp(false)
                   setFormNuevoResp({ area: '', subarea: '', responsable: '', monto: '', periodo: '2026-03' })
                   setNrcFirma('')
+                  setNrcAdjuntosVisited(false)
                 }}
               >
                 Enviar solicitud
