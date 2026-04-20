@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Devolucion } from '../types'
 
@@ -592,9 +592,38 @@ interface ModalReporteDevolucionProps {
   onClose: () => void
 }
 
+const PRINT_STYLES = `
+  * { box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; font-size: 11px; color: #1F2937; margin: 20px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  th, td { border: 1px solid #D1D5DB; padding: 5px 7px; text-align: left; vertical-align: top; font-size: 11px; }
+  th { background: #F3F4F6; font-weight: 600; }
+  @media print { @page { size: A4; margin: 12mm; } }
+`
+
 function ModalReporteDevolucion({ onClose }: ModalReporteDevolucionProps) {
+  const reportRef = useRef<HTMLDivElement>(null)
   const tdStyle = { border: '1px solid #E5E7EB', padding: 7 }
   const thStyle = { border: '1px solid #E5E7EB', padding: 7, textAlign: 'left' as const }
+
+  const openPrintWindow = (isPDF: boolean) => {
+    const content = reportRef.current
+    if (!content) return
+    const w = window.open('', '_blank')
+    if (!w) return
+    const pdfBanner = isPDF
+      ? `<div style="background:#FEF3C7;border:1px solid #FCD34D;padding:8px 12px;border-radius:4px;font-size:11px;margin-bottom:12px;color:#92400E;">
+           💡 En el diálogo de impresión selecciona <strong>Guardar como PDF</strong> como destino para descargar el documento.
+         </div>`
+      : ''
+    w.document.write(`<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Reporte Devolución — CMP</title>
+<style>${PRINT_STYLES}</style></head>
+<body>${pdfBanner}${content.innerHTML}
+<script>window.onload=function(){setTimeout(function(){window.print()},400)}<\/script>
+</body></html>`)
+    w.document.close()
+  }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -606,7 +635,7 @@ function ModalReporteDevolucion({ onClose }: ModalReporteDevolucionProps) {
           </div>
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
-        <div className="modal-body">
+        <div className="modal-body" ref={reportRef}>
           {/* Encabezado colaborador */}
           <div style={{ border: '1.5px solid #6B21A8', borderRadius: 8, padding: '14px 18px', marginBottom: 16, background: '#F5F3FF' }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: '#1E1B4B', marginBottom: 4 }}>Carlos Pérez Ramos</div>
@@ -723,8 +752,8 @@ function ModalReporteDevolucion({ onClose }: ModalReporteDevolucionProps) {
         </div>
         <div className="modal-footer">
           <button className="btn btn-gray" onClick={onClose}>Cerrar</button>
-          <button className="btn btn-outline">🖨 Imprimir</button>
-          <button className="btn btn-primary">📄 Generar PDF</button>
+          <button className="btn btn-outline" onClick={() => openPrintWindow(false)}>🖨 Imprimir</button>
+          <button className="btn btn-primary" onClick={() => openPrintWindow(true)}>📄 Generar PDF</button>
         </div>
       </div>
     </div>
@@ -751,6 +780,7 @@ function DetailView({ devolucion, onBack }: DetailViewProps) {
   const [showVerObs, setShowVerObs] = useState(false)
   const [verObsId, setVerObsId] = useState('')
   const [showReporte, setShowReporte] = useState(false)
+  const [devueltosIds, setDevueltosIds] = useState<Set<string>>(new Set())
 
   // Obs 4 — data real del colaborador desde Supabase
   const [bienesColab, setBienesColab] = useState<typeof BIENES_DEVOLUCION>([])
@@ -770,7 +800,7 @@ function DetailView({ devolucion, onBack }: DetailViewProps) {
           .eq('estado', 'Aprobado')
         if (bienesDB && bienesDB.length > 0) {
           setBienesColab(bienesDB.map((b, i) => ({
-            id: String(i+1), desc: b.bien_nombre, codigo: `CMP-${String(i+1).padStart(6,'0')}`,
+            id: b.id, desc: b.bien_nombre, codigo: `CMP-${String(i+1).padStart(6,'0')}`,
             marca: '—', modelo: '—', serie: '—',
             custodio: ['computo', 'comunicaciones', 'cómputo', 'tecnologia', 'tecnología'].includes((b.tipo??'').toLowerCase())
               ? 'Jesús Luman Marcos Aragon — Jefe de TI'
@@ -805,6 +835,29 @@ function DetailView({ devolucion, onBack }: DetailViewProps) {
   const openActaDevolucion = (id: string, nombre: string, codigo: string, marca: string, modelo: string, serie: string, custodio?: string) => {
     setActaBien({ id, nombre, codigo, marca, modelo, serie, custodio })
     setShowActa(true)
+  }
+
+  const handleFirmarActa = async (bienId: string) => {
+    // Update local state immediately
+    setDevueltosIds(prev => new Set([...prev, bienId]))
+    setBienesColab(prev => prev.map(b => b.id === bienId ? { ...b, devolucion: 'completado' } : b))
+
+    // Supabase: mark bien as Devuelto in solicitudes_asignacion
+    try {
+      await supabase.from('solicitudes_asignacion').update({ estado: 'Devuelto' }).eq('id', bienId)
+    } catch { /* prototype — silent failure for mock IDs */ }
+
+    // Check if all bienes + accesorios are now devueltos → update devoluciones.estado
+    try {
+      const nextDevueltos = new Set([...devueltosIds, bienId])
+      const allBienesDone = bienesColab.every(b => nextDevueltos.has(b.id) || b.devolucion === 'completado')
+      const allAccsDone = accsColab.every(a => nextDevueltos.has(a.id))
+      if (allBienesDone && allAccsDone) {
+        await supabase.from('devoluciones').update({ estado: 'completado' }).eq('id', devolucion.id)
+      }
+    } catch { /* ignore */ }
+
+    setShowActa(false)
   }
 
   const openVerObsDev = (id: string) => {
@@ -876,11 +929,13 @@ function DetailView({ devolucion, onBack }: DetailViewProps) {
                         ? <span className="sem sem-y"></span>
                         : <span className="sem sem-r"></span>}
                     </td>
-                    <td style={b.devolucion === 'pendiente' ? { color: '#991B1B', fontWeight: 600 } : { color: '#92400E', fontWeight: 600 }}>
-                      {b.devolucion === 'pendiente' ? '☐ Pendiente' : '⚠ Observado'}
+                    <td style={devueltosIds.has(b.id) || b.devolucion === 'completado' ? { color: '#065F46', fontWeight: 600 } : b.devolucion === 'pendiente' ? { color: '#991B1B', fontWeight: 600 } : { color: '#92400E', fontWeight: 600 }}>
+                      {devueltosIds.has(b.id) || b.devolucion === 'completado' ? '✔ Devuelto' : b.devolucion === 'pendiente' ? '☐ Pendiente' : '⚠ Observado'}
                     </td>
                     <td>
-                      {b.devolucion === 'observado' ? (
+                      {devueltosIds.has(b.id) || b.devolucion === 'completado' ? (
+                        <span className="badge b-green">✔ Devuelto</span>
+                      ) : b.devolucion === 'observado' ? (
                         <div className="actions-cell">
                           <button className="btn btn-gray btn-xs" onClick={() => openVerObsDev(b.id)}>Ver obs.</button>
                           <button className="btn btn-outline btn-xs" onClick={() => openActaDevolucion(b.id, b.desc, b.codigo, b.marca, b.modelo, b.serie, b.custodio)}>Registrar devolución</button>
@@ -924,9 +979,15 @@ function DetailView({ devolucion, onBack }: DetailViewProps) {
                     <td>{a.marca}</td>
                     <td><span className="badge b-green">Bueno</span></td>
                     <td><span className="sem sem-y"></span></td>
-                    <td style={{ color: '#991B1B', fontWeight: 600 }}>☐ Pendiente</td>
+                    <td style={{ color: devueltosIds.has(a.id) ? '#065F46' : '#991B1B', fontWeight: 600 }}>
+                      {devueltosIds.has(a.id) ? '✔ Devuelto' : '☐ Pendiente'}
+                    </td>
                     <td>
-                      <button className="btn btn-primary btn-xs" onClick={() => openActaDevolucion(a.id, a.nombre, a.codigo, a.marca, a.modelo, a.serie, 'Guissela Palacios Alvarez — Jefa de Administración')}>Registrar devolución</button>
+                      {devueltosIds.has(a.id) ? (
+                        <span className="badge b-green">✔ Devuelto</span>
+                      ) : (
+                        <button className="btn btn-primary btn-xs" onClick={() => openActaDevolucion(a.id, a.nombre, a.codigo, a.marca, a.modelo, a.serie, 'Guissela Palacios Alvarez — Jefa de Administración')}>Registrar devolución</button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -1068,7 +1129,7 @@ function DetailView({ devolucion, onBack }: DetailViewProps) {
             sede: COLABORADORES[devolucion.colaborador_dni]?.sede ?? '—',
           }}
           onClose={() => setShowActa(false)}
-          onFirmar={() => setShowActa(false)}
+          onFirmar={() => { if (actaBien) handleFirmarActa(actaBien.id) }}
         />
       )}
       {showVerObs && (
